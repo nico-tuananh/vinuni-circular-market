@@ -1,10 +1,9 @@
-# ****  
-
 <h1 align="center">♻️💰 CampusCircle: Student Circular Market Platform</h1>
 
 <p align="center">
-    <strong>COMP3030 - Databases and Database Systems</strong>
+    <strong>As part of the requirements for COMP3030 - Databases and Database Systems, Fall 2025 Semester</strong>
 </p>
+
 ---
 
 ## Problem Statement
