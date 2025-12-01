@@ -1,9 +1,13 @@
-📌 Project Title  
+# ****  
 
-CampusCircle: Student Circular Market Platform  
+<h1 align="center">♻️💰 CampusCircle: Student Circular Market Platform</h1>
 
-📄 Brief Description  
+<p align="center">
+    <strong>COMP3030 - Databases and Database Systems</strong>
+</p>
+---
 
+## Problem Statement
 Many students frequently buy new items (books, electronics, dorm furniture, etc.) that quickly become underused or are thrown away at the end of each semester. At the same time, new students need these exact items but have difficulty finding trusted sellers at reasonable prices.  
 
 CampusCircle is an internal marketplace for students to buy, sell, and share second-hand items within the university community. The system provides:  
@@ -15,7 +19,7 @@ CampusCircle is an internal marketplace for students to buy, sell, and share sec
 
 This helps reduce waste, save money for students, and promote a circular, sustainable campus economy.  
 
-🎯 Functional & Non-functional Requirements  
+## 🎯 Functional & Non-functional Requirements  
 
 1. Functional Requirements  
 
@@ -94,7 +98,7 @@ Maintainability
 - Separate layers: database, backend, frontend.
 - Use clear naming conventions and comments in code and SQL.
 
-🧱 Planned Core Entities (brief outline)  
+## 🧱 Planned Core Entities 
 
 User  
 
@@ -148,20 +152,21 @@ Comment
   - N–1 with User (sender/receiver).
   - 1–N with Comment (self-relationship via parent_id, for replies).
 
-🔧 Tech Stack  
+## 🔧 Tech Stack  
 
 - Database: MySQL
   - Tables, views, stored procedures, triggers, indexing.
-- Backend: Python Flask
-  - REST-like routes for login, listings, orders, reviews, admin functions.
-  - Uses parameterized queries to interact with MySQL.
-- Frontend: HTML, Node.js, Bootstrap, basic JavaScript
+- Backend: Java (Spring Boot)
+  - REST-style endpoints for login, listings, orders, reviews, admin functions.
+  - Uses parameterized queries / JPA / JDBC to interact with MySQL.
+- Frontend: Node.js + HTML + Bootstrap + basic JavaScript
+  - Node.js used for serving pages or building a lightweight frontend app.
   - Simple responsive pages for mobile & desktop.
 - Tools:
   - MySQL Workbench (design & queries).
   - GitHub for version control.
 
-👥 Team Members and Roles  
+## 👥 Team Members and Roles  
 
 - Nguyen The An – Database Architect  
   - Gather requirements, design the ERD and logical schema, write DDL (tables, constraints, relationships), define indexing strategy, and coordinate how the database will be used by the web application.
@@ -169,10 +174,10 @@ Comment
 - Le Ngoc Bich Phuong – Database Implementation  
   - Implement the schema in MySQL, populate sample data, create views, stored procedures, triggers, and user/role permissions, and optimize queries and indexes to support the web application.
 
-- Phan Nguyen Tuan Anh – Web Developer  
-  - Implement the Flask web application (routes, authentication, business logic for listings/orders/comments) using prepared statements, and design the user interface (pages, forms, navigation, Bootstrap styling) and integrate it with the MySQL database.
+- Phan Nguyen Tuan Anh – Software Engineer
+  - Implement the Java web application with a simple user interface and integrate it with the MySQL database.
 
-📅 Timeline (planned milestones)  
+## 📅 Planned Milestones  
 
 - By 01/12 – Topic & Requirements  
   - Finalize project idea (CampusCircle).  
