@@ -1,216 +1,370 @@
 <h1 align="center">♻️💰 CampusCircle: Student Circular Market Platform</h1>
 
 <p align="center">
-    <strong>As part of the requirements for COMP3030 - Databases and Database Systems, Fall 2025 Semester</strong>
+  <strong>COMP3030 – Databases and Database Systems (Fall 2025)</strong><br/>
+  <em>Project Proposal (Revised v2)</em>
 </p>
 
 ---
 
-## Problem Statement
-Many students frequently buy new items (books, electronics, dorm furniture, etc.) that quickly become underused or are thrown away at the end of each semester. At the same time, new students need these exact items but have difficulty finding trusted sellers at reasonable prices.  
+## 1) Problem Statement
 
-CampusCircle is an internal marketplace for students to buy, sell, and share second-hand items within the university community. The system provides:  
+At the end of each semester, many students throw away or leave behind underused items (textbooks, electronics, dorm furniture, etc.). Meanwhile, incoming students need these exact items but struggle to find trusted sellers at fair prices.
 
-- A safe, student-only platform (login with student accounts).
-- Listing and searching of used items by category and condition.
-- Options to sell, reserve, or lend/borrow for free.
-- Ratings and reviews to build trust between buyers and sellers.
+**CampusCircle** is a student-only marketplace that enables students to **buy/sell** or **lend/borrow** second-hand items within the university community. The platform aims to:
 
-This helps reduce waste, save money for students, and promote a circular, sustainable campus economy.  
+* Reduce campus waste and promote a circular economy.
+* Help students save money by reusing items.
+* Increase trust via ratings, reviews, and moderated public Q&A.
 
-## 🎯 Functional & Non-functional Requirements  
+---
 
-1. Functional Requirements  
+## 2) Goals & Scope
 
-User & Authentication  
+### Goals
 
-- Users can register with Vinuni email and log in/out securely.
-- Users can update their profile (name, phone, dorm/area, description).
-- Admin can manage user accounts (activate/deactivate, reset roles).
+* Provide a secure, internal marketplace accessible only to university students.
+* Support listing creation, browsing/searching, ordering/borrowing flows, and reviews.
+* Ensure data integrity (no double-selling, valid state transitions).
+* Provide admin controls and basic analytics.
 
-Items, Categories & Listings  
+### Out of Scope (for course scope)
 
-- Admin can manage categories (create, edit, delete categories such as Books, Electronics, Furniture, Others).
-- A logged-in user can create an item and publish a listing (set price, condition, listing type: sell or lend).
-- A user can edit or delete their own listings while they are still available.
-- Listings have statuses: available, reserved, sold, or borrowed.
+* Online payment integration.
+* Shipping/logistics and real-time chat (we use listing comments as Q&A).
+* External user access (non-students).
 
-Search, Filter & Browsing  
+---
 
-- Users can search listings by keyword (title/description).
-- Users can filter listings by category, price range, item condition, and status.
-- Users can sort listings by newest, lowest price, highest price.
+## 3) Functional Requirements
 
-Orders & Transactions  
+### A) User & Authentication
 
-- A buyer can place an order or send a request to borrow for an available listing.
-- The system prevents double-selling: once a listing is sold or borrowed, it cannot be ordered again.
-- Sellers can accept or reject incoming orders/requests.
-- When an order is confirmed, the system updates the listing status (e.g., from available → sold or borrowed).
+* Users register using a VinUni email and log in/out securely.
+* Users can update profile information (name, phone, dorm/area, description).
+* Admin can manage accounts (activate/deactivate) and manage roles (admin/student).
 
-Reviews & Ratings  
+### B) Categories & Listings
 
-- After a completed order, the buyer can leave a review and rating for the seller.
-- The system computes and displays the average rating for each seller.
+* Admin can create/edit/delete categories (Books, Electronics, Furniture, Others, etc.).
+* Logged-in users can create listings with:
 
-Comments, Q&A (Message-like feature)  
+  * Title, description, condition, category
+  * Listing type: **sell** or **lend**
+  * Price rules:
 
-- Under each listing, logged-in users can post public comments to ask questions or discuss item details.
-- Each comment displays the commenter’s name, timestamp, and content below the corresponding listing.
-- Sellers can reply to comments on their own listings (e.g., answer questions about price, condition, or meeting time).
-- The system stores all comments in the database and shows them in chronological order.
-- Admin can view and delete inappropriate comments to keep the marketplace safe and clean.
+    * **Sell**: `list_price` is the asking price.
+    * **Lend**: `list_price` can be **0** (free lending) or a small **fee/deposit** (optional).
+* Users can edit/delete their own listings while still available.
 
-Admin & Analytics  
+### C) Search, Filter & Sort
 
-- Admin can view overall statistics (number of users, active listings, completed orders).
-- The system provides summary reports, e.g.:
-  - Number of orders per month.
-  - Most popular categories.
-  - Top-rated sellers.
+* Keyword search by title/description.
+* Filter by category, price range, condition, and status.
+* Sort listings by newest, lowest price, or highest price.
 
-2. Non-functional Requirements  
+### D) Orders & Transactions (Sell + Lend)
 
-Security & Access Control  
+* A buyer can submit an order/request for an **available** listing.
+* **Requested orders do not lock listings.** A listing becomes locked only after the seller confirms.
+* The system prevents double-selling/double-borrowing: once confirmed, a listing is locked.
+* Sellers can accept or reject incoming requests.
+* After completion:
 
-- Passwords are stored in the database using hashing.
-- Different roles: admin, student (normal user) with least-privilege access.
-- Prevent SQL injection using prepared statements.
+  * For **sell**: the listing becomes **sold**.
+  * For **lend**: the listing becomes **available** again after return is recorded.
 
-Performance  
+### E) Reviews & Ratings
 
-- Basic operations (search listings, view item details, create order) should respond within 2–3 seconds for typical load.
-- Use indexes on frequently queried columns (e.g., category, price, listing status).
+* After a completed transaction, the buyer can leave a rating (1–5) and review for the seller.
+* The system displays the seller’s average rating (optionally pre-aggregated for performance).
 
-Reliability & Data Integrity  
+### F) Comments & Q&A (Message-like)
 
-- Use foreign keys and constraints to maintain referential integrity.
-- Prevent invalid states (e.g., orders on non-existing listings, negative prices).
+* Under each listing, logged-in users can post public comments in chronological order.
+* Sellers can reply to comments on their own listings.
+* Admin can delete inappropriate comments.
 
-Usability  
+### G) Admin & Analytics
 
-- Simple, mobile-friendly UI with clear navigation (Home, Browse, My Listings, My Orders).
-- Clear error messages and form validation.
+* Admin can view overall statistics: number of users, active listings, completed orders.
+* The system provides summary reports via predefined views, e.g.:
 
-Maintainability  
+  * Orders per month
+  * Most popular categories
+  * Top-rated sellers
 
-- Separate layers: database, backend, frontend.
-- Use clear naming conventions and comments in code and SQL.
+---
 
-## 🧱 Planned Core Entities 
+## 4) Non-functional Requirements
 
-User  
+### Security & Access Control
 
-- Attributes: user_id (PK), full_name, email, password_hash, phone, dorm, role (admin/student), created_at, status.
-- Relationships:
-  - 1–N with Listing (one user has many listings).
-  - 1–N with Order (one user has many orders (customer)).
-  - 1–N with Review (one user receive many reviews (seller)).
+* Passwords stored using hashing.
+* Role-based access: **admin** vs **student**, least-privilege permissions.
+* Prevent SQL injection via parameterized queries / ORM.
 
-Category  
+### Performance
 
-- Attributes: category_id (PK), name, description.
-- Relationships:
-  - 1–N with Item.
+* Typical operations (browse/search/view/create order) respond within **2–3 seconds** under course-scale load.
+* Use indexes on frequently queried columns and full-text search where appropriate.
 
-Item  
+### Reliability & Data Integrity
 
-- Attributes: item_id (PK), title, description, condition (new/used/like new), base_price, category_id (FK).
-- Relationships:
-  - N–1 with Category.
-  - 1–N with Listing.
+* Foreign keys and constraints enforce referential integrity.
+* Prevent invalid states (negative prices, invalid ratings, orders on unavailable listings).
 
-Listing  
+### Usability
 
-- Attributes: listing_id (PK), item_id (FK), seller_id (FK -> User), listing_type (sell / lend), list_price, status (available/reserved/sold/borrowed), created_at, updated_at.
-- Relationships:
-  - N–1 with Item.
-  - N–1 with User (seller).
-  - 1–N with Order.
-  - 1–N with Message (optional).
+* Simple, mobile-friendly UI with clear navigation (Home, Browse, My Listings, My Orders).
 
-Order  
+### Maintainability
 
-- Attributes: order_id (PK), listing_id (FK), buyer_id (FK -> User), final_price, is_borrow (boolean), order_date, status (requested/confirmed/cancelled/completed).
-- Relationships:
-  - N–1 with Listing.
-  - N–1 with User (buyer).
-  - 1–N with Review.
+* Clear separation of concerns: database layer, backend API, and frontend pages.
+* Consistent naming conventions and documented SQL/logic.
 
-Review  
+---
 
-- Attributes: review_id (PK), order_id (FK), rating (1–5), comment, created_at.
-- Relationships:
-  - N–1 with Order (connect to seller).
+## 5) Data Model (Revised v2)
 
-Comment  
+### Key Design Decision: Listing-Centric Model
 
-- Attributes: comment_id (PK), listing_id (FK), user_id (FK -> User), content, created_at, parent_id (FK -> Comment, nullable).
-- Relationships:
-  - N–1 with Listing.
-  - N–1 with User (sender/receiver).
-  - 1–N with Comment (self-relationship via parent_id, for replies).
+To avoid redundancy, the project uses a **listing-centric** schema where a listing includes the item’s descriptive fields (title, description, condition). This simplifies queries and reduces unnecessary joins.
 
-## 🔧 Tech Stack  
+### Core Entities
 
-- Database: MySQL
-  - Tables, views, stored procedures, triggers, indexing.
-- Backend: Java (Spring Boot)
-  - REST-style endpoints for login, listings, orders, reviews, admin functions.
-  - Uses parameterized queries / JPA / JDBC to interact with MySQL.
-- Frontend: Node.js + HTML + Bootstrap + basic JavaScript
-  - Node.js used for serving pages or building a lightweight frontend app.
-  - Simple responsive pages for mobile & desktop.
-- Tools:
-  - MySQL Workbench (design & queries).
-  - GitHub for version control.
+#### User
 
-## 👥 Team Members and Roles  
+* Attributes:
 
-- Nguyen The An – Database Architect  
-  - Gather requirements, design the ERD and logical schema, write DDL (tables, constraints, relationships), define indexing strategy, and coordinate how the database will be used by the web application.
+  * `user_id (PK)`, `full_name`, `email (unique)`, `password_hash`, `phone`, `dorm`,
+    `role (admin/student)`, `status (active/inactive)`, `created_at`
+* Optional performance fields:
 
-- Le Ngoc Bich Phuong – Database Implementation  
-  - Implement the schema in MySQL, populate sample data, create views, stored procedures, triggers, and user/role permissions, and optimize queries and indexes to support the web application.
+  * `avg_rating`, `rating_count` (maintained via trigger)
 
-- Phan Nguyen Tuan Anh – Software Engineer
-  - Implement the Java web application with a simple user interface and integrate it with the MySQL database.
+Relationships:
 
-## 📅 Planned Milestones  
+* 1–N with Listing (seller)
+* 1–N with Order (buyer)
 
-- By 01/12 – Topic & Requirements  
-  - Finalize project idea (CampusCircle).  
-  - Draft functional & non-functional requirements.  
-  - Register group and project title with instructor.
+Integrity constraints (key examples):
 
-- By 08/12 – Proposal & Peer Review  
-  - Submit a short proposal (description, main features, initial entities).  
-  - Receive and incorporate feedback from peers/lecturers.
+* `UNIQUE(email)` to prevent duplicate accounts.
+* One active confirmed transaction per listing is enforced via stored procedures with row locking.
 
-- By 15/12 – Database Design  
-  - Complete ERD (entities, relationships, cardinalities).  
-  - Normalize schema to 3NF.  
-  - Write a full DDL script (CREATE DATABASE, CREATE TABLE, PK/FK, constraints).  
-  - Prepare a design document (requirements + ERD + schema).
+#### Category
 
-- By 18/12 – Database Implementation  
-  - Implement schema in MySQL.  
-  - Insert sample data for users, items, listings, orders, reviews.  
-  - Create at least:
-    - 1–2 views (e.g., active listings, monthly stats).
-    - 2 stored procedures (e.g., create_order, update_listing_status).
-    - 1 trigger (e.g., when order completed → update listing status).
-  - Test queries and measure simple performance with/without indexes.
+* Attributes:
 
-- By 20/12 – Web Application Core  
-  - Implement authentication (register/login/logout).  
-  - Implement CRUD for listings (create, view, edit, delete).  
-  - Implement basic order flow (buyer requests, seller confirms).
+  * `category_id (PK)`, `name (unique)`, `description`
+    Relationships:
+* 1–N with Listing
 
-- By 22/12 – Final Integration & Presentation  
-  - Add reviews, basic analytics pages (stats).  
-  - Finalize role-based access (admin vs student).  
-  - Prepare:
-    - Slide deck (system overview, ERD, key features, demo screenshots).
-    - Project report (requirements, design, implementation, security, performance, testing).
-  - Final testing and live demo preparation.
+#### Listing
+
+* Attributes:
+
+  * `listing_id (PK)`, `seller_id (FK → User)`, `category_id (FK → Category)`,
+    `title`, `description`, `condition (new/like_new/used)`,
+    `listing_type (sell/lend)`, `list_price (>=0)`,
+    `status (available/reserved/sold/borrowed)`, `created_at`, `updated_at`
+
+Relationships:
+
+* N–1 with User (seller)
+* N–1 with Category
+* 1–N with Order
+* 1–N with Comment
+
+#### Order
+
+* Attributes:
+
+  * `order_id (PK)`, `listing_id (FK → Listing)`, `buyer_id (FK → User)`,
+    `offer_price`, `final_price`,
+    `status (requested/confirmed/rejected/cancelled/completed)`,
+    `order_date`, `confirmed_at`, `completed_at`,
+    Borrow-specific: `borrow_due_date`, `returned_at`
+
+Notes:
+
+* For **sell**: `completed` means transaction done; listing becomes `sold`.
+* For **lend**: `completed` means item returned (`returned_at` is set); listing returns to `available`.
+
+#### Review
+
+* Attributes:
+
+  * `review_id (PK)`, `order_id (FK → Order, UNIQUE)`, `rating (1–5)`, `comment`, `created_at`
+    Notes:
+* One review per order (enforced by `UNIQUE(order_id)`).
+* The reviewed seller is derived via `Order → Listing → seller_id` to avoid redundant seller fields.
+
+#### Comment
+
+* Attributes:
+
+  * `comment_id (PK)`, `listing_id (FK → Listing)`, `user_id (FK → User)`,
+    `content`, `created_at`, `parent_id (FK → Comment, nullable)`
+
+---
+
+## 6) Status Flow Clarification (Listing ↔ Order)
+
+### Listing Status
+
+* `available`: open for requests
+* `reserved` (**sell only**): an order is **confirmed**; listing locked (no other confirmations allowed)
+* `sold` (**sell only**): sale completed
+* `borrowed` (**lend only**): currently lent out; waiting for return
+
+**Rule:** `requested` orders do **not** change listing status. Only `confirmed` orders lock a listing.
+
+### Order Status
+
+* `requested`: buyer submitted request (does not lock listing yet)
+* `confirmed`: seller accepted; locks listing (reserved/borrowed)
+* `rejected`: seller rejected
+* `cancelled`: buyer (or seller) cancelled before completion
+* `completed`: finished
+
+  * sell: transaction done
+  * lend: item returned (`returned_at` set)
+
+### Borrow Rules (Lend)
+
+* `borrow_due_date` is required for lend-type orders when confirming.
+* `completed` for lend means the item is returned (`returned_at IS NOT NULL`).
+* Overdue can be computed as: `NOW() > borrow_due_date AND returned_at IS NULL`.
+
+---
+
+## 7) Performance Tuning Strategy (Indexes & Search) (Indexes & Search)
+
+### Planned Indexes
+
+**Listing**
+
+* `(category_id, status)` for browsing filters
+* `(status, created_at)` for newest/active listings
+* `(list_price)` for price filter/sort
+* `FULLTEXT(title, description)` for keyword search (preferred)
+
+**Order**
+
+* `(listing_id, status)` to check active/confirmed orders per listing
+* `(buyer_id, order_date)` for “My Orders” pages
+
+**Comment**
+
+* `(listing_id, created_at)` for chronological display
+
+**Review**
+
+* `UNIQUE(order_id)` to enforce one review per order
+
+---
+
+## 8) Stored Procedures, Triggers & Views (Course Requirements)
+
+### Where Rules Are Enforced (DB vs Backend)
+
+* **Critical state transitions** (request/confirm/cancel/complete) are enforced in **stored procedures** using **transactions** and **row locking** (`SELECT ... FOR UPDATE`) to prevent race conditions and double-selling.
+* **Triggers** are used for:
+
+  * Maintaining **derived/aggregated fields** (e.g., `User.avg_rating`, `User.rating_count`), and
+  * Acting as a lightweight safety net for consistency checks where appropriate.
+
+### Stored Procedures (planned)
+
+* `sp_request_order(...)`: validates listing is available; inserts order as requested.
+* `sp_respond_order(...)`: seller accepts/rejects; uses transaction and row locking; updates listing status accordingly.
+* `sp_complete_order(...)` (optional): completes an order; for lend-type orders it records returns (`returned_at`).
+
+### Trigger (planned)
+
+* A trigger maintains aggregated seller rating fields when a new review is inserted.
+
+### Views (planned)
+
+* `vw_active_listings`: active listings with seller/category details.
+* `vw_monthly_orders`: orders per month (completed orders).
+* `vw_top_categories` / `vw_top_sellers`: simplified analytics reports.
+
+---
+
+## 9) Tech Stack
+
+* **Database:** MySQL
+
+  * Tables, constraints, views, stored procedures, triggers, indexing, (optional) full-text search.
+* **Backend:** Java (Spring Boot)
+
+  * REST endpoints for authentication, listings, orders, reviews, admin.
+* **Frontend:** Node.js + HTML + Bootstrap + JavaScript
+
+  * Lightweight responsive UI for browsing and managing listings/orders.
+* **Tools:** MySQL Workbench, GitHub
+
+---
+
+## 10) Team Members and Roles
+
+* **Nguyen The An – Database Architect**
+
+  * Requirements, ERD/logical schema, DDL, constraints, indexing strategy, DB coordination.
+
+* **Le Ngoc Bich Phuong – Database Implementation**
+
+  * Implement schema in MySQL, sample data, views/procedures/triggers, query optimization.
+
+* **Phan Nguyen Tuan Anh – Software Engineer**
+
+  * Spring Boot backend + UI integration with MySQL database.
+
+---
+
+## 11) Planned Milestones
+
+* **By 01/12 – Topic & Requirements**
+
+  * Finalize idea (CampusCircle)
+  * Draft functional & non-functional requirements
+  * Register project title with instructor
+
+* **By 08/12 – Proposal & Peer Review**
+
+  * Submit proposal (features + initial entities)
+  * Incorporate feedback (this revised v2)
+
+* **By 15/12 – Database Design**
+
+  * Complete ERD (entities, relationships, cardinalities)
+  * Normalize schema to 3NF
+  * Write DDL script (create tables, PK/FK, constraints, indexes)
+  * Prepare design document (requirements + ERD + schema)
+
+* **By 18/12 – Database Implementation**
+
+  * Implement schema in MySQL
+  * Insert sample data (users, categories, listings, orders, reviews, comments)
+  * Create:
+
+    * 2+ views
+    * 2 stored procedures
+    * 1 trigger
+  * Test queries and compare performance with/without indexes
+
+* **By 20/12 – Web Application Core**
+
+  * Authentication (register/login/logout)
+  * CRUD listings
+  * Basic order flow (request → confirm/reject)
+
+* **By 22/12 – Final Integration & Presentation**
+
+  * Reviews + analytics pages
+  * Role-based access finalized
+  * Slides + report + demo screenshots
+  * Final testing and live demo rehearsal
