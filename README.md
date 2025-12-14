@@ -143,21 +143,20 @@ To avoid redundancy, the project uses a **listing-centric** schema where a listi
 
   * `avg_rating`, `rating_count` (maintained via trigger)
 
-Relationships:
+* Relationships:
+  * 1–N with Listing (seller)
+  * 1–N with Order (buyer)
 
-* 1–N with Listing (seller)
-* 1–N with Order (buyer)
-
-Integrity constraints (key examples):
-
-* `UNIQUE(email)` to prevent duplicate accounts.
-* One active confirmed transaction per listing is enforced via stored procedures with row locking.
+* Integrity constraints (key examples):
+  * `UNIQUE(email)` to prevent duplicate accounts.
+  * One active confirmed transaction per listing is enforced via stored procedures with row locking.
 
 #### Category
 
 * Attributes:
 
   * `category_id (PK)`, `name (unique)`, `description`
+
 * Relationships:
   * 1–N with Listing
 
@@ -186,19 +185,30 @@ Integrity constraints (key examples):
     `order_date`, `confirmed_at`, `completed_at`,
     Borrow-specific: `borrow_due_date`, `returned_at`
 
-Notes:
+* Relationships:
+  
+  * N-1 with Listing
+  * N-1 with User (buyer)
+  * 1-N with Review
 
-* For **sell**: `completed` means transaction done; listing becomes `sold`.
-* For **lend**: `completed` means item returned (`returned_at` is set); listing returns to `available`.
+* Notes:
+  * For **sell**: `completed` means transaction done; listing becomes `sold`.
+  * For **lend**: `completed` means item returned (`returned_at` is set); listing returns to `available`.
 
 #### Review
 
 * Attributes:
 
   * `review_id (PK)`, `order_id (FK → Order, UNIQUE)`, `rating (1–5)`, `comment`, `created_at`
-    Notes:
-* One review per order (enforced by `UNIQUE(order_id)`).
-* The reviewed seller is derived via `Order → Listing → seller_id` to avoid redundant seller fields.
+
+* Relationships:
+
+  * N–1 with Order (connect to seller)
+
+* Notes:
+  
+  * One review per order (enforced by `UNIQUE(order_id)`).
+  * The reviewed seller is derived via `Order → Listing → seller_id` to avoid redundant seller fields.
 
 #### Comment
 
@@ -206,6 +216,11 @@ Notes:
 
   * `comment_id (PK)`, `listing_id (FK → Listing)`, `user_id (FK → User)`,
     `content`, `created_at`, `parent_id (FK → Comment, nullable)`
+    
+* Relationships:
+  * N–1 with Listing
+  * N–1 with User (sender/receiver)
+  * 1–N with Comment (self-relationship via parent_id, for replies)
 
 ---
 
