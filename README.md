@@ -9,7 +9,7 @@
 
 ## 1) Problem Statement
 
-At the end of each semester, many students throw away or leave behind underused items (textbooks, electronics, dorm furniture, etc.). Meanwhile, incoming students need these exact items but struggle to find trusted sellers at fair prices.
+At the end of each semester, many students throw away or leave behind underused items (textbooks, electronics, address furniture, etc.). Meanwhile, incoming students need these exact items but struggle to find trusted sellers at fair prices.
 
 **CampusCircle** is a student-only marketplace that enables students to **buy/sell** or **lend/borrow** second-hand items within the university community. The platform aims to:
 
@@ -41,7 +41,7 @@ At the end of each semester, many students throw away or leave behind underused 
 ### A) User & Authentication
 
 * Users register using a VinUni email and log in/out securely.
-* Users can update profile information (name, phone, dorm/area, description).
+* Users can update profile information (name, phone, address/area, description).
 * Admin can manage accounts (activate/deactivate) and manage roles (admin/student).
 
 ### B) Categories & Listings
@@ -137,7 +137,7 @@ To avoid redundancy, the project uses a **listing-centric** schema where a listi
 
 * Attributes:
 
-  * `user_id (PK)`, `full_name`, `email (unique)`, `password_hash`, `phone`, `dorm`,
+  * `user_id (PK)`, `full_name`, `email (unique)`, `password_hash`, `phone`, `address`,
     `role (admin/student)`, `status (active/inactive)`, `created_at`
 * Optional performance fields:
 
