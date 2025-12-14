@@ -214,8 +214,7 @@ To avoid redundancy, the project uses a **listing-centric** schema where a listi
 
 * Attributes:
 
-  * `comment_id (PK)`, `listing_id (FK → Listing)`, `user_id (FK → User)`,
-    `content`, `created_at`, `parent_id (FK → Comment, nullable)`
+  * `comment_id (PK)`, `listing_id (FK → Listing)`, `user_id (FK → User)`, `created_at`, `parent_id (FK → Comment, nullable)`
     
 * Relationships:
   * N–1 with Listing
