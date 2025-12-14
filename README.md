@@ -189,7 +189,7 @@ To avoid redundancy, the project uses a **listing-centric** schema where a listi
   
   * N-1 with Listing
   * N-1 with User (buyer)
-  * 1-N with Review
+  * 1-1 with Review
 
 * Notes:
   * For **sell**: `completed` means transaction done; listing becomes `sold`.
@@ -203,7 +203,7 @@ To avoid redundancy, the project uses a **listing-centric** schema where a listi
 
 * Relationships:
 
-  * N–1 with Order (connect to seller)
+  * 1–1 with Order (connect to seller)
 
 * Notes:
   
