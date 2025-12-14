@@ -158,8 +158,8 @@ Integrity constraints (key examples):
 * Attributes:
 
   * `category_id (PK)`, `name (unique)`, `description`
-    Relationships:
-* 1–N with Listing
+* Relationships:
+  * 1–N with Listing
 
 #### Listing
 
