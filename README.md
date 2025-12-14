@@ -170,12 +170,11 @@ Integrity constraints (key examples):
     `listing_type (sell/lend)`, `list_price (>=0)`,
     `status (available/reserved/sold/borrowed)`, `created_at`, `updated_at`
 
-Relationships:
-
-* N–1 with User (seller)
-* N–1 with Category
-* 1–N with Order
-* 1–N with Comment
+* Relationships:
+  * N–1 with User (seller)
+  * N–1 with Category
+  * 1–N with Order
+  * 1–N with Comment
 
 #### Order
 
