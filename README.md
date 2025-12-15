@@ -88,10 +88,10 @@ At the end of each semester, many students throw away or leave behind underused 
 ### G) Admin & Analytics
 
 * Admin can view overall statistics: number of users, active listings, completed orders.
-* The system provides summary reports via predefined views, e.g.:
+* The system provides summary reports via predefined views, for example:
 
   * Orders per month
-  * Most popular categories
+  * Active listings for browsing
   * Top-rated sellers
 
 ---
