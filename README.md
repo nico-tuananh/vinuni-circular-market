@@ -67,7 +67,7 @@ At the end of each semester, many students throw away or leave behind underused 
 
 * A buyer can submit an order/request for an **available** listing.
 * **Requested orders do not lock listings.** A listing becomes locked only after the seller confirms.
-* The system prevents double-selling/double-borrowing: once confirmed, a listing is locked.
+* The system prevents double-selling by using stored procedure + transaction + row locking: once confirmed, a listing is locked.
 * Sellers can accept or reject incoming requests.
 * After completion:
 
