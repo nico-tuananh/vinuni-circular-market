@@ -106,13 +106,13 @@ At the end of each semester, many students throw away or leave behind underused 
 
 ## 4) Non-functional Requirements
 
-### Security & Access Control
+### A) Security & Access Control
 
 * Passwords stored using hashing.
 * Role-based access: **admin** vs **student**, least-privilege permissions.
 * Prevent SQL injection via parameterized queries / ORM.
 
-### Performance
+### B) Performance
 
 * Typical operations (browse/search/view/create order) respond within **2–3 seconds** under course-scale load.
 * Strategic indexing on frequently queried columns:
@@ -121,7 +121,7 @@ At the end of each semester, many students throw away or leave behind underused 
   - Comment: `(listing_id, created_at)`
 * Full-text search on `Listing(title, description)` for keyword search.
 
-### Reliability & Data Integrity
+### C) Reliability & Data Integrity
 
 * Foreign keys and constraints enforce referential integrity.
 * Check constraints prevent invalid data:
@@ -131,11 +131,11 @@ At the end of each semester, many students throw away or leave behind underused 
 * Row-level locking in stored procedures prevents race conditions and double-selling.
 * Atomic transactions ensure data consistency during state transitions.
 
-### Usability
+### D) Usability
 
 * Simple, mobile-friendly UI with clear navigation (Home, Browse, My Listings, My Orders).
 
-### Maintainability
+### E) Maintainability
 
 * Clear separation of concerns: database layer, backend API, and frontend pages.
 * Consistent naming conventions and documented SQL/logic.
