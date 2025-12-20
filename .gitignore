@@ -1,0 +1,8 @@
+references/
+.DS_Store
+backend/target/
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/public/
+frontend/src/assets/
