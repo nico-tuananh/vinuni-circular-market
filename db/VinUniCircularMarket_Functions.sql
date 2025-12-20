@@ -212,6 +212,8 @@ END$$
 DELIMITER ;
 
 -- 3.5. Complete confirmed order: Marks a confirmed order as completed and handles listing status transitions
+DROP PROCEDURE IF EXISTS sp_complete_order;
+
 DELIMITER $$
 
 CREATE PROCEDURE sp_complete_order(IN p_order_id BIGINT UNSIGNED)
@@ -262,7 +264,12 @@ BEGIN
     WHERE listing_id = v_listing_id;
 
   ELSE
-    UPDATE Listing SET status = 'available'
+    -- lend: record return time, then release listing
+    UPDATE `Order`
+    SET returned_at = NOW()
+    WHERE order_id = p_order_id;
+
+    UPDATE `Listing` SET status = 'available'
     WHERE listing_id = v_listing_id;
   END IF;
 
