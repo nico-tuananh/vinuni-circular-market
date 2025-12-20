@@ -6,7 +6,7 @@ import mysql.connector
 DB_CONFIG = {
     "host": "127.0.0.1",
     "user": "root",
-    "password": "tradaotranchauden",
+    "password": "your_password",
     "database": "VinUniCircularMarket",
     "port": 3306,
 }
