@@ -1,3 +1,6 @@
+CREATE DATABASE IF NOT EXISTS VinUniCircularMarket;
+USE VinUniCircularMarket;
+
 -- 1. User
 CREATE TABLE `User` (
   user_id        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
