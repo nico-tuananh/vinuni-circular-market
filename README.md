@@ -704,6 +704,30 @@ KEY idx_comment_parent (parent_id)
 UNIQUE KEY uq_review_order (order_id)
 ```
 
+### OLTP Workload Simulation (OLTP.py)
+
+To validate the effectiveness of our indexing and query optimizations under a realistic mixed workload, we include an optional DB-direct OLTP workload driver implemented in Python (OLTP.py). The script connects to the MySQL instance, samples existing IDs from the base tables (Category, User, Listing, Order), and repeatedly executes one operation per iteration according to a fixed workload mix.
+
+Workload mix (per iteration):
+- 70% Browse listings: select the most recent available listings within a randomly chosen category (ORDER BY created_at DESC, LIMIT 20).
+- 10% Seller listings: select the most recent listings for a randomly chosen seller (ORDER BY created_at DESC, LIMIT 20).
+- 10% Comments: select the most recent comments for a randomly chosen listing (ORDER BY created_at DESC, LIMIT 30).
+- 10% Order procedures: invoke transactional stored procedures for order-state transitions (sp_confirm_order, sp_cancel_order, sp_reject_order, sp_complete_order), chosen based on the current order status.
+
+Representative operations:
+- Browse / seller / comments are executed as parameterized SELECT statements (placeholders bound via mysql-connector) to mirror typical read paths.
+- Order-state transitions are executed via CALL sp_* procedures to stress transactional correctness and potential conflicts.
+
+Metrics reported:
+- Latency distribution (ms) per operation type: average latency, p95 latency, and maximum latency.
+- Error count and error rate: any database exception during execution (e.g., invalid state transitions signaled by stored procedures, constraint violations, or lock/time-out errors).
+- Throughput (ops/sec): number of successful operations divided by the total wall-clock runtime of the workload loop.
+
+How to run:
+- Ensure MySQL is running and the VinUniCircularMarket schema + sample data are loaded.
+- Run: `python3 OLTP.py` (default iters=500; increase iters for more stable percentiles).
+- Copy the printed summary (n/avg/p95/max per operation, total runtime, throughput, errors) into the OLTP results table in the final report.
+
 ## 8) Stored Procedures, Triggers & Views (Course Requirements)
 
 ### Where Rules Are Enforced (DB vs Backend)
