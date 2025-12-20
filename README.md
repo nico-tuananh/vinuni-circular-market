@@ -723,21 +723,9 @@ CREATE TRIGGER trg_user_email_vinuni_bu BEFORE UPDATE ON `User` ...
 
 ```sql
 -- Active listings for browsing
-CREATE OR REPLACE VIEW vw_active_listings AS
-SELECT
-  l.listing_id,
-  l.title,
-  l.description,
-  l.`condition`,
-  l.listing_type,
-  l.list_price,
-  l.status,
-  l.created_at,
-  u.user_id AS seller_id,
-  u.full_name AS seller_name,
-  u.email AS seller_email,
-  c.category_id,
-  c.name AS category_name
+CREATE VIEW vw_active_listings AS
+SELECT l.*, u.full_name AS seller_name, u.email AS seller_email,
+       c.name AS category_name
 FROM `Listing` l
 JOIN `User` u ON u.user_id = l.seller_id
 JOIN `Category` c ON c.category_id = l.category_id
