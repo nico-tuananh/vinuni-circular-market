@@ -5,113 +5,157 @@
   <em>Project Proposal (Revised v2)</em>
 </p>
 
----
-
 ## Project Structure
 
 This project follows a standard full-stack web application architecture with separate backend and frontend applications, containerized for easy deployment.
 
 ```
 vinuni-circular-market/
-├── backend/                          # Spring Boot REST API
+├── backend/                            # Spring Boot REST API
 │   ├── src/main/java/com/vinuni/circularmarket/
-│   │   ├── controller/               # REST endpoints (@RestController)
-│   │   │   ├── AuthController.java   # Authentication endpoints
-│   │   │   ├── ListingController.java # Listing CRUD operations
-│   │   │   ├── OrderController.java  # Order management
-│   │   │   ├── ReviewController.java # Review operations
-│   │   │   └── AdminController.java  # Admin functionality
-│   │   ├── service/                  # Business logic (@Service)
-│   │   │   ├── UserService.java
+│   │   ├── CircularMarketApplication.java
+│   │   ├── controller/                 # REST endpoints (@RestController)
+│   │   │   ├── AnalyticsController.java
+│   │   │   ├── AuthController.java
+│   │   │   ├── CategoryController.java
+│   │   │   ├── CommentController.java
+│   │   │   ├── HealthController.java
+│   │   │   ├── ListingController.java
+│   │   │   ├── OrderController.java
+│   │   │   ├── ReviewController.java
+│   │   │   └── UserController.java
+│   │   ├── dto/                        # Data Transfer Objects
+│   │   │   ├── AnalyticsDTO.java
+│   │   │   ├── AuthResponse.java
+│   │   │   ├── CategoryDTO.java
+│   │   │   ├── CommentDTO.java
+│   │   │   ├── CreateCommentRequest.java
+│   │   │   ├── CreateListingRequest.java
+│   │   │   ├── CreateOrderRequest.java
+│   │   │   ├── CreateReviewRequest.java
+│   │   │   ├── ListingDTO.java
+│   │   │   ├── LoginRequest.java
+│   │   │   ├── OrderDTO.java
+│   │   │   ├── RecentActivityDTO.java
+│   │   │   ├── RegisterRequest.java
+│   │   │   ├── ReviewDTO.java
+│   │   │   ├── TopSellerDTO.java
+│   │   │   ├── UpdateListingRequest.java
+│   │   │   └── UserDTO.java
+│   │   ├── service/                     # Business logic (@Service)
+│   │   │   ├── AnalyticsService.java
+│   │   │   ├── AuthService.java
+│   │   │   ├── CategoryService.java
+│   │   │   ├── CommentService.java
 │   │   │   ├── ListingService.java
 │   │   │   ├── OrderService.java
-│   │   │   └── ReviewService.java
-│   │   ├── repository/               # Data access (@Repository)
-│   │   │   ├── UserRepository.java
+│   │   │   ├── ReviewService.java
+│   │   │   └── UserService.java
+│   │   ├── model/                      # JPA entities (@Entity)
+│   │   │   ├── Category.java
+│   │   │   ├── Comment.java
+│   │   │   ├── Listing.java
+│   │   │   ├── ListingCondition.java
+│   │   │   ├── ListingStatus.java
+│   │   │   ├── ListingType.java
+│   │   │   ├── Order.java
+│   │   │   ├── OrderStatus.java
+│   │   │   ├── Review.java
+│   │   │   ├── User.java
+│   │   │   ├── UserRole.java
+│   │   │   └── UserStatus.java
+│   │   ├── repository/                 # Data access (@Repository)
+│   │   │   ├── CategoryRepository.java
+│   │   │   ├── CommentRepository.java
 │   │   │   ├── ListingRepository.java
 │   │   │   ├── OrderRepository.java
-│   │   │   └── ReviewRepository.java
-│   │   ├── model/                    # JPA entities (@Entity)
-│   │   │   ├── User.java
-│   │   │   ├── Category.java
-│   │   │   ├── Listing.java
-│   │   │   ├── Order.java
-│   │   │   ├── Review.java
-│   │   │   └── Comment.java
-│   │   ├── config/                   # Configuration classes
+│   │   │   ├── ReviewRepository.java
+│   │   │   └── UserRepository.java
+│   │   ├── config/                     # Configuration classes
 │   │   │   ├── DatabaseConfig.java
-│   │   │   ├── SecurityConfig.java
 │   │   │   └── WebConfig.java
-│   │   └── security/                 # Security components
+│   │   └── security/                   # Security components
+│   │       ├── CustomUserDetailsService.java
 │   │       ├── JwtAuthenticationFilter.java
-│   │       └── CustomUserDetailsService.java
+│   │       ├── JwtUtil.java
+│   │       └── SecurityConfig.java
 │   ├── src/main/resources/
-│   │   ├── application.properties    # App configuration
-│   │   ├── application-dev.properties
-│   │   └── static/                   # Static resources
-│   ├── src/test/                     # Unit & integration tests
-│   ├── pom.xml                       # Maven dependencies
-│   └── Dockerfile                    # Backend containerization
-├── frontend/                         # Node.js SPA
-│   ├── public/                       # Static assets
-│   │   ├── index.html                # Main HTML template
-│   │   ├── favicon.ico
-│   │   └── assets/                   # Images, icons
+│   │   └── application.properties
+│   ├── src/test/                       # Unit & integration tests
+│   ├── target/                         # Compiled classes and build artifacts
+│   ├── pom.xml
+│   └── Dockerfile
+├── frontend/                           # Vanilla JavaScript SPA with Vite
+│   ├── public/                         # Static assets
+│   │   └── vite.svg
 │   ├── src/
-│   │   ├── components/               # Reusable UI components
-│   │   │   ├── Header.js
-│   │   │   ├── Footer.js
-│   │   │   ├── ListingCard.js
-│   │   │   ├── OrderForm.js
-│   │   │   └── ReviewForm.js
-│   │   ├── pages/                    # Page components
-│   │   │   ├── HomePage.js           # Browse listings
-│   │   │   ├── ListingDetailPage.js  # Individual listing
-│   │   │   ├── MyListingsPage.js     # User listings
-│   │   │   ├── MyOrdersPage.js       # User orders
-│   │   │   ├── CreateListingPage.js  # New listing form
-│   │   │   ├── LoginPage.js          # Authentication
+│   │   ├── assets/                     # Images, icons, and other assets
+│   │   ├── components/                 # Reusable UI components
+│   │   │   ├── AdminLayoutComponent.js
+│   │   │   ├── ButtonComponent.js
+│   │   │   ├── CommentComponent.js
+│   │   │   ├── FooterComponent.js
+│   │   │   ├── FormComponent.js
+│   │   │   ├── HeaderComponent.js
+│   │   │   ├── ModalComponent.js
+│   │   │   ├── ReviewComponent.js
+│   │   │   └── StarRatingComponent.js
+│   │   ├── pages/                      # Page components
+│   │   │   ├── AdminCommentsPage.js
+│   │   │   ├── AdminDashboard.js
+│   │   │   ├── AdminUsersPage.js
+│   │   │   ├── BrowseListingsPage.js
+│   │   │   ├── CreateEditListingPage.js
+│   │   │   ├── HomePage.js
+│   │   │   ├── ListingDetailPage.js
+│   │   │   ├── LoginPage.js
+│   │   │   ├── MyListingsPage.js
+│   │   │   ├── MyOrdersPage.js
+│   │   │   ├── NotFoundPage.js
+│   │   │   ├── ProfilePage.js
 │   │   │   ├── RegisterPage.js
-│   │   │   └── AdminPage.js          # Admin dashboard
-│   │   ├── services/                 # API integration
-│   │   │   ├── api.js                # Axios configuration
-│   │   │   ├── authService.js        # Authentication API
-│   │   │   ├── listingService.js     # Listing operations
-│   │   │   ├── orderService.js       # Order management
-│   │   │   └── reviewService.js      # Review operations
-│   │   ├── utils/                    # Utilities
-│   │   │   ├── helpers.js            # Common functions
-│   │   │   ├── validation.js         # Form validation
-│   │   │   └── constants.js          # App constants
-│   │   └── styles/                   # Styling
-│   │       ├── main.css              # Custom styles
-│   │       └── bootstrap-custom.css  # Bootstrap overrides
-│   ├── package.json                  # Node.js dependencies
+│   │   │   ├── SellerOrdersPage.js
+│   │   │   └── SettingsPage.js
+│   │   ├── services/                   # API integration
+│   │   │   ├── api.js
+│   │   │   └── authService.js
+│   │   ├── utils/                      # Utilities
+│   │   │   ├── router.js
+│   │   │   ├── stateManager.js
+│   │   │   ├── testing.js
+│   │   │   └── validation.js
+│   │   ├── App.css
+│   │   ├── index.css
+│   │   └── main.js
+│   ├── dist/                           # Production build output
+│   ├── node_modules/                   # Node.js dependencies
+│   ├── .gitignore
+│   ├── .nvmrc
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package.json
 │   ├── package-lock.json
-│   ├── vite.config.js               # Vite bundler config
-│   ├── index.js                     # App entry point
-│   └── Dockerfile                    # Frontend containerization
-├── db/                              # Database layer
-│   ├── VinUniCircularMarket.sql     # Table schemas & constraints
+│   ├── README.md
+│   └── vite.config.js
+├── db/                                 # Database layer
+│   ├── VinUniCircularMarket.sql       # Table schemas & constraints
 │   ├── VinUniCircularMarket_Input.sql # Sample data
 │   └── VinUniCircularMarket_Functions.sql # Views, procedures, triggers
-├── docker/                          # Containerization
-│   ├── docker-compose.yml           # Multi-service orchestration
-│   ├── docker-compose.dev.yml       # Development setup
-│   ├── Dockerfile.backend           # Backend image
-│   └── Dockerfile.frontend          # Frontend image
-├── docs/                            # Documentation
-│   ├── API.md                       # API documentation
-│   ├── deployment.md                # Deployment guide
-│   └── testing.md                   # Testing instructions
-├── .gitignore                       # Git ignore rules
-├── README.md                        # Project documentation
-└── LICENSE                          # License
+├── docs/                               # Documentation
+│   ├── API.md
+│   ├── deployment.md
+│   └── testing.md
+├── references/                         # Reference implementations
+├── .gitignore
+├── IMPLEMENTATION_PLAN.md
+├── LICENSE
+└── README.md
 ```
+**Note**: Data flow is implemented to follow Spring Boot conventions:
+- Incoming request: HTTP Request → Request DTO → Service → Domain Model → Repository → Database.
+- Outcoming response: Database → Repository → Domain Model → Service → Response DTO → HTTP Response.
 
----
-
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -149,8 +193,6 @@ mvn clean install
 mvn spring-boot:run
 ```
 
-Backend will be available at: http://localhost:8010
-
 #### 4. Start Frontend (Vite)
 
 ```bash
@@ -160,13 +202,13 @@ npm install
 npm run dev
 ```
 
-Frontend will be available at: http://localhost:5174
-
 #### 5. Access the Application
 
-- **Frontend**: http://localhost:5174
-- **Backend API**: http://localhost:8010
-- **Database**: localhost:3306 (VinUniCircularMarket)
+| Component | Port | URL | Description |
+|-----------|------|-----|-------------|
+| **Frontend** | 5174 | http://localhost:5174 | Vite development server |
+| **Backend API** | 8010 | http://localhost:8010/api | Spring Boot REST API |
+| **Database** | 3306 | localhost:3306 | MySQL (VinUniCircularMarket) |
 
 ### Development Commands
 
@@ -200,8 +242,6 @@ npm run lint             # Run ESLint
 4. **Testing**: JUnit for backend, Jest for frontend
 5. **Deployment**: Docker containers for production
 
----
-
 ## 1) Problem Statement
 
 At the end of each semester, many students throw away or leave behind underused items (textbooks, electronics, address furniture, etc.). Meanwhile, incoming students need these exact items but struggle to find trusted sellers at fair prices.
@@ -211,8 +251,6 @@ At the end of each semester, many students throw away or leave behind underused 
 * Reduce campus waste and promote a circular economy.
 * Help students save money by reusing items.
 * Increase trust via ratings, reviews, and moderated public Q&A.
-
----
 
 ## 2) Goals & Scope
 
@@ -228,8 +266,6 @@ At the end of each semester, many students throw away or leave behind underused 
 * Online payment integration.
 * Shipping/logistics and real-time chat (we use listing comments as Q&A).
 * External user access (non-students).
-
----
 
 ## 3) Functional Requirements
 
@@ -297,8 +333,6 @@ At the end of each semester, many students throw away or leave behind underused 
   * `vw_monthly_orders`: Orders per month with revenue totals
   * `vw_top_sellers`: Top-rated sellers by average rating and review count
 
----
-
 ## 4) Non-functional Requirements
 
 ### A) Security & Access Control
@@ -334,8 +368,6 @@ At the end of each semester, many students throw away or leave behind underused 
 
 * Clear separation of concerns: database layer, backend API, and frontend pages.
 * Consistent naming conventions and documented SQL/logic.
-
----
 
 ## 5) Data Model (Revised v2)
 
@@ -595,8 +627,6 @@ CREATE TABLE `Comment` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 ```
 
----
-
 ## 6) Status Flow Clarification (Listing ↔ Order)
 
 ### Listing Status
@@ -624,8 +654,6 @@ CREATE TABLE `Comment` (
 * `borrow_due_date` is required for lend-type orders when confirming.
 * `completed` for lend means the item is returned (`returned_at IS NOT NULL`).
 * Overdue can be computed as: `NOW() > borrow_due_date AND returned_at IS NULL`.
-
----
 
 ## 7) Performance Tuning Strategy (Indexes & Search) (Indexes & Search)
 
@@ -675,8 +703,6 @@ KEY idx_comment_parent (parent_id)
 -- Already defined in table creation
 UNIQUE KEY uq_review_order (order_id)
 ```
-
----
 
 ## 8) Stored Procedures, Triggers & Views (Course Requirements)
 
@@ -754,8 +780,6 @@ WHERE u.rating_count > 0
 ORDER BY u.avg_rating DESC, u.rating_count DESC;
 ```
 
----
-
 ## 9) Tech Stack
 
 * **Database:** MySQL
@@ -768,8 +792,6 @@ ORDER BY u.avg_rating DESC, u.rating_count DESC;
 
   * Lightweight responsive UI for browsing and managing listings/orders.
 * **Tools:** MySQL Workbench, GitHub
-
----
 
 ## 10) Database Implementation
 
@@ -807,8 +829,6 @@ CALL sp_confirm_order(123);
 SELECT * FROM vw_top_sellers LIMIT 10;
 ```
 
----
-
 ## 11) Team Members and Roles
 
 * **Nguyen The An – Database Architect**
@@ -822,8 +842,6 @@ SELECT * FROM vw_top_sellers LIMIT 10;
 * **Phan Nguyen Tuan Anh – Software Engineer**
 
   * Spring Boot backend + UI integration with MySQL database.
-
----
 
 ## 12) Planned Milestones
 
