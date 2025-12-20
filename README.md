@@ -7,6 +7,201 @@
 
 ---
 
+## Project Structure
+
+This project follows a standard full-stack web application architecture with separate backend and frontend applications, containerized for easy deployment.
+
+```
+vinuni-circular-market/
+├── backend/                          # Spring Boot REST API
+│   ├── src/main/java/com/vinuni/circularmarket/
+│   │   ├── controller/               # REST endpoints (@RestController)
+│   │   │   ├── AuthController.java   # Authentication endpoints
+│   │   │   ├── ListingController.java # Listing CRUD operations
+│   │   │   ├── OrderController.java  # Order management
+│   │   │   ├── ReviewController.java # Review operations
+│   │   │   └── AdminController.java  # Admin functionality
+│   │   ├── service/                  # Business logic (@Service)
+│   │   │   ├── UserService.java
+│   │   │   ├── ListingService.java
+│   │   │   ├── OrderService.java
+│   │   │   └── ReviewService.java
+│   │   ├── repository/               # Data access (@Repository)
+│   │   │   ├── UserRepository.java
+│   │   │   ├── ListingRepository.java
+│   │   │   ├── OrderRepository.java
+│   │   │   └── ReviewRepository.java
+│   │   ├── model/                    # JPA entities (@Entity)
+│   │   │   ├── User.java
+│   │   │   ├── Category.java
+│   │   │   ├── Listing.java
+│   │   │   ├── Order.java
+│   │   │   ├── Review.java
+│   │   │   └── Comment.java
+│   │   ├── config/                   # Configuration classes
+│   │   │   ├── DatabaseConfig.java
+│   │   │   ├── SecurityConfig.java
+│   │   │   └── WebConfig.java
+│   │   └── security/                 # Security components
+│   │       ├── JwtAuthenticationFilter.java
+│   │       └── CustomUserDetailsService.java
+│   ├── src/main/resources/
+│   │   ├── application.properties    # App configuration
+│   │   ├── application-dev.properties
+│   │   └── static/                   # Static resources
+│   ├── src/test/                     # Unit & integration tests
+│   ├── pom.xml                       # Maven dependencies
+│   └── Dockerfile                    # Backend containerization
+├── frontend/                         # Node.js SPA
+│   ├── public/                       # Static assets
+│   │   ├── index.html                # Main HTML template
+│   │   ├── favicon.ico
+│   │   └── assets/                   # Images, icons
+│   ├── src/
+│   │   ├── components/               # Reusable UI components
+│   │   │   ├── Header.js
+│   │   │   ├── Footer.js
+│   │   │   ├── ListingCard.js
+│   │   │   ├── OrderForm.js
+│   │   │   └── ReviewForm.js
+│   │   ├── pages/                    # Page components
+│   │   │   ├── HomePage.js           # Browse listings
+│   │   │   ├── ListingDetailPage.js  # Individual listing
+│   │   │   ├── MyListingsPage.js     # User listings
+│   │   │   ├── MyOrdersPage.js       # User orders
+│   │   │   ├── CreateListingPage.js  # New listing form
+│   │   │   ├── LoginPage.js          # Authentication
+│   │   │   ├── RegisterPage.js
+│   │   │   └── AdminPage.js          # Admin dashboard
+│   │   ├── services/                 # API integration
+│   │   │   ├── api.js                # Axios configuration
+│   │   │   ├── authService.js        # Authentication API
+│   │   │   ├── listingService.js     # Listing operations
+│   │   │   ├── orderService.js       # Order management
+│   │   │   └── reviewService.js      # Review operations
+│   │   ├── utils/                    # Utilities
+│   │   │   ├── helpers.js            # Common functions
+│   │   │   ├── validation.js         # Form validation
+│   │   │   └── constants.js          # App constants
+│   │   └── styles/                   # Styling
+│   │       ├── main.css              # Custom styles
+│   │       └── bootstrap-custom.css  # Bootstrap overrides
+│   ├── package.json                  # Node.js dependencies
+│   ├── package-lock.json
+│   ├── vite.config.js               # Vite bundler config
+│   ├── index.js                     # App entry point
+│   └── Dockerfile                    # Frontend containerization
+├── db/                              # Database layer
+│   ├── VinUniCircularMarket.sql     # Table schemas & constraints
+│   ├── VinUniCircularMarket_Input.sql # Sample data
+│   └── VinUniCircularMarket_Functions.sql # Views, procedures, triggers
+├── docker/                          # Containerization
+│   ├── docker-compose.yml           # Multi-service orchestration
+│   ├── docker-compose.dev.yml       # Development setup
+│   ├── Dockerfile.backend           # Backend image
+│   └── Dockerfile.frontend          # Frontend image
+├── docs/                            # Documentation
+│   ├── API.md                       # API documentation
+│   ├── deployment.md                # Deployment guide
+│   └── testing.md                   # Testing instructions
+├── .gitignore                       # Git ignore rules
+├── README.md                        # Project documentation
+└── LICENSE                          # License
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Java 17** or higher
+- **Node.js 18** or higher
+- **MySQL 8.0** or higher
+- **Maven 3.6** or higher
+
+### Quick Start
+
+#### 1. Clone and Setup Database
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd vinuni-circular-market
+
+# Start local MySQL server and open the three files in db/ in MySQLWorkbench
+```
+
+#### 2. Setup Database Schema
+
+```bash
+# Run SQL scripts in order
+# - db/VinUniCircularMarket.sql
+# - db/VinUniCircularMarket_Input.sql
+# - db/VinUniCircularMarket_Functions.sql
+```
+
+#### 3. Start Backend (Spring Boot)
+
+```bash
+cd backend
+mvn clean install
+mvn spring-boot:run
+```
+
+Backend will be available at: http://localhost:8010
+
+#### 4. Start Frontend (Vite)
+
+```bash
+cd frontend
+nvm use
+npm install
+npm run dev
+```
+
+Frontend will be available at: http://localhost:5174
+
+#### 5. Access the Application
+
+- **Frontend**: http://localhost:5174
+- **Backend API**: http://localhost:8010
+- **Database**: localhost:3306 (VinUniCircularMarket)
+
+### Development Commands
+
+```bash
+# Backend
+cd backend
+mvn clean compile          # Compile
+mvn test                   # Run tests
+mvn spring-boot:run        # Start with hot reload
+
+# Frontend
+cd frontend
+npm run dev               # Start dev server
+npm run build            # Build for production
+npm run preview          # Preview production build
+npm run lint             # Run ESLint
+```
+
+### Architecture Overview
+
+- **Backend (Spring Boot)**: RESTful API with JPA/Hibernate for data persistence
+- **Frontend (Node.js + Vite)**: Modern SPA with Bootstrap for responsive design
+- **Database (MySQL)**: Relational database with stored procedures and triggers
+- **Deployment (Docker)**: Containerized services with docker-compose orchestration
+
+### Development Workflow
+
+1. **Backend**: Spring Boot with Maven, hot reload enabled
+2. **Frontend**: Vite dev server with hot module replacement
+3. **Database**: Local MySQL instance with migration scripts
+4. **Testing**: JUnit for backend, Jest for frontend
+5. **Deployment**: Docker containers for production
+
+---
+
 ## 1) Problem Statement
 
 At the end of each semester, many students throw away or leave behind underused items (textbooks, electronics, address furniture, etc.). Meanwhile, incoming students need these exact items but struggle to find trusted sellers at fair prices.
@@ -571,7 +766,7 @@ ORDER BY u.avg_rating DESC, u.rating_count DESC;
 
 ---
 
-## 9) Database Implementation
+## 10) Database Implementation
 
 ### Database Setup Order
 
