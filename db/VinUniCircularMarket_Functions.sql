@@ -266,7 +266,8 @@ BEGIN
   ELSE
     -- lend: record return time, then release listing
     UPDATE `Order`
-    SET returned_at = NOW()
+    SET returned_at = NOW(),
+      completed_at = NOW()
     WHERE order_id = p_order_id;
 
     UPDATE `Listing` SET status = 'available'
