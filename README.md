@@ -40,7 +40,7 @@ At the end of each semester, many students throw away or leave behind underused 
 
 ### A) User & Authentication
 
-* Users register using a VinUni email (`@vinuni.edu.vn` domain only, with subdomain support) and log in/out securely.
+* Users register using a VinUni email (`@vinuni.edu.vn` domain only) and log in/out securely.
 * Passwords are stored using secure hashing.
 * Users can update profile information (name, phone, address/area).
 * Admin can manage accounts (activate/deactivate) and manage roles (admin/student).
