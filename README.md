@@ -83,7 +83,6 @@ vinuni-circular-market/
 │   │   └── application.properties
 │   ├── src/test/                       # Unit & integration tests
 │   ├── target/                         # Compiled classes and build artifacts
-│   ├── pom.xml
 │   └── Dockerfile
 ├── frontend/                           # Vanilla JavaScript SPA with Vite
 │   ├── public/                         # Static assets
@@ -812,7 +811,7 @@ ORDER BY u.avg_rating DESC, u.rating_count DESC;
 * **Backend:** Java (Spring Boot)
 
   * REST endpoints for authentication, listings, orders, reviews, admin.
-* **Frontend:** Node.js + HTML + Bootstrap + JavaScript
+* **Frontend:** HTML, JavaScript, CSS, Bootstrap
 
   * Lightweight responsive UI for browsing and managing listings/orders.
 * **Tools:** MySQL Workbench, GitHub

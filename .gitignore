@@ -6,3 +6,4 @@ frontend/dist/
 frontend/build/
 frontend/public/
 frontend/src/assets/
+db/sample_script.sql
