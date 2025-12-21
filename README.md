@@ -2,7 +2,6 @@
 
 <p align="center">
   <strong>COMP3030 – Databases and Database Systems (Fall 2025)</strong><br/>
-  <em>Project Proposal (Revised v2)</em>
 </p>
 
 ## Project Structure
@@ -128,7 +127,6 @@ vinuni-circular-market/
 │   │   └── main.js
 │   ├── dist/                           # Production build output
 │   ├── node_modules/                   # Node.js dependencies
-│   ├── .gitignore
 │   ├── .nvmrc
 │   ├── eslint.config.js
 │   ├── index.html
