@@ -105,8 +105,16 @@ body {
 
 .navbar-brand {
   font-family: var(--font-family-secondary);
-  font-weight: 700;
-  font-size: 1.5rem;
+  font-weight: 900;
+  font-size: 1.75rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: -0.02em;
+  transition: var(--transition-normal);
+}
+
+.navbar-brand:hover {
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+  transform: translateY(-1px);
 }
 
 .card {
@@ -394,11 +402,11 @@ body {
 
 @media (max-width: 768px) {
   .navbar-brand {
-    font-size: 1.25rem;
+    font-size: 6rem;
   }
 
   h1 {
-    font-size: 2rem;
+    font-size: 6rem;
   }
 
   h2 {
@@ -764,4 +772,30 @@ button:focus-visible {
   right: 0;
   height: 2px;
   background-color: var(--primary-color);
+}
+
+/* Layout Separators */
+#header-nav {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#main-content {
+  border-top: 1px solid var(--gray-200);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+#footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Hero Section Full Width - Break out of container-fluid padding */
+#main-content > .bg-primary.text-white.py-5 {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  padding-left: calc(var(--bs-gutter-x, 1.5rem) + 15px);
+  padding-right: calc(var(--bs-gutter-x, 1.5rem) + 15px);
 }
