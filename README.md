@@ -4,6 +4,22 @@
   <strong>COMP3030 – Databases and Database Systems (Fall 2025)</strong><br/>
 </p>
 
+## Problem Statement
+
+At the end of each semester, many students throw away or leave behind underused items (textbooks, electronics, address furniture, etc.). Meanwhile, incoming students need these exact items but struggle to find trusted sellers at fair prices.
+
+**CampusCircle** is a student-only marketplace that enables students to **buy/sell** or **lend/borrow** second-hand items within the university community. The platform aims to:
+
+* Provide a secure, internal marketplace accessible only to university students.
+* Support listing creation, browsing/searching, ordering/borrowing flows, and reviews.
+* Ensure data integrity (no double-selling, valid state transitions).
+* Provide admin controls and basic analytics.
+
+However, out of scope for our website and the course itself would be:
+
+* Online payment integration.
+* Shipping/logistics and real-time chat (we use listing comments as Q&A).
+
 ## Project Structure
 
 This project follows a standard full-stack web application architecture with separate backend and frontend applications, containerized for easy deployment.
@@ -239,34 +255,9 @@ npm run lint             # Run ESLint
 4. **Testing**: JUnit for backend, Jest for frontend
 5. **Deployment**: Docker containers for production
 
-## 1) Problem Statement
+## Functional Requirements
 
-At the end of each semester, many students throw away or leave behind underused items (textbooks, electronics, address furniture, etc.). Meanwhile, incoming students need these exact items but struggle to find trusted sellers at fair prices.
-
-**CampusCircle** is a student-only marketplace that enables students to **buy/sell** or **lend/borrow** second-hand items within the university community. The platform aims to:
-
-* Reduce campus waste and promote a circular economy.
-* Help students save money by reusing items.
-* Increase trust via ratings, reviews, and moderated public Q&A.
-
-## 2) Goals & Scope
-
-### Goals
-
-* Provide a secure, internal marketplace accessible only to university students.
-* Support listing creation, browsing/searching, ordering/borrowing flows, and reviews.
-* Ensure data integrity (no double-selling, valid state transitions).
-* Provide admin controls and basic analytics.
-
-### Out of Scope (for course scope)
-
-* Online payment integration.
-* Shipping/logistics and real-time chat (we use listing comments as Q&A).
-* External user access (non-students).
-
-## 3) Functional Requirements
-
-### A) User & Authentication
+### User & Authentication
 
 * Users register using a VinUni email (`@vinuni.edu.vn` domain only) and log in/out securely.
 * Passwords are stored using secure hashing.
@@ -274,7 +265,7 @@ At the end of each semester, many students throw away or leave behind underused 
 * Admin can manage accounts (activate/deactivate) and manage roles (admin/student).
 * User ratings are automatically calculated and maintained via database triggers.
 
-### B) Categories & Listings
+### Categories & Listings
 
 * Predefined categories include: Electronics, Books, Furniture, Clothing, Dorm Supplies, Stationery, Sports, Kitchen, Bicycles, Home Decor, Course Materials, Lab Equipment, Musical Instruments, Gaming, Phones, Laptops, Tablets, Accessories, Health & Beauty, Others.
 * Logged-in users can create listings with:
@@ -288,13 +279,13 @@ At the end of each semester, many students throw away or leave behind underused 
 * Full-text search enabled on title and description fields.
 * Users can edit/delete their own listings while status is `available`.
 
-### C) Search, Filter & Sort
+### Search, Filter & Sort
 
 * Keyword search by title/description.
 * Filter by category, price range, condition, and status.
 * Sort listings by newest, lowest price, or highest price.
 
-### D) Orders & Transactions (Sell + Lend)
+### Orders & Transactions (Sell + Lend)
 
 * A buyer can submit an order/request for an **available** listing with optional offer price.
 * **Requested orders do not lock listings.** A listing becomes locked only after the seller confirms via `sp_confirm_order()`.
@@ -307,21 +298,21 @@ At the end of each semester, many students throw away or leave behind underused 
   * For **sell**: listing status becomes **sold** (permanent).
   * For **lend**: listing returns to **available** after return is recorded (`returned_at` timestamp).
 
-### E) Reviews & Ratings
+### Reviews & Ratings
 
 * After a completed transaction, the buyer can leave one review per order with rating (1–5) and optional comment.
 * Seller ratings are automatically calculated and updated via triggers (`trg_review_ai`/`trg_review_ad`).
 * Average rating and review count are pre-aggregated in User table for performance.
 * Top-rated sellers available via `vw_top_sellers` view.
 
-### F) Comments & Q&A (Message-like)
+### Comments & Q&A (Message-like)
 
 * Under each listing, logged-in users can post public comments in chronological order.
 * Supports threaded discussions with parent/child relationships (`parent_id`).
 * Comments are indexed for efficient chronological display.
 * Admin can delete inappropriate comments.
 
-### G) Admin & Analytics
+### Admin & Analytics
 
 * Admin can view overall statistics: number of users, active listings, completed orders.
 * Predefined views provide analytics:
@@ -330,15 +321,15 @@ At the end of each semester, many students throw away or leave behind underused 
   * `vw_monthly_orders`: Orders per month with revenue totals
   * `vw_top_sellers`: Top-rated sellers by average rating and review count
 
-## 4) Non-functional Requirements
+## Non-functional Requirements
 
-### A) Security & Access Control
+### Security & Access Control
 
 * Passwords stored using hashing.
 * Role-based access: **admin** vs **student**, least-privilege permissions.
 * Prevent SQL injection via parameterized queries / ORM.
 
-### B) Performance
+### Performance
 
 * Typical operations (browse/search/view/create order) respond within **2–3 seconds** under course-scale load.
 * Strategic indexing on frequently queried columns:
@@ -347,7 +338,7 @@ At the end of each semester, many students throw away or leave behind underused 
   - Comment: `(listing_id, created_at)`
 * Full-text search on `Listing(title, description)` for keyword search.
 
-### C) Reliability & Data Integrity
+### Reliability & Data Integrity
 
 * Foreign keys and constraints enforce referential integrity.
 * Check constraints prevent invalid data:
@@ -357,16 +348,16 @@ At the end of each semester, many students throw away or leave behind underused 
 * Row-level locking in stored procedures prevents race conditions and double-selling.
 * Atomic transactions ensure data consistency during state transitions.
 
-### D) Usability
+### Usability
 
 * Simple, mobile-friendly UI with clear navigation (Home, Browse, My Listings, My Orders).
 
-### E) Maintainability
+### Maintainability
 
 * Clear separation of concerns: database layer, backend API, and frontend pages.
 * Consistent naming conventions and documented SQL/logic.
 
-## 5) Data Model (Revised v2)
+## Data Model
 
 ### Key Design Decision: Listing-Centric Model
 
@@ -624,7 +615,7 @@ CREATE TABLE `Comment` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 ```
 
-## 6) Status Flow Clarification (Listing ↔ Order)
+## Status Flow Clarification (Listing ↔ Order)
 
 ### Listing Status
 
@@ -652,7 +643,7 @@ CREATE TABLE `Comment` (
 * `completed` for lend means the item is returned (`returned_at IS NOT NULL`).
 * Overdue can be computed as: `NOW() > borrow_due_date AND returned_at IS NULL`.
 
-## 7) Performance Tuning Strategy (Indexes & Search) (Indexes & Search)
+## Performance Tuning Strategy (Indexes & Search) (Indexes & Search)
 
 ### Implemented Indexes
 
@@ -725,7 +716,7 @@ How to run:
 - Run: `python3 OLTP.py` (default iters=500; increase iters for more stable percentiles).
 - Copy the printed summary (n/avg/p95/max per operation, total runtime, throughput, errors) into the OLTP results table in the final report.
 
-## 8) Stored Procedures, Triggers & Views (Course Requirements)
+## Stored Procedures, Triggers & Views (Course Requirements)
 
 ### Where Rules Are Enforced (DB vs Backend)
 
@@ -814,7 +805,7 @@ ORDER BY u.avg_rating DESC, u.rating_count DESC;
   * Lightweight responsive UI for browsing and managing listings/orders.
 * **Tools:** MySQL Workbench, GitHub
 
-## 10) Database Implementation
+## Database Implementation
 
 ### Database Setup Order
 
@@ -850,7 +841,7 @@ CALL sp_confirm_order(123);
 SELECT * FROM vw_top_sellers LIMIT 10;
 ```
 
-## 11) Team Members and Roles
+## Team Members and Roles
 
 * **Nguyen The An – Database Architect**
 
@@ -864,7 +855,7 @@ SELECT * FROM vw_top_sellers LIMIT 10;
 
   * Spring Boot backend + UI integration with MySQL database.
 
-## 12) Planned Milestones
+## Planned Milestones
 
 * **By 01/12 – Topic & Requirements**
 
