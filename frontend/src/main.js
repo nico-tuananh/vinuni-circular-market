@@ -62,7 +62,8 @@ class App {
 
     initializeComponents() {
         // Initialize header
-        this.header = new HeaderComponent('header-nav', this.currentUser);
+        const currentPath = window.location.pathname || '/';
+        this.header = new HeaderComponent('header-nav', this.currentUser, currentPath);
         this.header.render();
 
         // Initialize footer
@@ -90,6 +91,9 @@ class App {
             '/': () => this.loadPage('HomePage'),
             '/login': () => this.loadPage('LoginPage'),
             '/register': () => this.loadPage('RegisterPage'),
+            '/about': () => this.loadPage('AboutPage'),
+            '/terms-of-service': () => this.loadPage('TermsOfServicePage'),
+            '/privacy-policy': () => this.loadPage('PrivacyPolicyPage'),
             '/admin': () => this.loadPage('AdminDashboard'),
             '/admin/users': () => this.loadPage('AdminUsersPage'),
             '/admin/listings': () => this.loadPage('AdminListingsPage'),

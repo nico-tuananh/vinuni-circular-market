@@ -94,7 +94,7 @@ export class ListingDetailPage {
                             <h1 class="h3 mb-2">${this.listing.title}</h1>
                             <div class="d-flex gap-2 mb-2 flex-wrap">
                                 <span class="badge ${type === 'LEND' ? 'borrowing-badge' : 'bg-success'}">${type === 'LEND' ? 'Available for Borrow' : type}</span>
-                                <span class="badge bg-secondary">${this.listing.condition || 'Used'}</span>
+                                <span class="badge bg-secondary">${this.formatCondition(this.listing.condition)}</span>
                                 <span class="badge bg-${status === 'Active' ? 'success' : 'warning'}">${status}</span>
                                 ${type === 'LEND' ? this.renderBorrowingInfo() : ''}
                             </div>
@@ -184,7 +184,7 @@ export class ListingDetailPage {
                                     </tr>
                                     <tr>
                                         <td class="text-muted">Condition:</td>
-                                        <td>${this.listing.condition || 'Not specified'}</td>
+                                        <td>${this.formatCondition(this.listing.condition) || 'Not specified'}</td>
                                     </tr>
                                     <tr>
                                         <td class="text-muted">Type:</td>
@@ -529,7 +529,7 @@ export class ListingDetailPage {
             // Close modal and reload comments
             const modalElement = document.querySelector('.modal');
             if (modalElement) {
-                const modal = bootstrap.Modal.getInstance(modalElement);
+                const modal = window.bootstrap?.Modal?.getInstance(modalElement);
                 if (modal) modal.hide();
             }
 
@@ -544,6 +544,7 @@ export class ListingDetailPage {
             });
 
         } catch (error) {
+            console.error('Failed to submit comment:', error);
             const { globalState } = window;
             globalState.addNotification({
                 type: 'error',
@@ -694,7 +695,8 @@ export class ListingDetailPage {
     async submitBorrowingRequest() {
         const fromDate = document.getElementById('borrow-from-date')?.value;
         const toDate = document.getElementById('borrow-to-date')?.value;
-        const message = document.getElementById('borrow-message')?.value;
+        const borrowMessage = document.getElementById('borrow-message')?.value;
+        console.log('Borrow message:', borrowMessage);
 
         if (!fromDate || !toDate) {
             const { globalState } = window;
@@ -767,7 +769,7 @@ export class ListingDetailPage {
         // Close modal
         const modalElement = document.querySelector('.modal');
         if (modalElement) {
-            const modal = bootstrap.Modal.getInstance(modalElement);
+            const modal = window.bootstrap?.Modal?.getInstance(modalElement);
             if (modal) modal.hide();
         }
     }
@@ -798,6 +800,7 @@ export class ListingDetailPage {
 
     editComment(commentId) {
         // Implementation for editing comments
+        console.log('Edit comment:', commentId);
         const { globalState } = window;
         globalState.addNotification({
             type: 'info',
@@ -808,6 +811,7 @@ export class ListingDetailPage {
 
     deleteComment(commentId) {
         // Implementation for deleting comments
+        console.log('Delete comment:', commentId);
         const { globalState } = window;
         globalState.addNotification({
             type: 'info',
@@ -868,5 +872,15 @@ export class ListingDetailPage {
     formatDate(dateString) {
         if (!dateString) return null;
         return new Date(dateString).toLocaleDateString();
+    }
+
+    formatCondition(condition) {
+        if (!condition) return 'Used';
+        const conditionMap = {
+            'NEW': 'New',
+            'LIKE_NEW': 'Like New',
+            'USED': 'Used'
+        };
+        return conditionMap[condition] || condition;
     }
 }

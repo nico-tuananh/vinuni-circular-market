@@ -42,12 +42,10 @@ public class Listing {
     private String description;
 
     @NotNull(message = "Condition is required")
-    @Enumerated(EnumType.STRING)
-    @Column(name = "condition", nullable = false)
+    @Column(name = "condition", nullable = false, columnDefinition = "ENUM('new','like_new','used') NOT NULL")
     private ListingCondition condition;
 
     @NotNull(message = "Listing type is required")
-    @Enumerated(EnumType.STRING)
     @Column(name = "listing_type", nullable = false)
     private ListingType listingType;
 
@@ -58,7 +56,6 @@ public class Listing {
     private BigDecimal listPrice;
 
     @NotNull(message = "Status is required")
-    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private ListingStatus status = ListingStatus.AVAILABLE;
 

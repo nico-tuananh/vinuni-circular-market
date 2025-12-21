@@ -6,6 +6,7 @@ import com.vinuni.circularmarket.model.ListingStatus;
 import com.vinuni.circularmarket.model.ListingType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -56,10 +57,12 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
 
     /**
      * Find available listings (for public browsing)
-     * @param pageable pagination information
+     * @param status the listing status
+     * @param pageable pagination information (including sorting)
      * @return page of available listings
      */
-    Page<Listing> findByStatusOrderByCreatedAtDesc(ListingStatus status, Pageable pageable);
+    @EntityGraph(attributePaths = {"seller", "category"})
+    Page<Listing> findByStatus(ListingStatus status, Pageable pageable);
 
     /**
      * Full-text search on title and description
@@ -82,6 +85,7 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
      * @param pageable pagination information
      * @return page of filtered listings
      */
+    @EntityGraph(attributePaths = {"seller", "category"})
     @Query("SELECT l FROM Listing l WHERE l.status = 'AVAILABLE' " +
            "AND (:categoryId IS NULL OR l.category.categoryId = :categoryId) " +
            "AND (:minPrice IS NULL OR l.listPrice >= :minPrice) " +
@@ -137,10 +141,12 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
 
     /**
      * Find recently created listings (last 30 days)
-     * @param pageable pagination information
+     * @param thirtyDaysAgo the date threshold
+     * @param pageable pagination information (including sorting)
      * @return page of recent listings
      */
-    @Query("SELECT l FROM Listing l WHERE l.status = 'AVAILABLE' AND l.createdAt >= :thirtyDaysAgo ORDER BY l.createdAt DESC")
+    @EntityGraph(attributePaths = {"seller", "category"})
+    @Query("SELECT l FROM Listing l WHERE l.status = 'AVAILABLE' AND l.createdAt >= :thirtyDaysAgo")
     Page<Listing> findRecentListings(@Param("thirtyDaysAgo") java.time.LocalDateTime thirtyDaysAgo, Pageable pageable);
 
     /**

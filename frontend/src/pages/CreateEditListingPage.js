@@ -279,7 +279,8 @@ export class CreateEditListingPage {
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="agreeToTerms" name="agreeToTerms" required>
                             <label class="form-check-label" for="agreeToTerms">
-                                I agree to the <a href="#" onclick="event.preventDefault()">Terms of Service</a> and <a href="#" onclick="event.preventDefault()">Community Guidelines</a>
+                                I agree to the <a href="#" onclick="window.App.router.navigate('/terms-of-service')">Terms of Service</a>
+                                and <a href="#" onclick="window.App.router.navigate('/privacy-policy')">Privacy Policy</a>
                             </label>
                         </div>
 
@@ -299,11 +300,15 @@ export class CreateEditListingPage {
     }
 
     renderCategoryOptions() {
-        return this.categories.map(category => `
-            <option value="${category.id}" ${this.listing?.category?.id == category.id ? 'selected' : ''}>
-                ${category.name}
-            </option>
-        `).join('');
+        return this.categories.map(category => {
+            const categoryId = category.categoryId || category.id;
+            const listingCategoryId = this.listing?.category?.categoryId || this.listing?.category?.id;
+            return `
+                <option value="${categoryId}" ${listingCategoryId == categoryId ? 'selected' : ''}>
+                    ${category.name}
+                </option>
+            `;
+        }).join('');
     }
 
     renderImagePreviews() {
@@ -486,10 +491,11 @@ export class CreateEditListingPage {
         const { ValidationUtils } = await import('../utils/validation.js');
 
         // Build form data object
+        const categoryValue = formData.get('category');
         const formDataObj = {
             title: formData.get('title')?.trim(),
             description: formData.get('description')?.trim(),
-            categoryId: formData.get('category'),
+            categoryId: categoryValue && categoryValue.trim() !== '' ? categoryValue : null,
             listingType: formData.get('listingType'),
             condition: formData.get('condition'),
             listPrice: formData.get('listPrice'),
@@ -555,24 +561,34 @@ export class CreateEditListingPage {
             const { ListingService } = await import('../services/api.js');
 
             // Prepare listing data
+            const categoryIdValue = formDataObj.categoryId ? parseInt(formDataObj.categoryId) : null;
+            const listPriceValue = formDataObj.listPrice ? parseFloat(formDataObj.listPrice) : 0;
+
+            if (!categoryIdValue || isNaN(categoryIdValue)) {
+                globalState.addNotification({
+                    type: 'error',
+                    title: 'Validation Error',
+                    message: 'Please select a category.'
+                });
+                this.setLoading(false);
+                return;
+            }
+
             const listingData = {
-                title: title,
-                description: description,
-                categoryId: parseInt(categoryId),
-                listingType: listingType,
-                condition: condition,
-                listPrice: listPrice,
-                pickupAvailable: formData.get('pickupAvailable') === 'on',
-                deliveryAvailable: formData.get('deliveryAvailable') === 'on'
+                title: formDataObj.title,
+                description: formDataObj.description,
+                categoryId: categoryIdValue,
+                listingType: formDataObj.listingType,
+                condition: formDataObj.condition,
+                listPrice: listPriceValue,
+                pickupAvailable: formDataObj.pickupAvailable,
+                deliveryAvailable: formDataObj.deliveryAvailable
             };
 
             // Add lending-specific fields
-            if (listingType === 'LEND') {
-                const availableFrom = formData.get('availableFrom');
-                const availableUntil = formData.get('availableUntil');
-
-                if (availableFrom) listingData.availableFrom = availableFrom;
-                if (availableUntil) listingData.availableUntil = availableUntil;
+            if (formDataObj.listingType === 'LEND') {
+                if (formDataObj.availableFrom) listingData.availableFrom = formDataObj.availableFrom;
+                if (formDataObj.availableUntil) listingData.availableUntil = formDataObj.availableUntil;
             }
 
             // Handle images (in a real implementation, you'd upload them first)
@@ -583,16 +599,15 @@ export class CreateEditListingPage {
                     .map(img => img.preview);
             }
 
-            let response;
             if (this.isEditing) {
-                response = await ListingService.updateListing(this.listingId, listingData);
+                await ListingService.updateListing(this.listingId, listingData);
                 globalState.addNotification({
                     type: 'success',
                     title: 'Listing Updated',
                     message: 'Your listing has been updated successfully!'
                 });
             } else {
-                response = await ListingService.createListing(listingData);
+                await ListingService.createListing(listingData);
                 globalState.addNotification({
                     type: 'success',
                     title: 'Listing Created',

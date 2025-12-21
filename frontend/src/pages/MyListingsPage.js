@@ -21,7 +21,7 @@ export class MyListingsPage {
             return;
         }
 
-        // Load listings
+        // Load listings first
         await this.loadListings();
 
         this.container.innerHTML = `
@@ -261,12 +261,24 @@ export class MyListingsPage {
             const { ListingService } = await import('../services/api.js');
             const response = await ListingService.getMyListings();
 
-            this.listings = response || [];
-            this.totalPages = 1; // For now, assuming single page
+            // Handle paginated response structure
+            if (response && response.listings) {
+                this.listings = response.listings || [];
+                this.totalPages = response.totalPages || 1;
+                this.currentPage = response.currentPage || 0;
+            } else if (Array.isArray(response)) {
+                // Fallback if response is directly an array
+                this.listings = response;
+                this.totalPages = 1;
+            } else {
+                this.listings = [];
+                this.totalPages = 1;
+            }
 
         } catch (error) {
             console.error('Failed to load listings:', error);
             this.listings = [];
+            this.totalPages = 1;
         } finally {
             this.isLoading = false;
         }
@@ -284,6 +296,7 @@ export class MyListingsPage {
     filterByStatus(status) {
         // For now, just re-render with filtering
         // In a real implementation, this would filter on the server side
+        console.log('Filtering by status:', status);
         const container = document.getElementById('listings-container');
         if (container) {
             container.innerHTML = this.renderListingsTable();
@@ -300,6 +313,7 @@ export class MyListingsPage {
 
     async duplicateListing(listingId) {
         try {
+            console.log('Duplicate listing:', listingId);
             const { globalState } = window;
             globalState.addNotification({
                 type: 'info',
@@ -335,6 +349,7 @@ export class MyListingsPage {
                     });
 
                 } catch (error) {
+                    console.error('Failed to delete listing:', error);
                     const { globalState } = window;
                     globalState.addNotification({
                         type: 'error',

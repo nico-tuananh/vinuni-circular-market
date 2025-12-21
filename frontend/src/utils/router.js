@@ -4,12 +4,16 @@ export class Router {
         this.routes = routes;
         this.contentElementId = contentElementId;
         this.currentPage = null;
+        this.currentPath = '/';
         this.routeGuards = {};
     }
 
     navigate(path, updateHistory = true) {
         // Remove leading slash if present
         const cleanPath = path.startsWith('/') ? path : '/' + path;
+        
+        // Store current path
+        this.currentPath = cleanPath;
 
         // Find matching route
         let routeHandler = this.routes[cleanPath];
@@ -35,6 +39,11 @@ export class Router {
             // Update browser history
             if (updateHistory) {
                 window.history.pushState({}, '', cleanPath);
+            }
+
+            // Update header with current path
+            if (window.App && window.App.header) {
+                window.App.header.updatePath(cleanPath);
             }
 
             // Scroll to top of page
@@ -126,7 +135,7 @@ export class Router {
 
     // Helper method to create auth guard
     createAuthGuard(requireAuth = true, redirectTo = '/login') {
-        return (path) => {
+        return () => {
             const { globalState } = window;
             const isAuthenticated = globalState ? globalState.get('isAuthenticated') : false;
 
@@ -148,7 +157,7 @@ export class Router {
 
     // Helper method to create role guard
     createRoleGuard(requiredRole, redirectTo = '/') {
-        return (path) => {
+        return () => {
             const { globalState } = window;
             const user = globalState ? globalState.get('user') : null;
 

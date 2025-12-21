@@ -174,7 +174,7 @@ export class StateManager {
         if (notification.duration !== 0) {
             setTimeout(() => {
                 this.removeNotification(id);
-            }, notification.duration || 5000);
+            }, notification.duration || 3000);
         }
 
         return id;

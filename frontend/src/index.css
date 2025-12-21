@@ -1,7 +1,7 @@
 /* CampusCircle Custom Theme Variables */
 :root {
   /* Primary Colors - VinUni inspired */
-  --primary-color: #1e3a8a; /* Deep blue */
+  --primary-colori: #2E548A; /* Deep blue */
   --primary-light: #3b82f6; /* Lighter blue */
   --primary-dark: #1e293b; /* Dark blue */
 
@@ -747,4 +747,21 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+/* Active Navigation Link Styles */
+.nav-link.active {
+  font-weight: 600;
+  color: var(--primary-color) !important;
+  position: relative;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--primary-color);
 }

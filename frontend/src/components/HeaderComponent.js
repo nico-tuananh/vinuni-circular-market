@@ -1,9 +1,43 @@
 // Header Component
 export class HeaderComponent {
-    constructor(containerId, user = null) {
+    constructor(containerId, user = null, currentPath = '/') {
         this.containerId = containerId;
         this.user = user;
+        this.currentPath = currentPath;
         this.container = document.getElementById(containerId);
+    }
+
+    isActive(path) {
+        if (path === '/') {
+            return this.currentPath === '/';
+        }
+        
+        // Special handling for /listings - should match browse and detail pages, but not create/edit
+        if (path === '/listings') {
+            // Exact match for browse page
+            if (this.currentPath === '/listings') {
+                return true;
+            }
+            // Match detail pages like /listings/123, but not /listings/create or /listings/123/edit
+            if (this.currentPath.startsWith('/listings/')) {
+                // Check if it's a create or edit page
+                if (this.currentPath === '/listings/create' || this.currentPath.match(/^\/listings\/\d+\/edit$/)) {
+                    return false;
+                }
+                // Otherwise it's likely a detail page (numeric ID)
+                return this.currentPath.match(/^\/listings\/\d+$/);
+            }
+            return false;
+        }
+        
+        // /my-listings should also be active for create/edit listing pages
+        if (path === '/my-listings') {
+            return this.currentPath === '/my-listings' ||
+                   this.currentPath === '/listings/create' ||
+                   this.currentPath.match(/^\/listings\/\d+\/edit$/);
+        }
+        
+        return this.currentPath.startsWith(path);
     }
 
     render() {
@@ -12,7 +46,7 @@ export class HeaderComponent {
         this.container.innerHTML = `
             <div class="container">
                 <a class="navbar-brand" href="#" onclick="window.App.router.navigate('/')">
-                    ♻️💰 CampusCircle
+                    CampusCircle
                 </a>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,17 +56,17 @@ export class HeaderComponent {
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="window.App.router.navigate('/')">Home</a>
+                            <a class="nav-link ${this.isActive('/') ? 'active' : ''}" href="#" onclick="window.App.router.navigate('/')">Home</a>
                         </li>
                         ${this.user ? `
                         <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="window.App.router.navigate('/listings')">Browse Listings</a>
+                            <a class="nav-link ${this.isActive('/listings') ? 'active' : ''}" href="#" onclick="window.App.router.navigate('/listings')">Browse Listings</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="window.App.router.navigate('/my-listings')">My Listings</a>
+                            <a class="nav-link ${this.isActive('/my-listings') ? 'active' : ''}" href="#" onclick="window.App.router.navigate('/my-listings')">My Listings</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="window.App.router.navigate('/my-orders')">My Orders</a>
+                            <a class="nav-link ${this.isActive('/my-orders') ? 'active' : ''}" href="#" onclick="window.App.router.navigate('/my-orders')">My Orders</a>
                         </li>
                         ` : ''}
                     </ul>
@@ -70,6 +104,11 @@ export class HeaderComponent {
 
     updateUser(user) {
         this.user = user;
+        this.render();
+    }
+
+    updatePath(path) {
+        this.currentPath = path;
         this.render();
     }
 }

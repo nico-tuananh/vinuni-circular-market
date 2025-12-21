@@ -26,7 +26,7 @@ export class HomePage {
                     <div class="row align-items-center">
                         <div class="col-lg-6">
                             <h1 class="display-4 fw-bold mb-4">
-                                ♻️💰 Welcome to CampusCircle
+                                Welcome to CampusCircle
                             </h1>
                             <p class="lead mb-4">
                                 VinUni's student-exclusive marketplace for buying, selling, and sharing.
@@ -58,14 +58,6 @@ export class HomePage {
                                     <i class="bi bi-person-plus me-2"></i>Join Community
                                 </button>
                                 ` : ''}
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="text-center">
-                                <div class="bg-white bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
-                                     style="width: 200px; height: 200px;">
-                                    <span style="font-size: 4rem;">🎓</span>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -119,6 +111,7 @@ export class HomePage {
             </div>
 
             <!-- Features Section -->
+            ${!this.isAuthenticated ? `
             <div class="container py-5">
                 <div class="row text-center mb-5">
                     <h2 class="display-5 fw-bold">Why Choose CampusCircle?</h2>
@@ -134,7 +127,7 @@ export class HomePage {
                                 </div>
                                 <h5 class="card-title">Student-Only Community</h5>
                                 <p class="card-text text-muted">
-                                    Exclusive access for VinUni students with @vinuni.edu.vn email verification
+                                    Exclusive access for VinUni students
                                 </p>
                             </div>
                         </div>
@@ -169,9 +162,10 @@ export class HomePage {
                     </div>
                 </div>
             </div>
-
-            ${!this.isAuthenticated ? `
+            ` : ''}
+            
             <!-- CTA Section -->
+            ${!this.isAuthenticated ? `
             <div class="bg-light py-5">
                 <div class="container text-center">
                     <h3 class="mb-4">Ready to get started?</h3>
@@ -282,7 +276,7 @@ export class HomePage {
     renderListingCard(listing, colClass = 'col-md-4') {
         const imageUrl = listing.images && listing.images[0] ? listing.images[0] : '/placeholder-listing.png';
         const price = listing.price ? `$${listing.price.toFixed(2)}` : 'Free';
-        const condition = listing.condition || 'Used';
+        const condition = this.formatCondition(listing.condition);
         const type = listing.type || 'Sell';
 
         return `
@@ -326,5 +320,15 @@ export class HomePage {
         if (diffInDays < 7) return `${diffInDays}d ago`;
 
         return date.toLocaleDateString();
+    }
+
+    formatCondition(condition) {
+        if (!condition) return 'Used';
+        const conditionMap = {
+            'NEW': 'New',
+            'LIKE_NEW': 'Like New',
+            'USED': 'Used'
+        };
+        return conditionMap[condition] || condition;
     }
 }

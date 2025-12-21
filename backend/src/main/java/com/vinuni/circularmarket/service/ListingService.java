@@ -46,8 +46,15 @@ public class ListingService {
      */
     @Transactional(readOnly = true)
     public Page<ListingDTO> getAvailableListings(Pageable pageable) {
-        return listingRepository.findByStatusOrderByCreatedAtDesc(ListingStatus.AVAILABLE, pageable)
-                .map(this::convertToDTO);
+        logger.debug("Getting available listings with pageable: {}", pageable);
+
+        var listingPage = listingRepository.findByStatus(ListingStatus.AVAILABLE, pageable);
+        logger.debug("Found {} listings from repository", listingPage.getTotalElements());
+
+        var dtoPage = listingPage.map(this::convertToDTO);
+        logger.debug("Converted {} listings to DTOs", dtoPage.getContent().size());
+
+        return dtoPage;
     }
 
     /**
@@ -118,6 +125,14 @@ public class ListingService {
             Listing listing = new Listing(seller, category, request.getTitle(),
                                         request.getDescription(), request.getCondition(),
                                         request.getListingType(), request.getListPrice());
+
+            // Fallback (if JPA auditing doesn't work): Ensure timestamps are set
+            if (listing.getCreatedAt() == null) {
+                listing.setCreatedAt(LocalDateTime.now());
+            }
+            if (listing.getUpdatedAt() == null) {
+                listing.setUpdatedAt(LocalDateTime.now());
+            }
 
             Listing savedListing = listingRepository.save(listing);
             logger.info("CREATE OPERATION SUCCESS: Listing created - Listing ID: {}, Seller ID: {}, Title: {}",
@@ -246,31 +261,51 @@ public class ListingService {
      * @return ListingDTO
      */
     private ListingDTO convertToDTO(Listing listing) {
+        logger.debug("Converting listing {} to DTO", listing.getListingId());
+
         ListingDTO dto = new ListingDTO();
         dto.setListingId(listing.getListingId());
 
-        // Convert seller
-        if (listing.getSeller() != null) {
-            UserDTO sellerDTO = new UserDTO();
-            sellerDTO.setUserId(listing.getSeller().getUserId());
-            sellerDTO.setFullName(listing.getSeller().getFullName());
-            sellerDTO.setEmail(listing.getSeller().getEmail());
-            dto.setSeller(sellerDTO);
+        // Convert seller - force initialization
+        try {
+            User seller = listing.getSeller();
+            if (seller != null) {
+                logger.debug("Seller found for listing {}", listing.getListingId());
+                UserDTO sellerDTO = new UserDTO();
+                sellerDTO.setUserId(seller.getUserId());
+                sellerDTO.setFullName(seller.getFullName());
+                sellerDTO.setEmail(seller.getEmail());
+                dto.setSeller(sellerDTO);
+            } else {
+                logger.warn("No seller found for listing {}", listing.getListingId());
+            }
+        } catch (Exception e) {
+            logger.error("Error accessing seller for listing {}: {}", listing.getListingId(), e.getMessage());
         }
 
-        // Convert category
-        if (listing.getCategory() != null) {
-            CategoryDTO categoryDTO = new CategoryDTO();
-            categoryDTO.setCategoryId(listing.getCategory().getCategoryId());
-            categoryDTO.setName(listing.getCategory().getName());
-            categoryDTO.setDescription(listing.getCategory().getDescription());
-            dto.setCategory(categoryDTO);
+        // Convert category - force initialization
+        try {
+            Category category = listing.getCategory();
+            if (category != null) {
+                logger.debug("Category found for listing {}", listing.getListingId());
+                CategoryDTO categoryDTO = new CategoryDTO();
+                categoryDTO.setCategoryId(category.getCategoryId());
+                categoryDTO.setName(category.getName());
+                categoryDTO.setDescription(category.getDescription());
+                dto.setCategory(categoryDTO);
+            } else {
+                logger.warn("No category found for listing {}", listing.getListingId());
+            }
+        } catch (Exception e) {
+            logger.error("Error accessing category for listing {}: {}", listing.getListingId(), e.getMessage());
         }
 
         dto.setTitle(listing.getTitle());
         dto.setDescription(listing.getDescription());
+
         dto.setCondition(listing.getCondition());
         dto.setListingType(listing.getListingType());
+
         dto.setListPrice(listing.getListPrice());
         dto.setStatus(listing.getStatus());
         dto.setCreatedAt(listing.getCreatedAt());
@@ -280,6 +315,7 @@ public class ListingService {
         long commentCount = commentRepository.countByListing_ListingId(listing.getListingId());
         dto.setCommentCount(commentCount);
 
+        logger.debug("Successfully converted listing {} to DTO", listing.getListingId());
         return dto;
     }
 

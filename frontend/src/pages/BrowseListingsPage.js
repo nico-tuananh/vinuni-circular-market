@@ -21,12 +21,13 @@ export class BrowseListingsPage {
     async render() {
         if (!this.container) return;
 
+        // Set loading state before rendering
+        this.isLoading = true;
+
         // Parse URL parameters
         this.parseUrlParams();
 
-        // Load initial data
-        await this.loadData();
-
+        // Render initial HTML structure
         this.container.innerHTML = `
             <div class="container-fluid py-4">
                 <div class="row">
@@ -52,12 +53,12 @@ export class BrowseListingsPage {
                                     <label class="form-check-label" for="type-all">All Types</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="type" id="type-sell" value="Sell">
+                                    <input class="form-check-input" type="radio" name="type" id="type-sell" value="SELL">
                                     <label class="form-check-label" for="type-sell">For Sale</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="type" id="type-borrow" value="Borrow">
-                                    <label class="form-check-label" for="type-borrow">For Borrow</label>
+                                    <input class="form-check-input" type="radio" name="type" id="type-lend" value="LEND">
+                                    <label class="form-check-label" for="type-lend">For Lend</label>
                                 </div>
                             </div>
 
@@ -66,17 +67,15 @@ export class BrowseListingsPage {
                                 <label class="form-label fw-semibold">Condition</label>
                                 <select class="form-select" id="condition-filter">
                                     <option value="">Any Condition</option>
-                                    <option value="New">New</option>
-                                    <option value="Like New">Like New</option>
-                                    <option value="Good">Good</option>
-                                    <option value="Fair">Fair</option>
-                                    <option value="Poor">Poor</option>
+                                    <option value="NEW">New</option>
+                                    <option value="LIKE_NEW">Like New</option>
+                                    <option value="USED">Used</option>
                                 </select>
                             </div>
 
                             <!-- Price Range -->
                             <div class="mb-4">
-                                <label class="form-label fw-semibold">Price Range</label>
+                                <label class="form-label fw-semibold">Price Range ($)</label>
                                 <div class="row g-2">
                                     <div class="col-6">
                                         <input type="number" class="form-control" id="min-price" placeholder="Min" min="0">
@@ -154,6 +153,9 @@ export class BrowseListingsPage {
             </div>
         `;
 
+        // Load data after DOM is rendered
+        await this.loadData();
+
         this.attachEventListeners();
         this.updateFilterUI();
     }
@@ -191,6 +193,7 @@ export class BrowseListingsPage {
         if (sortSelect) {
             sortSelect.addEventListener('change', (e) => {
                 this.filters.sort = e.target.value;
+                this.currentPage = 1; // Reset to first page when sort changes
                 this.loadListings();
             });
         }
@@ -267,33 +270,53 @@ export class BrowseListingsPage {
             console.error('Failed to load browse listings data:', error);
             this.categories = [];
             this.listings = [];
+            this.isLoading = false;
+            this.updateListingsGrid();
         } finally {
             this.isLoading = false;
         }
     }
 
+    getSortParams() {
+        // Map frontend sort values to backend sortBy and sortDir
+        const sortMap = {
+            'newest': { sortBy: 'createdAt', sortDir: 'desc' },
+            'oldest': { sortBy: 'createdAt', sortDir: 'asc' },
+            'price_low': { sortBy: 'listPrice', sortDir: 'asc' },
+            'price_high': { sortBy: 'listPrice', sortDir: 'desc' },
+            'rating': { sortBy: 'createdAt', sortDir: 'desc' } // Rating not available, fallback to newest
+        };
+
+        const sortValue = this.filters.sort || 'newest';
+        return sortMap[sortValue] || sortMap['newest'];
+    }
+
     async loadListings() {
         try {
             this.isLoading = true;
-            this.updateResultsHeader();
 
             const { ListingService } = await import('../services/api.js');
             let response;
+
+            // Get sort parameters
+            const sortParams = this.getSortParams();
+            console.log('Sort params:', sortParams, 'Filter sort value:', this.filters.sort);
 
             // Build query parameters
             const params = {
                 page: this.currentPage - 1, // Backend uses 0-based pagination
                 size: 12,
-                sort: this.filters.sort
+                sortBy: sortParams.sortBy,
+                sortDir: sortParams.sortDir
             };
+            console.log('Request params:', params);
 
             // Add filter parameters
             if (this.filters.category) params.categoryId = this.filters.category;
-            if (this.filters.type) params.type = this.filters.type;
-            if (this.filters.condition) params.condition = this.filters.condition;
+            if (this.filters.type) params.listingTypeStr = this.filters.type;
+            if (this.filters.condition) params.conditionStr = this.filters.condition;
             if (this.filters.minPrice) params.minPrice = this.filters.minPrice;
             if (this.filters.maxPrice) params.maxPrice = this.filters.maxPrice;
-
             if (this.searchQuery) {
                 response = await ListingService.searchListings(this.searchQuery, params);
             } else if (Object.keys(this.filters).some(key => this.filters[key] && key !== 'sort')) {
@@ -302,10 +325,25 @@ export class BrowseListingsPage {
                 response = await ListingService.getListings(params);
             }
 
-            this.listings = response.content || [];
+            // Backend returns: {listings: [...], currentPage: 0, totalPages: 5, ...}
+            this.listings = response.listings || response.content || [];
             this.totalPages = response.totalPages || 1;
-            this.currentPage = (response.number || 0) + 1;
+            this.currentPage = (response.currentPage !== undefined ? response.currentPage : (response.number !== undefined ? response.number : 0)) + 1;
 
+            console.log('Loaded listings:', this.listings.length, 'items');
+            console.log('Response structure:', {
+                hasListings: !!response.listings,
+                hasContent: !!response.content,
+                listingsLength: this.listings.length,
+                totalPages: this.totalPages,
+                currentPage: this.currentPage,
+                responseKeys: Object.keys(response)
+            });
+
+            // Set loading to false BEFORE updating UI
+            this.isLoading = false;
+            
+            this.updateResultsHeader();
             this.updateListingsGrid();
             this.updatePagination();
             this.updateUrlParams();
@@ -313,9 +351,9 @@ export class BrowseListingsPage {
         } catch (error) {
             console.error('Failed to load listings:', error);
             this.listings = [];
-            this.updateListingsGrid();
-        } finally {
             this.isLoading = false;
+            this.updateResultsHeader();
+            this.updateListingsGrid();
         }
     }
 
@@ -414,7 +452,9 @@ export class BrowseListingsPage {
     }
 
     renderListings() {
+        console.log('Rendering listings, isLoading:', this.isLoading, 'has listings:', this.listings.length > 0);
         if (this.isLoading) {
+            console.log('Showing loading spinner');
             return '<div class="col-12 text-center py-5"><div class="spinner-border" role="status"></div></div>';
         }
 
@@ -438,17 +478,19 @@ export class BrowseListingsPage {
 
     renderListingCard(listing) {
         const imageUrl = listing.images && listing.images[0] ? listing.images[0] : '/placeholder-listing.png';
-        const price = listing.price ? `$${listing.price.toFixed(2)}` : 'Free';
-        const condition = listing.condition || 'Used';
-        const type = listing.type || 'Sell';
+        const priceValue = listing.listPrice || listing.price || 0;
+        const price = priceValue > 0 ? `$${priceValue.toFixed(2)}` : 'Free';
+        const condition = this.formatCondition(listing.condition);
+        const listingType = listing.listingType || listing.type || 'SELL';
+        const type = this.formatType(listingType);
 
         return `
             <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 shadow-custom listing-card" onclick="window.App.router.navigate('/listings/${listing.id}')">
+                <div class="card h-100 shadow-custom listing-card" onclick="window.App.router.navigate('/listings/${listing.listingId || listing.id}')">
                     <div class="position-relative">
                         <img src="${imageUrl}" class="card-img-top" alt="${listing.title}" style="height: 200px; object-fit: cover;">
                         <div class="position-absolute top-0 end-0 m-2">
-                            <span class="badge bg-${type === 'Borrow' ? 'info' : 'success'}">${type}</span>
+                            <span class="badge bg-${listingType === 'LEND' ? 'info' : 'success'}">${type}</span>
                         </div>
                     </div>
                     <div class="card-body">
@@ -523,9 +565,13 @@ export class BrowseListingsPage {
     }
 
     updateListingsGrid() {
+        console.log('Updating listings grid, isLoading:', this.isLoading, 'listings:', this.listings.length);
         const listingsGrid = document.getElementById('listings-grid');
         if (listingsGrid) {
             listingsGrid.innerHTML = this.renderListings();
+            console.log('Updated listings grid HTML');
+        } else {
+            console.warn('Listings grid element not found');
         }
     }
 
@@ -550,5 +596,24 @@ export class BrowseListingsPage {
         if (diffInDays < 7) return `${diffInDays}d ago`;
 
         return date.toLocaleDateString();
+    }
+
+    formatCondition(condition) {
+        if (!condition) return 'Used';
+        const conditionMap = {
+            'NEW': 'New',
+            'LIKE_NEW': 'Like New',
+            'USED': 'Used'
+        };
+        return conditionMap[condition] || condition;
+    }
+
+    formatType(type) {
+        if (!type) return 'Sell';
+        const typeMap = {
+            'SELL': 'Sell',
+            'LEND': 'Borrow'
+        };
+        return typeMap[type] || type;
     }
 }

@@ -8,6 +8,8 @@ import com.vinuni.circularmarket.model.ListingCondition;
 import com.vinuni.circularmarket.model.ListingType;
 import com.vinuni.circularmarket.service.ListingService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +28,8 @@ import java.util.Optional;
 @RequestMapping("/api/listings")
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5174", "http://localhost:8010"})
 public class ListingController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ListingController.class);
 
     private final ListingService listingService;
 
@@ -49,10 +53,22 @@ public class ListingController {
             @RequestParam(defaultValue = "desc") String sortDir) {
 
         try {
+            logger.debug("Starting getAvailableListings request: page={}, size={}, sortBy={}, sortDir={}", page, size, sortBy, sortDir);
+
             Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
             Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
+            logger.debug("Created pageable: {}", pageable);
+
             Page<ListingDTO> listingsPage = listingService.getAvailableListings(pageable);
+
+            logger.debug("Got listings page with {} items", listingsPage.getTotalElements());
+
+            // Check if any listing has issues
+            for (ListingDTO listing : listingsPage.getContent()) {
+                logger.debug("Processing listing {}: condition={}, type={}",
+                    listing.getListingId(), listing.getCondition(), listing.getListingType());
+            }
 
             Map<String, Object> response = new HashMap<>();
             response.put("listings", listingsPage.getContent());
@@ -61,10 +77,13 @@ public class ListingController {
             response.put("totalPages", listingsPage.getTotalPages());
             response.put("pageSize", listingsPage.getSize());
 
+            logger.debug("Created response with {} listings", listingsPage.getContent().size());
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            logger.error("Failed to retrieve listings", e);
             Map<String, String> error = new HashMap<>();
-            error.put("message", "Failed to retrieve listings");
+            error.put("message", "Failed to retrieve listings: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
@@ -103,7 +122,9 @@ public class ListingController {
     public ResponseEntity<?> searchListings(
             @RequestParam String query,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size) {
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
 
         try {
             if (query == null || query.trim().isEmpty()) {
@@ -112,7 +133,8 @@ public class ListingController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
             }
 
-            Pageable pageable = PageRequest.of(page, size);
+            Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
             Page<ListingDTO> listingsPage = listingService.searchListings(query.trim(), pageable);
 
             Map<String, Object> response = new HashMap<>();
@@ -146,13 +168,39 @@ public class ListingController {
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(required = false) ListingCondition condition,
-            @RequestParam(required = false) ListingType listingType,
+            @RequestParam(required = false) String conditionStr,
+            @RequestParam(required = false) String listingTypeStr,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size) {
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
 
         try {
-            Pageable pageable = PageRequest.of(page, size);
+            // Convert string parameters to enums
+            ListingCondition condition = null;
+            if (conditionStr != null && !conditionStr.trim().isEmpty()) {
+                try {
+                    condition = ListingCondition.valueOf(conditionStr.toUpperCase().replace(" ", "_"));
+                } catch (IllegalArgumentException e) {
+                    Map<String, String> error = new HashMap<>();
+                    error.put("message", "Invalid condition value: " + conditionStr);
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+                }
+            }
+
+            ListingType listingType = null;
+            if (listingTypeStr != null && !listingTypeStr.trim().isEmpty()) {
+                try {
+                    listingType = ListingType.valueOf(listingTypeStr.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    Map<String, String> error = new HashMap<>();
+                    error.put("message", "Invalid listing type value: " + listingTypeStr);
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+                }
+            }
+
+            Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
             Page<ListingDTO> listingsPage = listingService.filterListings(categoryId, minPrice, maxPrice,
                                                                          condition, listingType, pageable);
 
@@ -165,7 +213,7 @@ public class ListingController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
-            error.put("message", "Filter failed");
+            error.put("message", "Filter failed: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }

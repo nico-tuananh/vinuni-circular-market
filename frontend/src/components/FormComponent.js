@@ -190,11 +190,10 @@ export class FormComponent {
             fields: [
                 {
                     name: 'email',
-                    label: 'VinUni Email',
+                    label: 'Email',
                     type: 'email',
                     placeholder: 'your.email@vinuni.edu.vn',
                     required: true,
-                    helpText: 'Only @vinuni.edu.vn emails are accepted'
                 },
                 {
                     name: 'password',
@@ -221,7 +220,7 @@ export class FormComponent {
                 },
                 {
                     name: 'email',
-                    label: 'VinUni Email',
+                    label: 'Email',
                     type: 'email',
                     placeholder: 'your.email@vinuni.edu.vn',
                     required: true,
@@ -232,7 +231,7 @@ export class FormComponent {
                     label: 'Password',
                     type: 'password',
                     required: true,
-                    helpText: 'Minimum 6 characters'
+                    helpText: 'Minimum 6 characters, with at least one uppercase letter, one lowercase letter, and one number'
                 },
                 {
                     name: 'confirmPassword',

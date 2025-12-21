@@ -331,7 +331,7 @@ export class ListingService {
 
     // Search listings
     static async searchListings(query, params = {}) {
-        const queryParams = new URLSearchParams({ q: query, ...params }).toString();
+        const queryParams = new URLSearchParams({ query: query, ...params }).toString();
         return api.get(`/listings/search?${queryParams}`);
     }
 
