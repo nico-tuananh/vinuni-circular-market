@@ -8,6 +8,11 @@ export class HomePage {
         this.isLoading = true;
     }
 
+    get isAuthenticated() {
+        const { globalState } = window;
+        return globalState && !!globalState.get('user');
+    }
+
     async render() {
         if (!this.container) return;
 
@@ -48,9 +53,11 @@ export class HomePage {
                                 <button class="btn btn-light btn-lg" onclick="window.App.router.navigate('/listings')">
                                     <i class="bi bi-grid me-2"></i>Browse All
                                 </button>
+                                ${!this.isAuthenticated ? `
                                 <button class="btn btn-outline-light btn-lg" onclick="window.App.router.navigate('/register')">
                                     <i class="bi bi-person-plus me-2"></i>Join Community
                                 </button>
+                                ` : ''}
                             </div>
                         </div>
                         <div class="col-lg-6">
@@ -163,6 +170,7 @@ export class HomePage {
                 </div>
             </div>
 
+            ${!this.isAuthenticated ? `
             <!-- CTA Section -->
             <div class="bg-light py-5">
                 <div class="container text-center">
@@ -175,6 +183,7 @@ export class HomePage {
                     </button>
                 </div>
             </div>
+            ` : ''}
         `;
 
         this.attachEventListeners();

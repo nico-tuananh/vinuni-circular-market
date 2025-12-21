@@ -5,6 +5,9 @@ export default defineConfig({
   plugins: [],
   server: {
     port: 5174,
-    host: true
+    host: true,
+    allowedHosts: [
+      'leon-uninterdicted-traci.ngrok-free.dev'
+    ]
   }
 })

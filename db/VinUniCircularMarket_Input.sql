@@ -30,28 +30,6 @@ INSERT INTO `Category` (name, description) VALUES
   ('Health & Beauty', 'Personal care items and beauty tools (clean/unused)'),
   ('Others', 'Miscellaneous items not covered by other categories');
 
-INSERT INTO `User` (full_name, email, password_hash, phone, address, role, status, created_at) VALUES
-  ('Nguyễn Thế An',        '23an.nt@vinuni.edu.vn',     'hash_01', '+84000000091', 'Gia Lam, Hanoi',      'admin',   'active',   '2025-09-02 00:00:00'),
-  ('Trần Minh Anh',        '25anh.tm@vinuni.edu.vn',    'hash_02', '+84000000092', 'VinUni Dorm, Hanoi',  'admin',   'active',   '2025-09-03 00:00:00'),
-  ('Lê Quang Huy',         '22huy.lq@vinuni.edu.vn',    'hash_03', '+84000000093', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-04 00:00:00'),
-  ('Phạm Thu Hà',          '24ha.pt@vinuni.edu.vn',     'hash_04', '+84000000094', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-05 00:00:00'),
-  ('Vũ Đức Long',          '23long.vd@vinuni.edu.vn',   'hash_05', '+84000000095', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-06 00:00:00'),
-  ('Đặng Hải Nam',         '25nam.dh@vinuni.edu.vn',    'hash_06', '+84000000096', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-07 00:00:00'),
-  ('Bùi Ngọc Anh',         '22anh.bn@vinuni.edu.vn',    'hash_07', '+84000000097', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-08 00:00:00'),
-  ('Hoàng Gia Bảo',        '24bao.hg@vinuni.edu.vn',    'hash_08', '+84000000098', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-09 00:00:00'),
-  ('Ngô Thanh Tùng',       '23tung.nt@vinuni.edu.vn',   'hash_09', '+84000000099', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-10 00:00:00'),
-  ('Đỗ Mai Linh',          '25linh.dm@vinuni.edu.vn',   'hash_10', '+84000000100', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-11 00:00:00'),
-  ('Phan Nhật Minh',       '22minh.pn@vinuni.edu.vn',   'hash_11', '+84000000101', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-12 00:00:00'),
-  ('Lý Khánh Vy',          '24vy.lk@vinuni.edu.vn',     'hash_12', '+84000000102', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-13 00:00:00'),
-  ('Đinh Anh Tuấn',        '23tuan.da@vinuni.edu.vn',   'hash_13', '+84000000103', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-14 00:00:00'),
-  ('Nguyễn Hoàng Phương',  '25phuong.nh@vinuni.edu.vn', 'hash_14', '+84000000104', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-15 00:00:00'),
-  ('Trương Quốc Hưng',     '22hung.tq@vinuni.edu.vn',   'hash_15', '+84000000105', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-16 00:00:00'),
-  ('Đào Thùy Dương',       '24duong.dt@vinuni.edu.vn',  'hash_16', '+84000000106', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-17 00:00:00'),
-  ('Võ Thành Đạt',         '23dat.vt@vinuni.edu.vn',    'hash_17', '+84000000107', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-18 00:00:00'),
-  ('Nguyễn Hải Yến',       '25yen.nh@vinuni.edu.vn',    'hash_18', '+84000000108', 'VinUni Dorm, Hanoi',  'student', 'inactive', '2025-09-19 00:00:00'),
-  ('Trần Đức Anh',         '22anh.td@vinuni.edu.vn',    'hash_19', '+84000000109', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-20 00:00:00'),
-  ('Lê Thu Trang',         '24trang.lt@vinuni.edu.vn',  'hash_20', '+84000000110', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-21 00:00:00');
-
 INSERT INTO `Listing` (seller_id, category_id, title, description, `condition`, listing_type, list_price, status, created_at, updated_at) VALUES
   (3, 2, 'iPhone 12 64GB (Like New)', 'iPhone 12 64GB (Like New) - seeded sample listing.', 'used', 'sell', 3500000, 'available', '2025-10-02 09:00:00', '2025-10-02 11:00:00'),
   (4, 3, 'Calculus Textbook (Used)', 'Calculus Textbook (Used) - seeded sample listing.', 'new', 'sell', 120000, 'available', '2025-10-03 09:00:00', '2025-10-03 11:00:00'),
