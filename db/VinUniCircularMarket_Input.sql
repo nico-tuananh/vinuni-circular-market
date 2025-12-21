@@ -139,3 +139,100 @@ INSERT INTO `Comment` (listing_id, user_id, content, created_at, parent_id) VALU
   (4, 19, 'Reply 18 -> 3: Yes, please DM me.', '2025-10-22 14:00:00', 3),
   (5, 20, 'Reply 19 -> 4: Yes, please DM me.', '2025-10-22 17:00:00', 4),
   (6, 1, 'Reply 20 -> 5: Yes, please DM me.', '2025-10-22 20:00:00', 5);
+  
+  -- Same bcrypt hash for all inserted users
+SET @pw := '$2a$10$KeSbvfoMy24vAwDzzFSugu.YcePK1sqgJkrakgnoMwQZhHCnX2u0y';
+
+INSERT INTO `User` (full_name, email, password_hash, phone, address, role, status, created_at) VALUES
+  ('Nguyễn Đức Khánh',  '23khanh.nd@vinuni.edu.vn', @pw, '0901000001', 'VinUni Dorm, Hanoi',            'student', 'active',   '2025-09-22 00:00:00'),
+  ('Phạm Gia Hân',      '24han.pg@vinuni.edu.vn',   @pw, '0901000002', 'Vinhomes Ocean Park, Hanoi',    'student', 'active',   '2025-09-23 00:00:00'),
+  ('Trần Quốc Sơn',     '25son.tq@vinuni.edu.vn',   @pw, '0901000003', 'VinUni Dorm, Hanoi',            'student', 'active',   '2025-09-24 00:00:00'),
+  ('Lê Minh Khoa',      '22khoa.lm@vinuni.edu.vn',  @pw, '0901000004', 'Cau Giay, Hanoi',               'student', 'active',   '2025-09-25 00:00:00'),
+  ('Đỗ Ngọc Bích',      '23bich.dn@vinuni.edu.vn',  @pw, '0901000005', 'VinUni Dorm, Hanoi',            'student', 'active',   '2025-09-26 00:00:00'),
+  ('Vũ Anh Quân',       '24quan.va@vinuni.edu.vn',  @pw, '0901000006', 'Long Bien, Hanoi',              'student', 'active',   '2025-09-27 00:00:00'),
+  ('Nguyễn Thảo My',    '25my.nt@vinuni.edu.vn',    @pw, '0901000007', 'VinUni Dorm, Hanoi',            'student', 'active',   '2025-09-28 00:00:00'),
+  ('Hoàng Minh Đức',    '22duc.hm@vinuni.edu.vn',   @pw, '0901000008', 'Vinhomes Ocean Park, Hanoi',    'student', 'active',   '2025-09-29 00:00:00'),
+  ('Bùi Thuỳ Linh',     '23linh.bt@vinuni.edu.vn',  @pw, '0901000009', 'VinUni Dorm, Hanoi',            'student', 'active',   '2025-09-30 00:00:00'),
+  ('Ngô Phương Thảo',   '24thao.np@vinuni.edu.vn',  @pw, '0901000010', 'Hai Ba Trung, Hanoi',           'student', 'active',   '2025-10-01 00:00:00'),
+  ('Trương Nhật Nam',   '25nam.tn@vinuni.edu.vn',   @pw, '0901000011', 'VinUni Dorm, Hanoi',            'student', 'active',   '2025-10-02 00:00:00'),
+  ('Lý Thanh Tâm',      '22tam.lt@vinuni.edu.vn',   @pw, '0901000012', 'Vinhomes Ocean Park, Hanoi',    'student', 'active',   '2025-10-03 00:00:00'),
+  ('Phan Đức Huy',      '23huy.pd@vinuni.edu.vn',   @pw, '0901000013', 'VinUni Dorm, Hanoi',            'student', 'active',   '2025-10-04 00:00:00'),
+  ('Đặng Khánh Linh',   '24linh.dk@vinuni.edu.vn',  @pw, '0901000014', 'Cau Giay, Hanoi',               'student', 'active',   '2025-10-05 00:00:00'),
+  ('Mai Hoàng Anh',     '25anh.mh@vinuni.edu.vn',   @pw, '0901000015', 'VinUni Dorm, Hanoi',            'student', 'active',   '2025-10-06 00:00:00'),
+  ('Nguyễn Gia Bảo',    '22bao.ng@vinuni.edu.vn',   @pw, '0901000016', 'Long Bien, Hanoi',              'student', 'active',   '2025-10-07 00:00:00'),
+  ('Trần Thuỳ Dung',    '23dung.tt@vinuni.edu.vn',  @pw, '0901000017', 'VinUni Dorm, Hanoi',            'student', 'inactive', '2025-10-08 00:00:00'),
+  ('Lê Hữu Phúc',       '24phuc.lh@vinuni.edu.vn',  @pw, '0901000018', 'Vinhomes Ocean Park, Hanoi',    'student', 'active',   '2025-10-09 00:00:00'),
+  ('Võ Minh Tuệ',       '25tue.vm@vinuni.edu.vn',   @pw, '0901000019', 'VinUni Dorm, Hanoi',            'student', 'active',   '2025-10-10 00:00:00'),
+  ('Đinh Hải Đăng',     '22dang.dh@vinuni.edu.vn',  @pw, '0901000020', 'Cau Giay, Hanoi',               'student', 'active',   '2025-10-11 00:00:00');
+
+SET @pw := '$2a$10$QLhq3hg2pBwkNmRV1LcMGuxZK40Uedmmrvphm8Rdf6Dktvp3f8dbG';
+
+INSERT INTO `User` (full_name, email, password_hash, phone, address, role, status) VALUES
+  ('Nguyễn Minh Nhật Anh',      '23anh.nmn@vinuni.edu.vn',   @pw, '0903000001', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Trần Đức Minh Khoa',        '24khoa.tdm@vinuni.edu.vn',  @pw, '0903000002', 'Cau Giay, Hanoi',            'student', 'active'),
+  ('Lê Quang Hữu Phúc',         '25phuc.lqh@vinuni.edu.vn',  @pw, '0903000003', 'Vinhomes Ocean Park, Hanoi', 'student', 'active'),
+  ('Phạm Thảo Ngọc Lan',        '22lan.ptn@vinuni.edu.vn',   @pw, '0903000004', 'Long Bien, Hanoi',           'student', 'active'),
+  ('Vũ Khánh Gia Huy',          '23huy.vkg@vinuni.edu.vn',   @pw, '0903000005', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Đỗ Hoàng Minh Long',        '24long.dhm@vinuni.edu.vn',  @pw, '0903000006', 'Hai Ba Trung, Hanoi',        'student', 'active'),
+  ('Bùi Thuỳ Bảo Ngọc',         '25ngoc.btb@vinuni.edu.vn',  @pw, '0903000007', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Ngô Thanh Hải Đăng',        '22dang.nth@vinuni.edu.vn',  @pw, '0903000008', 'Cau Giay, Hanoi',            'student', 'active'),
+  ('Hoàng Gia Bảo Nam',         '23nam.hgb@vinuni.edu.vn',   @pw, '0903000009', 'Vinhomes Ocean Park, Hanoi', 'student', 'active'),
+  ('Đặng Minh Tuấn Kiệt',       '24kiet.dmt@vinuni.edu.vn',  @pw, '0903000010', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Mai Anh Thuỳ Dung',         '25dung.mat@vinuni.edu.vn',  @pw, '0903000011', 'Long Bien, Hanoi',           'student', 'inactive'),
+  ('Lý Quốc Trung Hiếu',        '22hieu.lqt@vinuni.edu.vn',  @pw, '0903000012', 'Cau Giay, Hanoi',            'student', 'active'),
+  ('Nguyễn Thảo Minh Châu',     '23chau.ntm@vinuni.edu.vn',  @pw, '0903000013', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Trần Nhật Minh Quân',       '24quan.tnm@vinuni.edu.vn',  @pw, '0903000014', 'Hai Ba Trung, Hanoi',        'student', 'active'),
+  ('Phan Đức Anh Tú',           '25tu.pda@vinuni.edu.vn',    @pw, '0903000015', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Võ Ngọc Minh Trang',        '22trang.vnm@vinuni.edu.vn', @pw, '0903000016', 'Vinhomes Ocean Park, Hanoi', 'student', 'active'),
+  ('Lê Thanh Gia Vy',           '23vy.ltg@vinuni.edu.vn',    @pw, '0903000017', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Phạm Minh Quang Sơn',       '24son.pmq@vinuni.edu.vn',   @pw, '0903000018', 'Long Bien, Hanoi',           'student', 'active'),
+  ('Đinh Hữu Minh Tâm',         '25tam.dhm@vinuni.edu.vn',   @pw, '0903000019', 'Cau Giay, Hanoi',            'student', 'active'),
+  ('Nguyễn Hoàng Phương Linh',  '22linh.nhp@vinuni.edu.vn',  @pw, '0903000020', 'VinUni Dorm, Hanoi',         'student', 'active');
+
+SET @pw := '$2a$10$4KmKd0HblXrcmVLAootABO/UkAmEG38Mx2joRBuUk2.9D4IiJ5CgW';
+
+INSERT INTO `User` (full_name, email, password_hash, phone, address, role, status) VALUES
+  ('Nguyễn Quang Minh Anh',     '23anh.nqm@vinuni.edu.vn',   @pw, '0904000001', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Trần Gia Huy Khoa',         '24khoa.tgh@vinuni.edu.vn',  @pw, '0904000002', 'Cau Giay, Hanoi',            'student', 'active'),
+  ('Lê Thanh Minh Phúc',        '25phuc.ltm@vinuni.edu.vn',  @pw, '0904000003', 'Vinhomes Ocean Park, Hanoi', 'student', 'active'),
+  ('Phạm Quốc Minh Lan',        '22lan.pqm@vinuni.edu.vn',   @pw, '0904000004', 'Long Bien, Hanoi',           'student', 'active'),
+  ('Vũ Đức Minh Huy',           '23huy.vdm@vinuni.edu.vn',   @pw, '0904000005', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Đỗ Minh Anh Long',          '24long.dma@vinuni.edu.vn',  @pw, '0904000006', 'Hai Ba Trung, Hanoi',        'student', 'active'),
+  ('Bùi Ngọc Minh Quân',        '25quan.bnm@vinuni.edu.vn',  @pw, '0904000007', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Ngô Đức Minh Đăng',         '22dang.ndm@vinuni.edu.vn',  @pw, '0904000008', 'Cau Giay, Hanoi',            'student', 'active'),
+  ('Hoàng Minh Gia Nam',        '23nam.hmg@vinuni.edu.vn',   @pw, '0904000009', 'Vinhomes Ocean Park, Hanoi', 'student', 'active'),
+  ('Đặng Quốc Minh Kiệt',       '24kiet.dqm@vinuni.edu.vn',  @pw, '0904000010', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Mai Minh Anh Dung',         '25dung.mma@vinuni.edu.vn',  @pw, '0904000011', 'Long Bien, Hanoi',           'student', 'inactive'),
+  ('Lý Minh Quốc Hiếu',         '22hieu.lmq@vinuni.edu.vn',  @pw, '0904000012', 'Cau Giay, Hanoi',            'student', 'active'),
+  ('Nguyễn Gia Minh Châu',      '23chau.ngm@vinuni.edu.vn',  @pw, '0904000013', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Trần Đức Minh Quân',        '24quan.tdm@vinuni.edu.vn',  @pw, '0904000014', 'Hai Ba Trung, Hanoi',        'student', 'active'),
+  ('Phan Minh Đức Tú',          '25tu.pmd@vinuni.edu.vn',    @pw, '0904000015', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Võ Minh Ngọc Trang',        '22trang.vmn@vinuni.edu.vn', @pw, '0904000016', 'Vinhomes Ocean Park, Hanoi', 'student', 'active'),
+  ('Lê Minh Thanh Vy',          '23vy.lmt@vinuni.edu.vn',    @pw, '0904000017', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Phạm Quang Minh Sơn',       '24son.pqm@vinuni.edu.vn',   @pw, '0904000018', 'Long Bien, Hanoi',           'student', 'active'),
+  ('Đinh Minh Hữu Tâm',         '25tam.dmh@vinuni.edu.vn',   @pw, '0904000019', 'Cau Giay, Hanoi',            'student', 'active'),
+  ('Nguyễn Phương Hoàng Linh',  '22linh.nph@vinuni.edu.vn',  @pw, '0904000020', 'VinUni Dorm, Hanoi',         'student', 'active');
+
+SET @pw := '$2a$10$mVmXE8l9OqW8u8VndowIB.MG.3pB/m2U05eXwSz8dWooXmbzxvbq.';
+
+INSERT INTO `User` (full_name, email, password_hash, phone, address, role, status) VALUES
+  ('Nguyễn Hải Minh Quân',      '23quan.nhm@vinuni.edu.vn',   @pw, '0906000001', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Trần Đức Anh Phát',         '24phat.tda@vinuni.edu.vn',   @pw, '0906000002', 'Cau Giay, Hanoi',            'student', 'active'),
+  ('Lê Minh Quang Bảo',         '25bao.lmq@vinuni.edu.vn',    @pw, '0906000003', 'Vinhomes Ocean Park, Hanoi', 'student', 'active'),
+  ('Phạm Thị Kim Ngân',         '22ngan.ptk@vinuni.edu.vn',   @pw, '0906000004', 'Long Bien, Hanoi',           'student', 'active'),
+  ('Vũ Gia Huy Khánh',          '23khanh.vgh@vinuni.edu.vn',  @pw, '0906000005', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Đỗ Thanh Minh Tín',         '24tin.dtm@vinuni.edu.vn',    @pw, '0906000006', 'Hai Ba Trung, Hanoi',        'student', 'active'),
+  ('Bùi Quốc Anh Tuấn',         '25tuan.bqa@vinuni.edu.vn',   @pw, '0906000007', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Ngô Minh Hoàng Yến',        '22yen.nmh@vinuni.edu.vn',    @pw, '0906000008', 'Cau Giay, Hanoi',            'student', 'active'),
+  ('Hoàng Đức Minh Khang',      '23khang.hdm@vinuni.edu.vn',  @pw, '0906000009', 'Vinhomes Ocean Park, Hanoi', 'student', 'active'),
+  ('Đặng Nhật Anh Kiên',        '24kien.dna@vinuni.edu.vn',   @pw, '0906000010', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Mai Thuỳ Anh My',           '25my.mta@vinuni.edu.vn',     @pw, '0906000011', 'Long Bien, Hanoi',           'student', 'inactive'),
+  ('Lý Quang Minh Dương',       '22duong.lqm@vinuni.edu.vn',  @pw, '0906000012', 'Cau Giay, Hanoi',            'student', 'active'),
+  ('Nguyễn Phương Thảo Nhi',    '23nhi.npt@vinuni.edu.vn',    @pw, '0906000013', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Trương Gia Minh Thảo',      '24thao.tgm@vinuni.edu.vn',   @pw, '0906000014', 'Hai Ba Trung, Hanoi',        'student', 'active'),
+  ('Phan Hoàng Anh Quý',        '25quy.pha@vinuni.edu.vn',    @pw, '0906000015', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Võ Thanh Hương Oanh',       '22oanh.vth@vinuni.edu.vn',   @pw, '0906000016', 'Vinhomes Ocean Park, Hanoi', 'student', 'active'),
+  ('Lê Ngọc Minh Trang',        '23trang.lnm@vinuni.edu.vn',  @pw, '0906000017', 'VinUni Dorm, Hanoi',         'student', 'active'),
+  ('Phạm Quang Hữu Lộc',        '24loc.pqh@vinuni.edu.vn',    @pw, '0906000018', 'Long Bien, Hanoi',           'student', 'active'),
+  ('Đinh Gia Bảo Linh',         '25linh.dgb@vinuni.edu.vn',   @pw, '0906000019', 'Cau Giay, Hanoi',            'student', 'active'),
+  ('Nguyễn Hoàng Tuấn Việt',    '22viet.nht@vinuni.edu.vn',   @pw, '0906000020', 'VinUni Dorm, Hanoi',         'student', 'active');
