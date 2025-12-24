@@ -8,6 +8,9 @@ TRUNCATE TABLE `Review`;
 TRUNCATE TABLE `User`;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- Insert into `Category` table
+
 INSERT INTO `Category` (name, description) VALUES
   ('Electronics', 'Phones, headphones, chargers, and everyday gadgets'),
   ('Books', 'Textbooks, novels, and printed course materials'),
@@ -30,125 +33,30 @@ INSERT INTO `Category` (name, description) VALUES
   ('Health & Beauty', 'Personal care items and beauty tools (clean/unused)'),
   ('Others', 'Miscellaneous items not covered by other categories');
 
-INSERT INTO `User` (full_name, email, password_hash, phone, address, role, status, created_at) VALUES
-  ('Nguyễn Thế An',        '23an.nt@vinuni.edu.vn',     'hash_01', '+84000000091', 'Gia Lam, Hanoi',      'admin',   'active',   '2025-09-02 00:00:00'),
-  ('Trần Minh Anh',        '25anh.tm@vinuni.edu.vn',    'hash_02', '+84000000092', 'VinUni Dorm, Hanoi',  'admin',   'active',   '2025-09-03 00:00:00'),
-  ('Lê Quang Huy',         '22huy.lq@vinuni.edu.vn',    'hash_03', '+84000000093', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-04 00:00:00'),
-  ('Phạm Thu Hà',          '24ha.pt@vinuni.edu.vn',     'hash_04', '+84000000094', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-05 00:00:00'),
-  ('Vũ Đức Long',          '23long.vd@vinuni.edu.vn',   'hash_05', '+84000000095', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-06 00:00:00'),
-  ('Đặng Hải Nam',         '25nam.dh@vinuni.edu.vn',    'hash_06', '+84000000096', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-07 00:00:00'),
-  ('Bùi Ngọc Anh',         '22anh.bn@vinuni.edu.vn',    'hash_07', '+84000000097', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-08 00:00:00'),
-  ('Hoàng Gia Bảo',        '24bao.hg@vinuni.edu.vn',    'hash_08', '+84000000098', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-09 00:00:00'),
-  ('Ngô Thanh Tùng',       '23tung.nt@vinuni.edu.vn',   'hash_09', '+84000000099', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-10 00:00:00'),
-  ('Đỗ Mai Linh',          '25linh.dm@vinuni.edu.vn',   'hash_10', '+84000000100', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-11 00:00:00'),
-  ('Phan Nhật Minh',       '22minh.pn@vinuni.edu.vn',   'hash_11', '+84000000101', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-12 00:00:00'),
-  ('Lý Khánh Vy',          '24vy.lk@vinuni.edu.vn',     'hash_12', '+84000000102', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-13 00:00:00'),
-  ('Đinh Anh Tuấn',        '23tuan.da@vinuni.edu.vn',   'hash_13', '+84000000103', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-14 00:00:00'),
-  ('Nguyễn Hoàng Phương',  '25phuong.nh@vinuni.edu.vn', 'hash_14', '+84000000104', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-15 00:00:00'),
-  ('Trương Quốc Hưng',     '22hung.tq@vinuni.edu.vn',   'hash_15', '+84000000105', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-16 00:00:00'),
-  ('Đào Thùy Dương',       '24duong.dt@vinuni.edu.vn',  'hash_16', '+84000000106', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-17 00:00:00'),
-  ('Võ Thành Đạt',         '23dat.vt@vinuni.edu.vn',    'hash_17', '+84000000107', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-18 00:00:00'),
-  ('Nguyễn Hải Yến',       '25yen.nh@vinuni.edu.vn',    'hash_18', '+84000000108', 'VinUni Dorm, Hanoi',  'student', 'inactive', '2025-09-19 00:00:00'),
-  ('Trần Đức Anh',         '22anh.td@vinuni.edu.vn',    'hash_19', '+84000000109', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-20 00:00:00'),
-  ('Lê Thu Trang',         '24trang.lt@vinuni.edu.vn',  'hash_20', '+84000000110', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-21 00:00:00');
-
-SET FOREIGN_KEY_CHECKS = 0;
-TRUNCATE TABLE `Listing`;
-SET FOREIGN_KEY_CHECKS = 1;
-INSERT INTO `Listing`
-(seller_id, category_id, title, description, `condition`, listing_type, list_price, status)
-VALUES
-(1, 1, 'Calculus Textbook (Stewart 8th)',           'Clean pages, some highlights.',                       'used',     'sell',  12.50, 'available'),
-(2, 2, 'Aluminum Adjustable Laptop Stand (13-16")', 'Sturdy, barely used.',                                'like_new', 'sell',  18.00, 'available'),
-(3, 3, 'Sony WH-CH510 Wireless Headphones',         'Battery good, minor scratches.',                      'used',     'sell',  25.00, 'reserved'),
-(4, 4, 'Casio fx-570VN PLUS Calculator',            'Fully functional, includes cover.',                   'like_new', 'sell',  10.00, 'sold'),
-(5, 1, 'Muji B5 Notebook Set (3-pack)',             'Brand new, unopened.',                                'new',      'sell',   6.50, 'available'),
-(1, 2, 'Thermos 500ml Insulated Water Bottle',      'Keeps cold ~12h, no leaks.',                          'like_new', 'sell',   9.99, 'available'),
-(2, 3, 'Uniqlo Hoodie Size M (Gray)',               'Comfortable, washed, no stains.',                     'used',     'sell',  15.00, 'available'),
-(3, 4, 'LED Desk Lamp (3 Modes, USB Powered)',      'Works well, adjustable neck.',                        'like_new', 'sell',  11.75, 'reserved'),
-(4, 1, 'Laptop Backpack 15.6" (Water Resistant)',   'Good condition, all zippers ok.',                     'used',     'sell',  20.00, 'available'),
-(5, 2, 'Keychron K2 Mechanical Keyboard (Brown)',   'Lightly used, comes with cable.',                     'like_new', 'sell',  30.00, 'sold'),
-(1, 3, 'Compact Travel Umbrella (Windproof)',       'Opens/closes smoothly.',                              'used',     'sell',   4.50, 'available'),
-(2, 4, 'Anker PowerCore 10000 Power Bank',          'Charges fast, includes short cable.',                 'like_new', 'sell',  13.20, 'available'),
-(3, 1, 'A4 Magnetic Whiteboard + Marker',           'Great for study notes, easy to wipe.',                'used',     'lend',   0.00, 'available'),
-(4, 2, 'HDMI 2.0 Cable 2m (4K Support)',            'Works fine, no bends.',                               'used',     'lend',   0.00, 'reserved'),
-(5, 3, 'Phone Tripod (Adjustable, 1.6m)',           'Stable, with phone clamp.',                           'like_new', 'lend',   0.00, 'borrowed'),
-(1, 4, 'Logitech M331 Silent Wireless Mouse',       'Quiet clicks, smooth tracking.',                      'like_new', 'sell',   8.80, 'available'),
-(2, 1, 'TOEIC Flashcards Set (New)',                'Unopened box, complete set.',                         'new',      'sell',   5.00, 'available'),
-(3, 2, 'Bike Helmet Size M (Black)',                'No cracks, straps good.',                             'used',     'sell',  14.00, 'reserved'),
-(4, 3, 'Extension Cord 3-Outlets 2m (Safety)',      'Good condition, no loose socket.',                    'used',     'sell',   6.00, 'available'),
-(5, 4, 'Ergonomic Study Chair (Adjustable Height)', 'Comfortable, minor scratches on legs.',               'used',     'sell',  22.00, 'available');
-
-INSERT INTO `Order` (listing_id, buyer_id, offer_price, final_price, status, order_date, confirmed_at, completed_at, borrow_due_date, returned_at) VALUES
-  (5, 9, 810000, 810000, 'confirmed', '2025-10-10 10:00:00', '2025-10-10 12:00:00', NULL, NULL, NULL),
-  (6, 10, 135000, 135000, 'confirmed', '2025-10-11 10:00:00', '2025-10-11 12:00:00', NULL, NULL, NULL),
-  (7, 11, 720000, 720000, 'confirmed', '2025-10-12 10:00:00', '2025-10-12 12:00:00', NULL, NULL, NULL),
-  (8, 12, 225000, 225000, 'confirmed', '2025-10-13 10:00:00', '2025-10-13 12:00:00', NULL, NULL, NULL),
-  (9, 15, 950000, 950000, 'completed', '2025-10-14 10:00:00', '2025-10-14 13:00:00', '2025-10-15 16:00:00', NULL, NULL),
-  (10, 16, 9025000, 9025000, 'completed', '2025-10-15 10:00:00', '2025-10-15 13:00:00', '2025-10-16 16:00:00', NULL, NULL),
-  (11, 17, 57000, 57000, 'completed', '2025-10-16 10:00:00', '2025-10-16 13:00:00', '2025-10-17 16:00:00', NULL, NULL),
-  (12, 18, 285000, 285000, 'completed', '2025-10-17 10:00:00', '2025-10-17 13:00:00', '2025-10-18 16:00:00', NULL, NULL),
-  (1, 8, 2975000, NULL, 'requested', '2025-10-26 10:00:00', NULL, NULL, NULL, NULL),
-  (2, 9, 102000, NULL, 'rejected', '2025-10-27 10:00:00', NULL, NULL, NULL, NULL),
-  (3, 10, 170000, NULL, 'cancelled', '2025-10-28 10:00:00', NULL, NULL, NULL, NULL),
-  (4, 11, 382500, NULL, 'rejected', '2025-10-29 10:00:00', NULL, NULL, NULL, NULL),
-  (13, 11, 50000, 50000, 'completed', '2025-10-18 10:00:00', '2025-10-18 11:00:00', '2025-10-20 12:00:00', '2025-10-25 10:00:00', '2025-10-24 22:00:00'),
-  (14, 12, 80000, 80000, 'completed', '2025-10-19 10:00:00', '2025-10-19 11:00:00', '2025-10-21 12:00:00', '2025-10-26 10:00:00', '2025-10-25 22:00:00'),
-  (15, 13, 150000, 150000, 'completed', '2025-10-20 10:00:00', '2025-10-20 11:00:00', '2025-10-22 12:00:00', '2025-10-27 10:00:00', '2025-10-26 22:00:00'),
-  (16, 14, 70000, 70000, 'completed', '2025-10-21 10:00:00', '2025-10-21 11:00:00', '2025-10-23 12:00:00', '2025-10-28 10:00:00', '2025-10-27 22:00:00'),
-  (17, 14, 40000, 40000, 'confirmed', '2025-10-22 10:00:00', '2025-10-22 12:00:00', NULL, '2025-11-01 10:00:00', NULL),
-  (18, 15, 100000, 100000, 'confirmed', '2025-10-23 10:00:00', '2025-10-23 12:00:00', NULL, '2025-11-02 10:00:00', NULL),
-  (19, 12, 60000, 60000, 'confirmed', '2025-10-24 10:00:00', '2025-10-24 12:00:00', NULL, '2025-11-03 10:00:00', NULL),
-  (20, 13, 30000, 30000, 'confirmed', '2025-10-25 10:00:00', '2025-10-25 12:00:00', NULL, '2025-11-04 10:00:00', NULL);
-
-INSERT INTO `Review` (order_id, rating, comment, created_at) VALUES
-  (1, 5, 'Excellent — smooth transaction!', '2025-10-16 15:00:00'),
-  (2, 4, 'Good — item matched the description.', '2025-10-17 15:00:00'),
-  (3, 4, 'Good communication and on-time meetup.', '2025-10-18 15:00:00'),
-  (4, 3, 'Okay — everything worked, minor delays.', '2025-10-19 15:00:00'),
-  (5, 5, 'Great seller — highly recommended!', '2025-10-20 15:00:00'),
-  (6, 4, 'Good deal, friendly interaction.', '2025-10-21 15:00:00'),
-  (7, 3, 'Decent — acceptable condition for the price.', '2025-10-22 15:00:00'),
-  (8, 5, 'Perfect — exactly as advertised.', '2025-10-23 15:00:00'),
-  (9, 4, 'Good — quick and easy.', '2025-10-24 15:00:00'),
-  (10, 3, 'Okay — could be faster to respond.', '2025-10-25 15:00:00'),
-  (11, 5, 'Excellent experience overall!', '2025-10-26 15:00:00'),
-  (12, 5, 'Great quality — would buy again.', '2025-10-27 15:00:00'),
-  (13, 4, 'Good — returned on time and clean.', '2025-10-28 15:00:00'),
-  (14, 3, 'Okay — worked fine for borrowing.', '2025-10-29 15:00:00'),
-  (15, 4, 'Good — helpful and cooperative.', '2025-10-30 15:00:00'),
-  (16, 5, 'Excellent — very reliable!', '2025-10-31 15:00:00'),
-  (17, 3, 'Okay — item was usable, slight wear.', '2025-11-01 15:00:00'),
-  (18, 4, 'Good — clear instructions and pickup.', '2025-11-02 15:00:00'),
-  (19, 5, 'Amazing — super smooth process!', '2025-11-03 15:00:00'),
-  (20, 4, 'Good — thanks!', '2025-11-04 15:00:00');
-  
-INSERT INTO `Comment` (listing_id, user_id, content, created_at, parent_id) VALUES
-  (2, 2, 'Comment 1: Interested! Is this still available?', '2025-10-20 11:00:00', NULL),
-  (3, 3, 'Comment 2: Interested! Is this still available?', '2025-10-20 14:00:00', NULL),
-  (4, 4, 'Comment 3: Interested! Is this still available?', '2025-10-20 17:00:00', NULL),
-  (5, 5, 'Comment 4: Interested! Is this still available?', '2025-10-20 20:00:00', NULL),
-  (6, 6, 'Comment 5: Interested! Is this still available?', '2025-10-20 23:00:00', NULL),
-  (7, 7, 'Comment 6: Interested! Is this still available?', '2025-10-21 02:00:00', NULL),
-  (8, 8, 'Comment 7: Interested! Is this still available?', '2025-10-21 05:00:00', NULL),
-  (9, 9, 'Comment 8: Interested! Is this still available?', '2025-10-21 08:00:00', NULL),
-  (10, 10, 'Comment 9: Interested! Is this still available?', '2025-10-21 11:00:00', NULL),
-  (11, 11, 'Comment 10: Interested! Is this still available?', '2025-10-21 14:00:00', NULL),
-  (12, 12, 'Comment 11: Interested! Is this still available?', '2025-10-21 17:00:00', NULL),
-  (13, 13, 'Comment 12: Interested! Is this still available?', '2025-10-21 20:00:00', NULL),
-  (14, 14, 'Comment 13: Interested! Is this still available?', '2025-10-21 23:00:00', NULL),
-  (15, 15, 'Comment 14: Interested! Is this still available?', '2025-10-22 02:00:00', NULL),
-  (16, 16, 'Comment 15: Interested! Is this still available?', '2025-10-22 05:00:00', NULL),
-  (2, 17, 'Reply 16 -> 1: Yes, please DM me.', '2025-10-22 08:00:00', 1),
-  (3, 18, 'Reply 17 -> 2: Yes, please DM me.', '2025-10-22 11:00:00', 2),
-  (4, 19, 'Reply 18 -> 3: Yes, please DM me.', '2025-10-22 14:00:00', 3),
-  (5, 20, 'Reply 19 -> 4: Yes, please DM me.', '2025-10-22 17:00:00', 4),
-  (6, 1, 'Reply 20 -> 5: Yes, please DM me.', '2025-10-22 20:00:00', 5);
-  
-  -- Same bcrypt hash for all inserted users
 SET @pw := '$2a$10$KeSbvfoMy24vAwDzzFSugu.YcePK1sqgJkrakgnoMwQZhHCnX2u0y';
 
+-- Insert into `User` table
 INSERT INTO `User` (full_name, email, password_hash, phone, address, role, status, created_at) VALUES
+  ('Nguyễn Thế An',        '23an.nt@vinuni.edu.vn',     @pw, '+84000000091', 'Gia Lam, Hanoi',      'admin',   'active',   '2025-09-02 00:00:00'),
+  ('Trần Minh Anh',        '25anh.tm@vinuni.edu.vn',    @pw, '+84000000092', 'VinUni Dorm, Hanoi',  'admin',   'active',   '2025-09-03 00:00:00'),
+  ('Lê Quang Huy',         '22huy.lq@vinuni.edu.vn',    @pw, '+84000000093', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-04 00:00:00'),
+  ('Phạm Thu Hà',          '24ha.pt@vinuni.edu.vn',     @pw, '+84000000094', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-05 00:00:00'),
+  ('Vũ Đức Long',          '23long.vd@vinuni.edu.vn',   @pw, '+84000000095', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-06 00:00:00'),
+  ('Đặng Hải Nam',         '25nam.dh@vinuni.edu.vn',    @pw, '+84000000096', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-07 00:00:00'),
+  ('Bùi Ngọc Anh',         '22anh.bn@vinuni.edu.vn',    @pw, '+84000000097', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-08 00:00:00'),
+  ('Hoàng Gia Bảo',        '24bao.hg@vinuni.edu.vn',    @pw, '+84000000098', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-09 00:00:00'),
+  ('Ngô Thanh Tùng',       '23tung.nt@vinuni.edu.vn',   @pw, '+84000000099', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-10 00:00:00'),
+  ('Đỗ Mai Linh',          '25linh.dm@vinuni.edu.vn',   @pw, '+84000000100', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-11 00:00:00'),
+  ('Phan Nhật Minh',       '22minh.pn@vinuni.edu.vn',   @pw, '+84000000101', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-12 00:00:00'),
+  ('Lý Khánh Vy',          '24vy.lk@vinuni.edu.vn',     @pw, '+84000000102', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-13 00:00:00'),
+  ('Đinh Anh Tuấn',        '23tuan.da@vinuni.edu.vn',   @pw, '+84000000103', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-14 00:00:00'),
+  ('Nguyễn Hoàng Phương',  '25phuong.nh@vinuni.edu.vn', @pw, '+84000000104', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-15 00:00:00'),
+  ('Trương Quốc Hưng',     '22hung.tq@vinuni.edu.vn',   @pw, '+84000000105', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-16 00:00:00'),
+  ('Đào Thùy Dương',       '24duong.dt@vinuni.edu.vn',  @pw, '+84000000106', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-17 00:00:00'),
+  ('Võ Thành Đạt',         '23dat.vt@vinuni.edu.vn',    @pw, '+84000000107', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-18 00:00:00'),
+  ('Nguyễn Hải Yến',       '25yen.nh@vinuni.edu.vn',    @pw, '+84000000108', 'VinUni Dorm, Hanoi',  'student', 'inactive', '2025-09-19 00:00:00'),
+  ('Trần Đức Anh',         '22anh.td@vinuni.edu.vn',    @pw, '+84000000109', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-20 00:00:00'),
+  ('Lê Thu Trang',         '24trang.lt@vinuni.edu.vn',  @pw, '+84000000110', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-21 00:00:00'),
   ('Nguyễn Đức Khánh',  '23khanh.nd@vinuni.edu.vn', @pw, '0901000001', 'VinUni Dorm, Hanoi',            'student', 'active',   '2025-09-22 00:00:00'),
   ('Phạm Gia Hân',      '24han.pg@vinuni.edu.vn',   @pw, '0901000002', 'Vinhomes Ocean Park, Hanoi',    'student', 'active',   '2025-09-23 00:00:00'),
   ('Trần Quốc Sơn',     '25son.tq@vinuni.edu.vn',   @pw, '0901000003', 'VinUni Dorm, Hanoi',            'student', 'active',   '2025-09-24 00:00:00'),
@@ -265,3 +173,96 @@ INSERT INTO `User` (full_name, email, password_hash, phone, address, role, statu
   ('Phạm Hải Minh Phương',      '24phuong.phm@vinuni.edu.vn', @pw, '0907000018', 'Long Bien, Hanoi',           'student', 'active'),
   ('Đinh Anh Tuệ Nhi',          '25nhi.dat@vinuni.edu.vn',    @pw, '0907000019', 'Cau Giay, Hanoi',            'student', 'active'),
   ('Nguyễn Hồng Anh Thư',       '22thu.nha@vinuni.edu.vn',    @pw, '0907000020', 'VinUni Dorm, Hanoi',         'student', 'active');
+
+-- Insert into `Listing` table
+INSERT INTO `Listing` (seller_id, category_id, title, description, `condition`, listing_type, list_price, status)
+VALUES
+(1, 1, 'Calculus Textbook (Stewart 8th)',           'Clean pages, some highlights.',                       'used',     'sell',  12.50, 'available'),
+(2, 2, 'Aluminum Adjustable Laptop Stand (13-16")', 'Sturdy, barely used.',                                'like_new', 'sell',  18.00, 'available'),
+(3, 3, 'Sony WH-CH510 Wireless Headphones',         'Battery good, minor scratches.',                      'used',     'sell',  25.00, 'reserved'),
+(4, 4, 'Casio fx-570VN PLUS Calculator',            'Fully functional, includes cover.',                   'like_new', 'sell',  10.00, 'sold'),
+(5, 1, 'Muji B5 Notebook Set (3-pack)',             'Brand new, unopened.',                                'new',      'sell',   6.50, 'available'),
+(1, 2, 'Thermos 500ml Insulated Water Bottle',      'Keeps cold ~12h, no leaks.',                          'like_new', 'sell',   9.99, 'available'),
+(2, 3, 'Uniqlo Hoodie Size M (Gray)',               'Comfortable, washed, no stains.',                     'used',     'sell',  15.00, 'available'),
+(3, 4, 'LED Desk Lamp (3 Modes, USB Powered)',      'Works well, adjustable neck.',                        'like_new', 'sell',  11.75, 'reserved'),
+(4, 1, 'Laptop Backpack 15.6" (Water Resistant)',   'Good condition, all zippers ok.',                     'used',     'sell',  20.00, 'available'),
+(5, 2, 'Keychron K2 Mechanical Keyboard (Brown)',   'Lightly used, comes with cable.',                     'like_new', 'sell',  30.00, 'sold'),
+(1, 3, 'Compact Travel Umbrella (Windproof)',       'Opens/closes smoothly.',                              'used',     'sell',   4.50, 'available'),
+(2, 4, 'Anker PowerCore 10000 Power Bank',          'Charges fast, includes short cable.',                 'like_new', 'sell',  13.20, 'available'),
+(3, 1, 'A4 Magnetic Whiteboard + Marker',           'Great for study notes, easy to wipe.',                'used',     'lend',   0.00, 'available'),
+(4, 2, 'HDMI 2.0 Cable 2m (4K Support)',            'Works fine, no bends.',                               'used',     'lend',   0.00, 'reserved'),
+(5, 3, 'Phone Tripod (Adjustable, 1.6m)',           'Stable, with phone clamp.',                           'like_new', 'lend',   0.00, 'borrowed'),
+(1, 4, 'Logitech M331 Silent Wireless Mouse',       'Quiet clicks, smooth tracking.',                      'like_new', 'sell',   8.80, 'available'),
+(2, 1, 'TOEIC Flashcards Set (New)',                'Unopened box, complete set.',                         'new',      'sell',   5.00, 'available'),
+(3, 2, 'Bike Helmet Size M (Black)',                'No cracks, straps good.',                             'used',     'sell',  14.00, 'reserved'),
+(4, 3, 'Extension Cord 3-Outlets 2m (Safety)',      'Good condition, no loose socket.',                    'used',     'sell',   6.00, 'available'),
+(5, 4, 'Ergonomic Study Chair (Adjustable Height)', 'Comfortable, minor scratches on legs.',               'used',     'sell',  22.00, 'available');
+
+-- Insert into `Order` table
+INSERT INTO `Order` (listing_id, buyer_id, offer_price, final_price, status, order_date, confirmed_at, completed_at, borrow_due_date, returned_at) VALUES
+  (5, 9, 810000, 810000, 'confirmed', '2025-10-10 10:00:00', '2025-10-10 12:00:00', NULL, NULL, NULL),
+  (6, 10, 135000, 135000, 'confirmed', '2025-10-11 10:00:00', '2025-10-11 12:00:00', NULL, NULL, NULL),
+  (7, 11, 720000, 720000, 'confirmed', '2025-10-12 10:00:00', '2025-10-12 12:00:00', NULL, NULL, NULL),
+  (8, 12, 225000, 225000, 'confirmed', '2025-10-13 10:00:00', '2025-10-13 12:00:00', NULL, NULL, NULL),
+  (9, 15, 950000, 950000, 'completed', '2025-10-14 10:00:00', '2025-10-14 13:00:00', '2025-10-15 16:00:00', NULL, NULL),
+  (10, 16, 9025000, 9025000, 'completed', '2025-10-15 10:00:00', '2025-10-15 13:00:00', '2025-10-16 16:00:00', NULL, NULL),
+  (11, 17, 57000, 57000, 'completed', '2025-10-16 10:00:00', '2025-10-16 13:00:00', '2025-10-17 16:00:00', NULL, NULL),
+  (12, 18, 285000, 285000, 'completed', '2025-10-17 10:00:00', '2025-10-17 13:00:00', '2025-10-18 16:00:00', NULL, NULL),
+  (1, 8, 2975000, NULL, 'requested', '2025-10-26 10:00:00', NULL, NULL, NULL, NULL),
+  (2, 9, 102000, NULL, 'rejected', '2025-10-27 10:00:00', NULL, NULL, NULL, NULL),
+  (3, 10, 170000, NULL, 'cancelled', '2025-10-28 10:00:00', NULL, NULL, NULL, NULL),
+  (4, 11, 382500, NULL, 'rejected', '2025-10-29 10:00:00', NULL, NULL, NULL, NULL),
+  (13, 11, 50000, 50000, 'completed', '2025-10-18 10:00:00', '2025-10-18 11:00:00', '2025-10-20 12:00:00', '2025-10-25 10:00:00', '2025-10-24 22:00:00'),
+  (14, 12, 80000, 80000, 'completed', '2025-10-19 10:00:00', '2025-10-19 11:00:00', '2025-10-21 12:00:00', '2025-10-26 10:00:00', '2025-10-25 22:00:00'),
+  (15, 13, 150000, 150000, 'completed', '2025-10-20 10:00:00', '2025-10-20 11:00:00', '2025-10-22 12:00:00', '2025-10-27 10:00:00', '2025-10-26 22:00:00'),
+  (16, 14, 70000, 70000, 'completed', '2025-10-21 10:00:00', '2025-10-21 11:00:00', '2025-10-23 12:00:00', '2025-10-28 10:00:00', '2025-10-27 22:00:00'),
+  (17, 14, 40000, 40000, 'confirmed', '2025-10-22 10:00:00', '2025-10-22 12:00:00', NULL, '2025-11-01 10:00:00', NULL),
+  (18, 15, 100000, 100000, 'confirmed', '2025-10-23 10:00:00', '2025-10-23 12:00:00', NULL, '2025-11-02 10:00:00', NULL),
+  (19, 12, 60000, 60000, 'confirmed', '2025-10-24 10:00:00', '2025-10-24 12:00:00', NULL, '2025-11-03 10:00:00', NULL),
+  (20, 13, 30000, 30000, 'confirmed', '2025-10-25 10:00:00', '2025-10-25 12:00:00', NULL, '2025-11-04 10:00:00', NULL);
+
+-- Insert into `Review` table
+INSERT INTO `Review` (order_id, rating, comment, created_at) VALUES
+  (1, 5, 'Excellent — smooth transaction!', '2025-10-16 15:00:00'),
+  (2, 4, 'Good — item matched the description.', '2025-10-17 15:00:00'),
+  (3, 4, 'Good communication and on-time meetup.', '2025-10-18 15:00:00'),
+  (4, 3, 'Okay — everything worked, minor delays.', '2025-10-19 15:00:00'),
+  (5, 5, 'Great seller — highly recommended!', '2025-10-20 15:00:00'),
+  (6, 4, 'Good deal, friendly interaction.', '2025-10-21 15:00:00'),
+  (7, 3, 'Decent — acceptable condition for the price.', '2025-10-22 15:00:00'),
+  (8, 5, 'Perfect — exactly as advertised.', '2025-10-23 15:00:00'),
+  (9, 4, 'Good — quick and easy.', '2025-10-24 15:00:00'),
+  (10, 3, 'Okay — could be faster to respond.', '2025-10-25 15:00:00'),
+  (11, 5, 'Excellent experience overall!', '2025-10-26 15:00:00'),
+  (12, 5, 'Great quality — would buy again.', '2025-10-27 15:00:00'),
+  (13, 4, 'Good — returned on time and clean.', '2025-10-28 15:00:00'),
+  (14, 3, 'Okay — worked fine for borrowing.', '2025-10-29 15:00:00'),
+  (15, 4, 'Good — helpful and cooperative.', '2025-10-30 15:00:00'),
+  (16, 5, 'Excellent — very reliable!', '2025-10-31 15:00:00'),
+  (17, 3, 'Okay — item was usable, slight wear.', '2025-11-01 15:00:00'),
+  (18, 4, 'Good — clear instructions and pickup.', '2025-11-02 15:00:00'),
+  (19, 5, 'Amazing — super smooth process!', '2025-11-03 15:00:00'),
+  (20, 4, 'Good — thanks!', '2025-11-04 15:00:00');
+  
+-- Insert into `Comment` table
+INSERT INTO `Comment` (listing_id, user_id, content, created_at, parent_id) VALUES
+  (2, 2, 'Comment 1: Interested! Is this still available?', '2025-10-20 11:00:00', NULL),
+  (3, 3, 'Comment 2: Interested! Is this still available?', '2025-10-20 14:00:00', NULL),
+  (4, 4, 'Comment 3: Interested! Is this still available?', '2025-10-20 17:00:00', NULL),
+  (5, 5, 'Comment 4: Interested! Is this still available?', '2025-10-20 20:00:00', NULL),
+  (6, 6, 'Comment 5: Interested! Is this still available?', '2025-10-20 23:00:00', NULL),
+  (7, 7, 'Comment 6: Interested! Is this still available?', '2025-10-21 02:00:00', NULL),
+  (8, 8, 'Comment 7: Interested! Is this still available?', '2025-10-21 05:00:00', NULL),
+  (9, 9, 'Comment 8: Interested! Is this still available?', '2025-10-21 08:00:00', NULL),
+  (10, 10, 'Comment 9: Interested! Is this still available?', '2025-10-21 11:00:00', NULL),
+  (11, 11, 'Comment 10: Interested! Is this still available?', '2025-10-21 14:00:00', NULL),
+  (12, 12, 'Comment 11: Interested! Is this still available?', '2025-10-21 17:00:00', NULL),
+  (13, 13, 'Comment 12: Interested! Is this still available?', '2025-10-21 20:00:00', NULL),
+  (14, 14, 'Comment 13: Interested! Is this still available?', '2025-10-21 23:00:00', NULL),
+  (15, 15, 'Comment 14: Interested! Is this still available?', '2025-10-22 02:00:00', NULL),
+  (16, 16, 'Comment 15: Interested! Is this still available?', '2025-10-22 05:00:00', NULL),
+  (2, 17, 'Reply 16 -> 1: Yes, please DM me.', '2025-10-22 08:00:00', 1),
+  (3, 18, 'Reply 17 -> 2: Yes, please DM me.', '2025-10-22 11:00:00', 2),
+  (4, 19, 'Reply 18 -> 3: Yes, please DM me.', '2025-10-22 14:00:00', 3),
+  (5, 20, 'Reply 19 -> 4: Yes, please DM me.', '2025-10-22 17:00:00', 4),
+  (6, 1, 'Reply 20 -> 5: Yes, please DM me.', '2025-10-22 20:00:00', 5);
