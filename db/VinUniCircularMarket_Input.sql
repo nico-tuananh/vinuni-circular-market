@@ -30,27 +30,54 @@ INSERT INTO `Category` (name, description) VALUES
   ('Health & Beauty', 'Personal care items and beauty tools (clean/unused)'),
   ('Others', 'Miscellaneous items not covered by other categories');
 
-INSERT INTO `Listing` (seller_id, category_id, title, description, `condition`, listing_type, list_price, status, created_at, updated_at) VALUES
-  (3, 2, 'iPhone 12 64GB (Like New)', 'iPhone 12 64GB (Like New) - seeded sample listing.', 'used', 'sell', 3500000, 'available', '2025-10-02 09:00:00', '2025-10-02 11:00:00'),
-  (4, 3, 'Calculus Textbook (Used)', 'Calculus Textbook (Used) - seeded sample listing.', 'new', 'sell', 120000, 'available', '2025-10-03 09:00:00', '2025-10-03 11:00:00'),
-  (5, 4, 'Desk Lamp (New)', 'Desk Lamp (New) - seeded sample listing.', 'like_new', 'sell', 200000, 'available', '2025-10-04 09:00:00', '2025-10-04 11:00:00'),
-  (6, 5, 'Winter Jacket (Used)', 'Winter Jacket (Used) - seeded sample listing.', 'used', 'sell', 450000, 'available', '2025-10-05 09:00:00', '2025-10-05 11:00:00'),
-  (7, 6, 'Mechanical Keyboard (Like New)', 'Mechanical Keyboard (Like New) - seeded sample listing.', 'new', 'sell', 900000, 'reserved', '2025-10-06 09:00:00', '2025-10-06 11:00:00'),
-  (8, 7, 'Data Structures Book (Used)', 'Data Structures Book (Used) - seeded sample listing.', 'like_new', 'sell', 150000, 'reserved', '2025-10-07 09:00:00', '2025-10-07 11:00:00'),
-  (9, 8, 'Ergonomic Chair (Used)', 'Ergonomic Chair (Used) - seeded sample listing.', 'used', 'sell', 800000, 'reserved', '2025-10-08 09:00:00', '2025-10-08 11:00:00'),
-  (10, 9, 'VinUni Hoodie (New)', 'VinUni Hoodie (New) - seeded sample listing.', 'new', 'sell', 250000, 'reserved', '2025-10-09 09:00:00', '2025-10-09 11:00:00'),
-  (11, 10, 'Noise-cancelling Headphones (Like New)', 'Noise-cancelling Headphones (Like New) - seeded sample listing.', 'like_new', 'sell', 1000000, 'sold', '2025-10-10 09:00:00', '2025-10-10 11:00:00'),
-  (12, 11, 'MacBook Air M1 (Used)', 'MacBook Air M1 (Used) - seeded sample listing.', 'used', 'sell', 9500000, 'sold', '2025-10-11 09:00:00', '2025-10-11 11:00:00'),
-  (13, 12, 'Graph Notebook Pack (New)', 'Graph Notebook Pack (New) - seeded sample listing.', 'new', 'sell', 60000, 'sold', '2025-10-12 09:00:00', '2025-10-12 11:00:00'),
-  (14, 13, 'Gaming Mouse (Like New)', 'Gaming Mouse (Like New) - seeded sample listing.', 'like_new', 'sell', 300000, 'sold', '2025-10-13 09:00:00', '2025-10-13 11:00:00'),
-  (15, 14, 'Badminton Racket (Lend)', 'Badminton Racket (Lend) - seeded sample listing.', 'used', 'lend', 50000, 'available', '2025-10-14 09:00:00', '2025-10-14 11:00:00'),
-  (16, 15, 'Guitar (Lend)', 'Guitar (Lend) - seeded sample listing.', 'new', 'lend', 80000, 'available', '2025-10-15 09:00:00', '2025-10-15 11:00:00'),
-  (17, 16, 'Projector (Lend)', 'Projector (Lend) - seeded sample listing.', 'like_new', 'lend', 150000, 'available', '2025-10-16 09:00:00', '2025-10-16 11:00:00'),
-  (18, 17, 'Camera Tripod (Lend)', 'Camera Tripod (Lend) - seeded sample listing.', 'used', 'lend', 70000, 'available', '2025-10-17 09:00:00', '2025-10-17 11:00:00'),
-  (19, 18, 'Yoga Mat (Lend)', 'Yoga Mat (Lend) - seeded sample listing.', 'new', 'lend', 40000, 'borrowed', '2025-10-18 09:00:00', '2025-10-18 11:00:00'),
-  (20, 19, 'Power Drill (Lend)', 'Power Drill (Lend) - seeded sample listing.', 'like_new', 'lend', 100000, 'borrowed', '2025-10-19 09:00:00', '2025-10-19 11:00:00'),
-  (3, 20, 'Board Game Set (Lend)', 'Board Game Set (Lend) - seeded sample listing.', 'used', 'lend', 60000, 'borrowed', '2025-10-20 09:00:00', '2025-10-20 11:00:00'),
-  (4, 1, 'Calculator TI-84 (Lend)', 'Calculator TI-84 (Lend) - seeded sample listing.', 'new', 'lend', 30000, 'borrowed', '2025-10-21 09:00:00', '2025-10-21 11:00:00');
+INSERT INTO `User` (full_name, email, password_hash, phone, address, role, status, created_at) VALUES
+  ('Nguyễn Thế An',        '23an.nt@vinuni.edu.vn',     'hash_01', '+84000000091', 'Gia Lam, Hanoi',      'admin',   'active',   '2025-09-02 00:00:00'),
+  ('Trần Minh Anh',        '25anh.tm@vinuni.edu.vn',    'hash_02', '+84000000092', 'VinUni Dorm, Hanoi',  'admin',   'active',   '2025-09-03 00:00:00'),
+  ('Lê Quang Huy',         '22huy.lq@vinuni.edu.vn',    'hash_03', '+84000000093', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-04 00:00:00'),
+  ('Phạm Thu Hà',          '24ha.pt@vinuni.edu.vn',     'hash_04', '+84000000094', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-05 00:00:00'),
+  ('Vũ Đức Long',          '23long.vd@vinuni.edu.vn',   'hash_05', '+84000000095', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-06 00:00:00'),
+  ('Đặng Hải Nam',         '25nam.dh@vinuni.edu.vn',    'hash_06', '+84000000096', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-07 00:00:00'),
+  ('Bùi Ngọc Anh',         '22anh.bn@vinuni.edu.vn',    'hash_07', '+84000000097', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-08 00:00:00'),
+  ('Hoàng Gia Bảo',        '24bao.hg@vinuni.edu.vn',    'hash_08', '+84000000098', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-09 00:00:00'),
+  ('Ngô Thanh Tùng',       '23tung.nt@vinuni.edu.vn',   'hash_09', '+84000000099', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-10 00:00:00'),
+  ('Đỗ Mai Linh',          '25linh.dm@vinuni.edu.vn',   'hash_10', '+84000000100', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-11 00:00:00'),
+  ('Phan Nhật Minh',       '22minh.pn@vinuni.edu.vn',   'hash_11', '+84000000101', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-12 00:00:00'),
+  ('Lý Khánh Vy',          '24vy.lk@vinuni.edu.vn',     'hash_12', '+84000000102', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-13 00:00:00'),
+  ('Đinh Anh Tuấn',        '23tuan.da@vinuni.edu.vn',   'hash_13', '+84000000103', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-14 00:00:00'),
+  ('Nguyễn Hoàng Phương',  '25phuong.nh@vinuni.edu.vn', 'hash_14', '+84000000104', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-15 00:00:00'),
+  ('Trương Quốc Hưng',     '22hung.tq@vinuni.edu.vn',   'hash_15', '+84000000105', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-16 00:00:00'),
+  ('Đào Thùy Dương',       '24duong.dt@vinuni.edu.vn',  'hash_16', '+84000000106', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-17 00:00:00'),
+  ('Võ Thành Đạt',         '23dat.vt@vinuni.edu.vn',    'hash_17', '+84000000107', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-18 00:00:00'),
+  ('Nguyễn Hải Yến',       '25yen.nh@vinuni.edu.vn',    'hash_18', '+84000000108', 'VinUni Dorm, Hanoi',  'student', 'inactive', '2025-09-19 00:00:00'),
+  ('Trần Đức Anh',         '22anh.td@vinuni.edu.vn',    'hash_19', '+84000000109', 'Gia Lam, Hanoi',      'student', 'active',   '2025-09-20 00:00:00'),
+  ('Lê Thu Trang',         '24trang.lt@vinuni.edu.vn',  'hash_20', '+84000000110', 'VinUni Dorm, Hanoi',  'student', 'active',   '2025-09-21 00:00:00');
+
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE `Listing`;
+SET FOREIGN_KEY_CHECKS = 1;
+INSERT INTO `Listing`
+(seller_id, category_id, title, description, `condition`, listing_type, list_price, status)
+VALUES
+(1, 1, 'Calculus Textbook (Stewart 8th)',           'Clean pages, some highlights.',                       'used',     'sell',  12.50, 'available'),
+(2, 2, 'Aluminum Adjustable Laptop Stand (13-16")', 'Sturdy, barely used.',                                'like_new', 'sell',  18.00, 'available'),
+(3, 3, 'Sony WH-CH510 Wireless Headphones',         'Battery good, minor scratches.',                      'used',     'sell',  25.00, 'reserved'),
+(4, 4, 'Casio fx-570VN PLUS Calculator',            'Fully functional, includes cover.',                   'like_new', 'sell',  10.00, 'sold'),
+(5, 1, 'Muji B5 Notebook Set (3-pack)',             'Brand new, unopened.',                                'new',      'sell',   6.50, 'available'),
+(1, 2, 'Thermos 500ml Insulated Water Bottle',      'Keeps cold ~12h, no leaks.',                          'like_new', 'sell',   9.99, 'available'),
+(2, 3, 'Uniqlo Hoodie Size M (Gray)',               'Comfortable, washed, no stains.',                     'used',     'sell',  15.00, 'available'),
+(3, 4, 'LED Desk Lamp (3 Modes, USB Powered)',      'Works well, adjustable neck.',                        'like_new', 'sell',  11.75, 'reserved'),
+(4, 1, 'Laptop Backpack 15.6" (Water Resistant)',   'Good condition, all zippers ok.',                     'used',     'sell',  20.00, 'available'),
+(5, 2, 'Keychron K2 Mechanical Keyboard (Brown)',   'Lightly used, comes with cable.',                     'like_new', 'sell',  30.00, 'sold'),
+(1, 3, 'Compact Travel Umbrella (Windproof)',       'Opens/closes smoothly.',                              'used',     'sell',   4.50, 'available'),
+(2, 4, 'Anker PowerCore 10000 Power Bank',          'Charges fast, includes short cable.',                 'like_new', 'sell',  13.20, 'available'),
+(3, 1, 'A4 Magnetic Whiteboard + Marker',           'Great for study notes, easy to wipe.',                'used',     'lend',   0.00, 'available'),
+(4, 2, 'HDMI 2.0 Cable 2m (4K Support)',            'Works fine, no bends.',                               'used',     'lend',   0.00, 'reserved'),
+(5, 3, 'Phone Tripod (Adjustable, 1.6m)',           'Stable, with phone clamp.',                           'like_new', 'lend',   0.00, 'borrowed'),
+(1, 4, 'Logitech M331 Silent Wireless Mouse',       'Quiet clicks, smooth tracking.',                      'like_new', 'sell',   8.80, 'available'),
+(2, 1, 'TOEIC Flashcards Set (New)',                'Unopened box, complete set.',                         'new',      'sell',   5.00, 'available'),
+(3, 2, 'Bike Helmet Size M (Black)',                'No cracks, straps good.',                             'used',     'sell',  14.00, 'reserved'),
+(4, 3, 'Extension Cord 3-Outlets 2m (Safety)',      'Good condition, no loose socket.',                    'used',     'sell',   6.00, 'available'),
+(5, 4, 'Ergonomic Study Chair (Adjustable Height)', 'Comfortable, minor scratches on legs.',               'used',     'sell',  22.00, 'available');
 
 INSERT INTO `Order` (listing_id, buyer_id, offer_price, final_price, status, order_date, confirmed_at, completed_at, borrow_due_date, returned_at) VALUES
   (5, 9, 810000, 810000, 'confirmed', '2025-10-10 10:00:00', '2025-10-10 12:00:00', NULL, NULL, NULL),
