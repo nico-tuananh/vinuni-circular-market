@@ -9,16 +9,12 @@ export class RegisterPage {
     render() {
         if (!this.container) return;
 
-        console.log('🎨 Rendering RegisterPage...');
-
         // Create form component
         const { FormComponent } = window;
-        console.log('📝 FormComponent available:', !!FormComponent);
         this.formComponent = FormComponent.createRegisterForm(
             (event) => this.handleSubmit(event),
             this.isLoading
         );
-        console.log('✅ Register form created:', !!this.formComponent);
 
         this.container.innerHTML = `
             <div class="container py-5">
@@ -68,17 +64,13 @@ export class RegisterPage {
 
     attachEventListeners() {
         const form = document.querySelector('#main-content form');
-        console.log('🔗 Register: Attaching form submit listener to:', form);
         if (form) {
             // Remove any existing listeners by cloning the form
             const newForm = form.cloneNode(true);
             form.parentNode.replaceChild(newForm, form);
 
-            console.log('🔗 Register: Form cloned and replaced, attaching listeners');
-
             // Attach submit listener
             newForm.addEventListener('submit', (e) => {
-                console.log('🎯 Register: Form submit event triggered');
                 e.preventDefault();
                 e.stopPropagation();
                 this.handleSubmit(e);
@@ -87,9 +79,7 @@ export class RegisterPage {
             // Also attach click listener to button as backup
             const submitButton = newForm.querySelector('button[type="submit"]');
             if (submitButton) {
-                console.log('🔗 Register: Found submit button, attaching click listener');
                 submitButton.addEventListener('click', (e) => {
-                    console.log('🔘 Register: Submit button clicked directly');
                     e.preventDefault();
                     e.stopPropagation();
                     const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
@@ -98,21 +88,15 @@ export class RegisterPage {
             } else {
                 console.warn('⚠️ Register: Submit button not found');
             }
-
-            console.log('✅ Register: Event listeners attached successfully');
         } else {
             console.error('❌ Register: Form element not found for event listeners');
         }
     }
 
     async handleSubmit(event) {
-        console.log('🎯 RegisterPage: handleSubmit called with event:', event);
-        console.log('🎯 RegisterPage: event.target:', event.target);
-        console.log('🎯 RegisterPage: event.currentTarget:', event.currentTarget);
         event.preventDefault();
 
         if (this.isLoading) {
-            console.log('⚠️ RegisterPage: Form is loading, ignoring submit');
             return;
         }
 
@@ -124,9 +108,6 @@ export class RegisterPage {
         if (!formElement || formElement.tagName !== 'FORM') {
             formElement = document.querySelector('#main-content form');
         }
-        
-        console.log('📝 Register: Form element found:', formElement);
-        console.log('📝 Register: FormComponent available:', !!this.formComponent);
 
         if (!formElement) {
             console.error('❌ Register: Could not find form element!');
@@ -135,13 +116,7 @@ export class RegisterPage {
         }
 
         // Get form data using the form component
-        console.log('📝 Register: Extracting form data from form element');
         const formData = this.formComponent.getFormData(formElement);
-        console.log('📋 Register: Extracted form data keys:', Object.keys(formData));
-        console.log('📋 Register: Extracted form data:', Object.keys(formData).reduce((acc, key) => {
-            acc[key] = key === 'password' || key === 'confirmPassword' ? '***' : formData[key];
-            return acc;
-        }, {}));
 
         // Client-side validation
         const { AuthService } = await import('../services/authService.js');
@@ -162,16 +137,11 @@ export class RegisterPage {
             address: { type: 'address' }
         };
 
-        console.log('🔍 Register: Starting validation with rules:', Object.keys(validationRules));
         const validation = ValidationUtils.validateForm(formData, validationRules);
-        console.log('🔍 Register: Validation result - isValid:', validation.isValid);
-        console.log('🔍 Register: Validation errors:', validation.errors);
 
         if (!validation.isValid) {
-            console.warn('❌ Register: Validation failed, errors:', validation.errors);
             // Set field-specific errors
             Object.entries(validation.errors).forEach(([field, message]) => {
-                console.log(`❌ Register: Setting error for field ${field}: ${message}`);
                 this.formComponent.setFieldError(field, message);
             });
             // Re-render form to show errors
@@ -183,8 +153,6 @@ export class RegisterPage {
             }
             return;
         }
-
-        console.log('✅ Register: Validation passed, proceeding with registration');
 
         this.setLoading(true);
         globalState.setLoading(true);
@@ -199,9 +167,8 @@ export class RegisterPage {
                 address: formData.address || null
             };
 
-            console.log('🚀 Register: Making API call...');
             await AuthService.register(registerData);
-            console.log('✅ Register: API call successful');
+            console.log('✅ Registration successful for user:', formData.email);
 
             // Show success notification
             globalState.addNotification({
@@ -212,7 +179,7 @@ export class RegisterPage {
 
             window.App.router.navigate('/login');
         } catch (error) {
-            console.error('❌ Register: Registration failed:', error);
+            console.error('❌ Registration failed:', error.message);
             this.showError(error.message || 'Registration failed. Please try again.');
         } finally {
             this.setLoading(false);

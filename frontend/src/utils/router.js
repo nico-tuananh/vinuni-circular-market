@@ -10,12 +10,17 @@ export class Router {
 
     navigate(path, updateHistory = true) {
         // Remove leading slash if present
-        const cleanPath = path.startsWith('/') ? path : '/' + path;
+        const fullPath = path.startsWith('/') ? path : '/' + path;
         
-        // Store current path
-        this.currentPath = cleanPath;
+        // Separate path from query string for route matching
+        const [pathWithoutQuery, queryString] = fullPath.split('?');
+        const cleanPath = pathWithoutQuery;
+        const fullPathWithQuery = queryString ? `${cleanPath}?${queryString}` : cleanPath;
+        
+        // Store current path (with query string)
+        this.currentPath = fullPathWithQuery;
 
-        // Find matching route
+        // Find matching route (using path without query string)
         let routeHandler = this.routes[cleanPath];
         let params = {};
 
@@ -31,17 +36,17 @@ export class Router {
         routeHandler = routeHandler || this.routes['/404'];
 
         if (routeHandler) {
-            // Check route guard
+            // Check route guard (using path without query string)
             if (!this.checkRouteGuard(cleanPath)) {
                 return; // Guard prevented navigation
             }
 
-            // Update browser history
+            // Update browser history (preserve query string)
             if (updateHistory) {
-                window.history.pushState({}, '', cleanPath);
+                window.history.pushState({}, '', fullPathWithQuery);
             }
 
-            // Update header with current path
+            // Update header with current path (without query string for display)
             if (window.App && window.App.header) {
                 window.App.header.updatePath(cleanPath);
             }

@@ -18,6 +18,7 @@ class App {
         this.header = null;
         this.footer = null;
         this.currentUser = null;
+        this.currentPage = null;
         this.notificationContainer = null;
     }
 
@@ -132,12 +133,17 @@ class App {
 
     async loadPage(pageName, params = {}) {
         try {
+            // Clean up current page before loading new one
+            if (this.currentPage && typeof this.currentPage.destroy === 'function') {
+                this.currentPage.destroy();
+            }
+
             const module = await import(`./pages/${pageName}.js`);
             const PageClass = module[pageName];
 
             if (PageClass) {
-                const page = new PageClass(params);
-                page.render();
+                this.currentPage = new PageClass(params);
+                this.currentPage.render();
             } else {
                 console.error(`Page class ${pageName} not found`);
                 this.router.navigate('/404');

@@ -9,16 +9,12 @@ export class LoginPage {
     render() {
         if (!this.container) return;
 
-        console.log('🎨 Rendering LoginPage...');
-
         // Create form component
         const { FormComponent } = window;
-        console.log('📝 FormComponent available:', !!FormComponent);
         this.formComponent = FormComponent.createLoginForm(
             (event) => this.handleSubmit(event),
             this.isLoading
         );
-        console.log('✅ Login form created:', !!this.formComponent);
 
         this.container.innerHTML = `
             <div class="container py-5">
@@ -66,17 +62,13 @@ export class LoginPage {
 
     attachEventListeners() {
         const form = document.querySelector('#main-content form');
-        console.log('🔗 Login: Attaching form submit listener to:', form);
         if (form) {
             // Remove any existing listeners by cloning the form
             const newForm = form.cloneNode(true);
             form.parentNode.replaceChild(newForm, form);
 
-            console.log('🔗 Login: Form cloned and replaced, attaching listeners');
-
             // Attach submit listener
             newForm.addEventListener('submit', (e) => {
-                console.log('🎯 Login: Form submit event triggered');
                 e.preventDefault();
                 e.stopPropagation();
                 this.handleSubmit(e);
@@ -85,9 +77,7 @@ export class LoginPage {
             // Also attach click listener to button as backup
             const submitButton = newForm.querySelector('button[type="submit"]');
             if (submitButton) {
-                console.log('🔗 Login: Found submit button, attaching click listener');
                 submitButton.addEventListener('click', (e) => {
-                    console.log('🔘 Login: Submit button clicked directly');
                     e.preventDefault();
                     e.stopPropagation();
                     const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
@@ -96,19 +86,15 @@ export class LoginPage {
             } else {
                 console.warn('⚠️ Login: Submit button not found');
             }
-
-            console.log('✅ Login: Event listeners attached successfully');
         } else {
             console.error('❌ Login: Form element not found for event listeners');
         }
     }
 
     async handleSubmit(event) {
-        console.log('🎯 LoginPage: handleSubmit called with event:', event);
         event.preventDefault();
 
         if (this.isLoading) {
-            console.log('⚠️ LoginPage: Form is loading, ignoring submit');
             return;
         }
 
@@ -120,9 +106,6 @@ export class LoginPage {
         if (!formElement || formElement.tagName !== 'FORM') {
             formElement = document.querySelector('#main-content form');
         }
-        
-        console.log('📝 Login: Form element found:', formElement);
-        console.log('📝 Login: FormComponent available:', !!this.formComponent);
 
         if (!formElement) {
             console.error('❌ Login: Could not find form element!');
@@ -131,12 +114,9 @@ export class LoginPage {
         }
 
         // Get form data using the form component
-        console.log('📝 Login: Extracting form data from form element');
         const formData = this.formComponent.getFormData(formElement);
         const email = formData.email;
         const password = formData.password;
-        console.log('📋 Login: Extracted form data keys:', Object.keys(formData));
-        console.log('📋 Login: Extracted form data:', { email: email ? 'present' : 'empty', password: password ? 'present' : 'empty' });
 
         // Client-side validation
         const { AuthService } = await import('../services/authService.js');
@@ -153,17 +133,11 @@ export class LoginPage {
             password: { type: 'required', label: 'Password' }
         };
 
-        console.log('🔍 Login: Starting validation with rules:', Object.keys(validationRules));
-        console.log('🔍 Login: Form data values:', { email: email || 'empty', password: password ? '***' : 'empty' });
         const validation = ValidationUtils.validateForm({ email, password }, validationRules);
-        console.log('🔍 Login: Validation result - isValid:', validation.isValid);
-        console.log('🔍 Login: Validation errors:', validation.errors);
 
         if (!validation.isValid) {
-            console.warn('❌ Login: Validation failed, errors:', validation.errors);
             // Set field-specific errors
             Object.entries(validation.errors).forEach(([field, message]) => {
-                console.log(`❌ Login: Setting error for field ${field}: ${message}`);
                 this.formComponent.setFieldError(field, message);
             });
             // Re-render form to show errors
@@ -176,13 +150,13 @@ export class LoginPage {
             return;
         }
 
-        console.log('✅ Login: Validation passed, proceeding with login');
-
         this.setLoading(true);
         globalState.setLoading(true);
 
         try {
             const response = await AuthService.login(email, password);
+
+            console.log('✅ Login successful for user:', response.user.email);
 
             // Show success notification
             globalState.addNotification({
@@ -198,6 +172,7 @@ export class LoginPage {
                 window.App.router.navigate('/');
             }
         } catch (error) {
+            console.error('❌ Login failed:', error.message);
             this.showError(error.message || 'Login failed. Please check your credentials and try again.');
         } finally {
             this.setLoading(false);

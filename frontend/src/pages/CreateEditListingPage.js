@@ -305,8 +305,8 @@ export class CreateEditListingPage {
             const listingCategoryId = this.listing?.category?.categoryId || this.listing?.category?.id;
             return `
                 <option value="${categoryId}" ${listingCategoryId == categoryId ? 'selected' : ''}>
-                    ${category.name}
-                </option>
+                ${category.name}
+            </option>
             `;
         }).join('');
     }

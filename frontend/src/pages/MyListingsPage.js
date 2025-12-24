@@ -3,6 +3,7 @@ export class MyListingsPage {
     constructor() {
         this.container = document.getElementById('main-content');
         this.listings = [];
+        this.filteredListings = null;
         this.isLoading = true;
         this.currentPage = 0;
         this.totalPages = 1;
@@ -61,7 +62,9 @@ export class MyListingsPage {
                                 </div>
                             </div>
                             <div class="card-body p-0" id="listings-container">
-                                ${this.renderListingsTable()}
+                                <div class="table-responsive" style="overflow: visible;">
+                                    ${this.renderListingsTable()}
+                                </div>
                             </div>
                         </div>
 
@@ -79,10 +82,16 @@ export class MyListingsPage {
     }
 
     renderStatsCards() {
-        const activeListings = this.listings.filter(l => l.status === 'Active').length;
+        const activeListings = this.listings.filter(l => {
+            const status = l.status?.toUpperCase() || '';
+            return status === 'AVAILABLE' || status === 'RESERVED';
+        }).length;
         const totalViews = this.listings.reduce((sum, l) => sum + (l.viewCount || 0), 0);
         const totalFavorites = this.listings.reduce((sum, l) => sum + (l.favoriteCount || 0), 0);
-        const soldItems = this.listings.filter(l => l.status === 'Sold' || l.status === 'Rented').length;
+        const soldItems = this.listings.filter(l => {
+            const status = l.status?.toUpperCase() || '';
+            return status === 'SOLD' || status === 'BORROWED';
+        }).length;
 
         return `
             <div class="col-md-3 mb-3">
@@ -141,24 +150,22 @@ export class MyListingsPage {
         }
 
         return `
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Item</th>
-                            <th>Type</th>
-                            <th>Price</th>
-                            <th>Status</th>
-                            <th>Views</th>
-                            <th>Created</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${this.listings.map(listing => this.renderListingRow(listing)).join('')}
-                    </tbody>
-                </table>
-            </div>
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Item</th>
+                        <th>Type</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Views</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${this.listings.map(listing => this.renderListingRow(listing)).join('')}
+                </tbody>
+            </table>
         `;
     }
 
@@ -185,16 +192,16 @@ export class MyListingsPage {
                     ${listing.type === 'Borrow' ? '<small class="text-muted d-block">per day</small>' : ''}
                 </td>
                 <td>
-                    <span class="badge ${statusBadgeClass}">${listing.status || 'Active'}</span>
+                    <span class="badge ${statusBadgeClass}">${this.formatStatus(listing.status)}</span>
                 </td>
                 <td>${listing.viewCount || 0}</td>
                 <td>${this.formatDate(listing.createdAt)}</td>
                 <td>
                     <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" onclick="event.stopPropagation()">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport" data-bs-auto-close="true" onclick="event.stopPropagation()">
                             Actions
                         </button>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="#" onclick="event.stopPropagation(); window.currentMyListingsPage.viewListing('${listing.id}')">
                                 <i class="bi bi-eye me-2"></i>View
                             </a></li>
@@ -202,7 +209,7 @@ export class MyListingsPage {
                                 <i class="bi bi-pencil me-2"></i>Edit
                             </a></li>
                             <li><a class="dropdown-item" href="#" onclick="event.stopPropagation(); window.currentMyListingsPage.duplicateListing('${listing.id}')">
-                                <i class="bi bi-copy me-2"></i>Duplicate
+                                <i class="bi bi-files me-2"></i>Duplicate
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item text-danger" href="#" onclick="event.stopPropagation(); window.currentMyListingsPage.deleteListing('${listing.id}')">
@@ -294,12 +301,31 @@ export class MyListingsPage {
     }
 
     filterByStatus(status) {
-        // For now, just re-render with filtering
-        // In a real implementation, this would filter on the server side
-        console.log('Filtering by status:', status);
+        let displayListings = this.listings;
+        
+        if (status !== 'all') {
+            const statusMap = {
+                'active': ['AVAILABLE', 'RESERVED'],
+                'inactive': [],
+                'sold': ['SOLD'],
+                'rented': ['BORROWED']
+            };
+            const targetStatuses = statusMap[status] || [];
+            displayListings = this.listings.filter(l => {
+                const listingStatus = (l.status?.toUpperCase() || '');
+                return targetStatuses.includes(listingStatus);
+            });
+        }
+        
         const container = document.getElementById('listings-container');
         if (container) {
-            container.innerHTML = this.renderListingsTable();
+            const tableContainer = container.querySelector('.table-responsive');
+            if (tableContainer) {
+                const originalListings = this.listings;
+                this.listings = displayListings;
+                tableContainer.innerHTML = this.renderListingsTable();
+                this.listings = originalListings;
+            }
         }
     }
 
@@ -371,14 +397,19 @@ export class MyListingsPage {
     }
 
     getStatusBadgeClass(status) {
+        if (!status) return 'bg-secondary';
+        const statusUpper = status.toUpperCase();
         const statusClasses = {
-            'Active': 'bg-success',
-            'Inactive': 'bg-secondary',
-            'Sold': 'bg-warning',
-            'Rented': 'bg-info',
-            'Expired': 'bg-danger'
+            'AVAILABLE': 'bg-success',
+            'RESERVED': 'bg-info',
+            'SOLD': 'bg-warning',
+            'BORROWED': 'bg-primary',
+            'ACTIVE': 'bg-success',
+            'INACTIVE': 'bg-secondary',
+            'RENTED': 'bg-info',
+            'EXPIRED': 'bg-danger'
         };
-        return statusClasses[status] || 'bg-secondary';
+        return statusClasses[statusUpper] || 'bg-secondary';
     }
 
     formatDate(dateString) {
@@ -389,5 +420,17 @@ export class MyListingsPage {
             day: 'numeric',
             year: 'numeric'
         });
+    }
+
+    formatStatus(status) {
+        if (!status) return 'Available';
+        const statusUpper = status.toUpperCase();
+        const statusMap = {
+            'AVAILABLE': 'Available',
+            'RESERVED': 'Reserved',
+            'SOLD': 'Sold',
+            'BORROWED': 'Borrowed'
+        };
+        return statusMap[statusUpper] || status;
     }
 }

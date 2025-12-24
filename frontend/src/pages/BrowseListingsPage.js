@@ -19,15 +19,25 @@ export class BrowseListingsPage {
     }
 
     async render() {
-        if (!this.container) return;
+        console.log('🎨 BrowseListingsPage: render() called');
+        console.log('📍 BrowseListingsPage: Container element found:', !!this.container);
+
+        if (!this.container) {
+            console.error('❌ BrowseListingsPage: Container not found, aborting render');
+            return;
+        }
 
         // Set loading state before rendering
+        console.log('⏳ BrowseListingsPage: Setting loading state to true before render');
         this.isLoading = true;
 
         // Parse URL parameters
+        console.log('🔗 BrowseListingsPage: Parsing URL parameters');
         this.parseUrlParams();
+        console.log('📋 BrowseListingsPage: URL params parsed - searchQuery:', this.searchQuery, 'page:', this.currentPage, 'filters:', this.filters);
 
         // Render initial HTML structure
+        console.log('🏗️ BrowseListingsPage: Rendering HTML structure');
         this.container.innerHTML = `
             <div class="container-fluid py-4">
                 <div class="row">
@@ -154,28 +164,57 @@ export class BrowseListingsPage {
         `;
 
         // Load data after DOM is rendered
+        console.log('📊 BrowseListingsPage: HTML rendered, starting data loading');
         await this.loadData();
 
+        console.log('👂 BrowseListingsPage: Attaching event listeners');
         this.attachEventListeners();
+
+        console.log('🔧 BrowseListingsPage: Updating filter UI');
         this.updateFilterUI();
+
+        console.log('✅ BrowseListingsPage: render() completed successfully');
     }
 
     attachEventListeners() {
+        console.log('👂 BrowseListingsPage: attachEventListeners() called');
+
         // Search functionality
         const searchInput = document.getElementById('search-input');
         const searchBtn = document.getElementById('search-btn');
 
+        console.log('🔍 BrowseListingsPage: Search elements found - input:', !!searchInput, 'button:', !!searchBtn);
+
         if (searchInput) {
+            console.log('⌨️ BrowseListingsPage: Attaching keypress listener to search input');
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
+                    console.log('⏎ BrowseListingsPage: Enter key pressed in search input');
                     this.performSearch();
                 }
             });
+            console.log('✅ BrowseListingsPage: Search input keypress listener attached');
+        } else {
+            console.warn('⚠️ BrowseListingsPage: Search input element not found');
         }
 
         if (searchBtn) {
-            searchBtn.addEventListener('click', () => this.performSearch());
+            console.log('🖱️ BrowseListingsPage: Attaching click listener to search button');
+            searchBtn.addEventListener('click', () => {
+                console.log('🖱️ BrowseListingsPage: Search button clicked');
+                this.performSearch();
+            });
+            console.log('✅ BrowseListingsPage: Search button click listener attached');
+        } else {
+            console.warn('⚠️ BrowseListingsPage: Search button element not found');
         }
+
+        // Set search input value after DOM is ready
+        console.log('🔄 BrowseListingsPage: Updating search input value');
+        this.updateSearchInputValue();
+        console.log('✅ BrowseListingsPage: Search input value updated');
+
+        console.log('✅ BrowseListingsPage: All event listeners attached successfully');
 
         // Filter functionality
         const applyFiltersBtn = document.getElementById('apply-filters');
@@ -227,6 +266,8 @@ export class BrowseListingsPage {
     }
 
     parseUrlParams() {
+        console.log('🔗 BrowseListingsPage: Parsing URL params from:', window.location.href);
+        console.log('🔗 BrowseListingsPage: window.location.search:', window.location.search);
         const urlParams = new URLSearchParams(window.location.search);
 
         this.searchQuery = urlParams.get('q') || '';
@@ -237,6 +278,8 @@ export class BrowseListingsPage {
         this.filters.maxPrice = urlParams.get('maxPrice') || '';
         this.filters.sort = urlParams.get('sort') || 'newest';
         this.currentPage = parseInt(urlParams.get('page')) || 1;
+        
+        console.log('🔗 BrowseListingsPage: Parsed searchQuery:', this.searchQuery);
     }
 
     updateUrlParams() {
@@ -256,23 +299,47 @@ export class BrowseListingsPage {
     }
 
     async loadData() {
+        console.log('📊 BrowseListingsPage: loadData() started');
+
         try {
+            console.log('⏳ BrowseListingsPage: Setting initial loading state');
             this.isLoading = true;
 
+            console.log('📂 BrowseListingsPage: Loading categories');
+            console.log('📦 BrowseListingsPage: Importing CategoryService');
             const { CategoryService } = await import('../services/api.js');
+            console.log('✅ BrowseListingsPage: CategoryService imported');
+
+            console.log('🚀 BrowseListingsPage: Calling CategoryService.getCategories()');
             const categoriesData = await CategoryService.getCategories();
+            console.log('📥 BrowseListingsPage: Categories data received');
 
             this.categories = categoriesData.content || categoriesData || [];
+            console.log('📋 BrowseListingsPage: Categories processed:', this.categories.length, 'categories loaded');
 
+            console.log('📄 BrowseListingsPage: Now loading listings');
             await this.loadListings();
+            console.log('✅ BrowseListingsPage: loadData() completed successfully');
 
         } catch (error) {
-            console.error('Failed to load browse listings data:', error);
+            console.error('❌ BrowseListingsPage: loadData() failed:', error);
+            console.error('❌ BrowseListingsPage: Error details:', {
+                message: error.message,
+                stack: error.stack,
+                name: error.name
+            });
+
+            console.log('🔄 BrowseListingsPage: Resetting state due to error');
             this.categories = [];
             this.listings = [];
             this.isLoading = false;
+
+            console.log('🖥️ BrowseListingsPage: Updating UI with error state');
             this.updateListingsGrid();
+
+            console.error('❌ BrowseListingsPage: loadData() ended with failure');
         } finally {
+            console.log('🏁 BrowseListingsPage: loadData() finally block - setting loading to false');
             this.isLoading = false;
         }
     }
@@ -292,15 +359,24 @@ export class BrowseListingsPage {
     }
 
     async loadListings() {
+        console.log('📡 BrowseListingsPage: loadListings() started');
+        console.log('📊 BrowseListingsPage: Current state - page:', this.currentPage, 'searchQuery:', this.searchQuery, 'filters:', this.filters);
+
         try {
+            console.log('⏳ BrowseListingsPage: Setting loading state to true');
             this.isLoading = true;
 
+            console.log('📦 BrowseListingsPage: Importing ListingService');
             const { ListingService } = await import('../services/api.js');
+            console.log('✅ BrowseListingsPage: ListingService imported successfully');
+
             let response;
+            let apiMethod = 'unknown';
 
             // Get sort parameters
+            console.log('🔧 BrowseListingsPage: Getting sort parameters');
             const sortParams = this.getSortParams();
-            console.log('Sort params:', sortParams, 'Filter sort value:', this.filters.sort);
+            console.log('📋 BrowseListingsPage: Sort params:', sortParams, 'Filter sort value:', this.filters.sort);
 
             // Build query parameters
             const params = {
@@ -309,72 +385,157 @@ export class BrowseListingsPage {
                 sortBy: sortParams.sortBy,
                 sortDir: sortParams.sortDir
             };
-            console.log('Request params:', params);
+            console.log('🏗️ BrowseListingsPage: Base request params built:', params);
 
             // Add filter parameters
-            if (this.filters.category) params.categoryId = this.filters.category;
-            if (this.filters.type) params.listingTypeStr = this.filters.type;
-            if (this.filters.condition) params.conditionStr = this.filters.condition;
-            if (this.filters.minPrice) params.minPrice = this.filters.minPrice;
-            if (this.filters.maxPrice) params.maxPrice = this.filters.maxPrice;
-            if (this.searchQuery) {
-                response = await ListingService.searchListings(this.searchQuery, params);
-            } else if (Object.keys(this.filters).some(key => this.filters[key] && key !== 'sort')) {
-                response = await ListingService.filterListings(params);
-            } else {
-                response = await ListingService.getListings(params);
+            const filterKeys = [];
+            if (this.filters.category) {
+                params.categoryId = this.filters.category;
+                filterKeys.push('category');
+            }
+            if (this.filters.type) {
+                params.listingTypeStr = this.filters.type;
+                filterKeys.push('type');
+            }
+            if (this.filters.condition) {
+                params.conditionStr = this.filters.condition;
+                filterKeys.push('condition');
+            }
+            if (this.filters.minPrice) {
+                params.minPrice = this.filters.minPrice;
+                filterKeys.push('minPrice');
+            }
+            if (this.filters.maxPrice) {
+                params.maxPrice = this.filters.maxPrice;
+                filterKeys.push('maxPrice');
             }
 
-            // Backend returns: {listings: [...], currentPage: 0, totalPages: 5, ...}
-            this.listings = response.listings || response.content || [];
-            this.totalPages = response.totalPages || 1;
-            this.currentPage = (response.currentPage !== undefined ? response.currentPage : (response.number !== undefined ? response.number : 0)) + 1;
+            console.log('🔍 BrowseListingsPage: Final request params:', params);
+            console.log('🎯 BrowseListingsPage: Active filters:', filterKeys.length > 0 ? filterKeys.join(', ') : 'none');
+            console.log('🔎 BrowseListingsPage: Search query present:', !!this.searchQuery);
 
-            console.log('Loaded listings:', this.listings.length, 'items');
-            console.log('Response structure:', {
-                hasListings: !!response.listings,
-                hasContent: !!response.content,
-                listingsLength: this.listings.length,
-                totalPages: this.totalPages,
-                currentPage: this.currentPage,
-                responseKeys: Object.keys(response)
-            });
+            // Determine which API method to call
+            if (this.searchQuery) {
+                console.log('🔍 BrowseListingsPage: Using search API with query:', `"${this.searchQuery}"`);
+                apiMethod = 'searchListings';
+                console.log('🚀 BrowseListingsPage: Calling ListingService.searchListings()');
+                response = await ListingService.searchListings(this.searchQuery, params);
+                console.log('📥 BrowseListingsPage: Search API response received');
+            } else if (Object.keys(this.filters).some(key => this.filters[key] && key !== 'sort')) {
+                console.log('🔧 BrowseListingsPage: Using filter API');
+                apiMethod = 'filterListings';
+                console.log('🚀 BrowseListingsPage: Calling ListingService.filterListings()');
+                response = await ListingService.filterListings(params);
+                console.log('📥 BrowseListingsPage: Filter API response received');
+            } else {
+                console.log('📄 BrowseListingsPage: Using basic listings API (no search/filter)');
+                apiMethod = 'getListings';
+                console.log('🚀 BrowseListingsPage: Calling ListingService.getListings()');
+                response = await ListingService.getListings(params);
+                console.log('📥 BrowseListingsPage: Basic listings API response received');
+            }
+
+            console.log('📊 BrowseListingsPage: API response received from method:', apiMethod);
+            console.log('📋 BrowseListingsPage: Raw response keys:', Object.keys(response));
+            console.log('📋 BrowseListingsPage: Response has listings/content:', !!response.listings, !!response.content);
+
+            // Process response data
+            console.log('🔄 BrowseListingsPage: Processing response data');
+            this.listings = response.listings || response.content || [];
+            this.totalPages = response.totalPages || response.totalPages || 1;
+
+            const backendPage = response.currentPage !== undefined ? response.currentPage : (response.number !== undefined ? response.number : 0);
+            this.currentPage = backendPage + 1;
+
+            console.log('✅ BrowseListingsPage: Data processed successfully');
+            console.log('📊 BrowseListingsPage: Final state - listings:', this.listings.length, 'totalPages:', this.totalPages, 'currentPage:', this.currentPage);
 
             // Set loading to false BEFORE updating UI
+            console.log('⏹️ BrowseListingsPage: Setting loading state to false');
             this.isLoading = false;
-            
+
+            console.log('🖥️ BrowseListingsPage: Updating UI components');
             this.updateResultsHeader();
             this.updateListingsGrid();
             this.updatePagination();
             this.updateUrlParams();
+            this.updateSearchInputValue();
+
+            console.log('✅ BrowseListingsPage: loadListings() completed successfully');
 
         } catch (error) {
-            console.error('Failed to load listings:', error);
+            console.error('❌ BrowseListingsPage: loadListings() failed with error:', error);
+            console.error('❌ BrowseListingsPage: Error details:', {
+                message: error.message,
+                stack: error.stack,
+                name: error.name
+            });
+
+            console.log('🔄 BrowseListingsPage: Resetting state due to error');
             this.listings = [];
             this.isLoading = false;
+
+            console.log('🖥️ BrowseListingsPage: Updating UI with error state');
             this.updateResultsHeader();
             this.updateListingsGrid();
+
+            console.error('❌ BrowseListingsPage: loadListings() ended with failure');
         }
     }
 
     performSearch() {
+        console.log('🚀 BrowseListingsPage: performSearch() called');
+
+        const searchInput = document.getElementById('search-input');
+        console.log('🔍 BrowseListingsPage: Search input element found:', !!searchInput);
+
+        if (searchInput) {
+            const oldQuery = this.searchQuery;
+            this.searchQuery = searchInput.value.trim();
+
+            console.log('📝 BrowseListingsPage: Search query updated from:', oldQuery ? `"${oldQuery}"` : '(empty)', 'to:', this.searchQuery ? `"${this.searchQuery}"` : '(empty)');
+
+            console.log('🔄 BrowseListingsPage: Resetting page to 1');
+            this.currentPage = 1;
+
+            console.log('📡 BrowseListingsPage: Calling loadListings()');
+            this.loadListings();
+        } else {
+            console.error('❌ BrowseListingsPage: Search input element not found!');
+        }
+    }
+
+    updateSearchInputValue() {
         const searchInput = document.getElementById('search-input');
         if (searchInput) {
-            this.searchQuery = searchInput.value.trim();
-            this.currentPage = 1;
-            this.loadListings();
+            searchInput.value = this.searchQuery || '';
+            console.log('🔄 BrowseListingsPage: Search input value updated to:', this.searchQuery || '(empty)');
+        } else {
+            console.warn('⚠️ BrowseListingsPage: Search input element not found when updating value');
         }
     }
 
     applyFilters() {
+        console.log('🔧 BrowseListingsPage: applyFilters() called');
+
         // Get price range values
+        console.log('💰 BrowseListingsPage: Getting price range values');
         const minPriceInput = document.getElementById('min-price');
         const maxPriceInput = document.getElementById('max-price');
+
+        const oldMinPrice = this.filters.minPrice;
+        const oldMaxPrice = this.filters.maxPrice;
 
         this.filters.minPrice = minPriceInput ? minPriceInput.value : '';
         this.filters.maxPrice = maxPriceInput ? maxPriceInput.value : '';
 
+        console.log('💰 BrowseListingsPage: Price filters updated - min:', oldMinPrice, '->', this.filters.minPrice, 'max:', oldMaxPrice, '->', this.filters.maxPrice);
+
+        console.log('🔄 BrowseListingsPage: Resetting page to 1 for filters');
         this.currentPage = 1;
+
+        console.log('📊 BrowseListingsPage: Current filter state:', this.filters);
+        console.log('📡 BrowseListingsPage: Calling loadListings() with filters');
         this.loadListings();
     }
 
@@ -483,6 +644,7 @@ export class BrowseListingsPage {
         const condition = this.formatCondition(listing.condition);
         const listingType = listing.listingType || listing.type || 'SELL';
         const type = this.formatType(listingType);
+        const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 
         return `
             <div class="col-lg-4 col-md-6 mb-4">
@@ -490,7 +652,7 @@ export class BrowseListingsPage {
                     <div class="position-relative">
                         <img src="${imageUrl}" class="card-img-top" alt="${listing.title}" style="height: 200px; object-fit: cover;">
                         <div class="position-absolute top-0 end-0 m-2">
-                            <span class="badge bg-${listingType === 'LEND' ? 'info' : 'success'}">${type}</span>
+                            <span class="badge bg-${listingType === 'LEND' ? 'info' : 'success'}">${capitalizedType}</span>
                         </div>
                     </div>
                     <div class="card-body">

@@ -4,13 +4,9 @@ export class AuthService {
     static USER_KEY = 'user';
 
     static async login(email, password) {
-        console.log('🔐 LOGIN START: AuthService.login called with email:', email);
-
         const url = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8010/api'}/auth/login`;
-        console.log('🌐 LOGIN STEP 1: Making request to:', url);
 
         const requestBody = { email, password };
-        console.log('📤 LOGIN STEP 2: Request payload:', { email: email, password: password ? '[REDACTED]' : 'empty' });
 
         const response = await fetch(url, {
             method: 'POST',
@@ -20,55 +16,29 @@ export class AuthService {
             body: JSON.stringify(requestBody)
         });
 
-        console.log('📡 LOGIN STEP 3: Response status:', response.status);
-        console.log('📡 LOGIN STEP 3: Response headers:', Object.fromEntries(response.headers.entries()));
-
         if (!response.ok) {
-            console.error('❌ LOGIN STEP 4: Response not ok, status:', response.status);
-
             let errorMessage = 'Login failed';
             try {
                 const errorData = await response.json();
-                console.error('❌ LOGIN STEP 4: Error response body:', errorData);
                 errorMessage = errorData.message || errorMessage;
-            } catch (parseError) {
-                console.error('❌ LOGIN STEP 4: Could not parse error response:', parseError);
+            } catch {
                 const errorText = await response.text();
-                console.error('❌ LOGIN STEP 4: Raw error response:', errorText);
+                errorMessage = errorText || errorMessage;
             }
 
             throw new Error(errorMessage);
         }
 
-        console.log('✅ LOGIN STEP 4: Response OK, parsing JSON...');
         const data = await response.json();
-        console.log('✅ LOGIN STEP 5: Response data received:', {
-            hasToken: !!data.token,
-            hasUser: !!data.user,
-            userRole: data.user?.role,
-            userEmail: data.user?.email
-        });
-
-        console.log('💾 LOGIN STEP 6: Setting token and user in localStorage');
         this.setToken(data.token);
         this.setUser(data.user);
 
-        console.log('🎉 LOGIN SUCCESS: Login process completed successfully');
+        console.log('✅ Login successful for user:', email);
         return data;
     }
 
     static async register(userData) {
-        console.log('🔐 REGISTER START: AuthService.register called with data:', {
-            fullName: userData.fullName,
-            email: userData.email,
-            hasPassword: !!userData.password,
-            hasConfirmPassword: !!userData.confirmPassword,
-            hasPhone: !!userData.phone,
-            hasAddress: !!userData.address
-        });
-
         const url = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8010/api'}/auth/register`;
-        console.log('🌐 REGISTER STEP 1: Making request to:', url);
 
         const requestBody = {
             fullName: userData.fullName,
@@ -78,14 +48,6 @@ export class AuthService {
             phone: userData.phone || null,
             address: userData.address || null
         };
-        console.log('📤 REGISTER STEP 2: Request payload:', {
-            fullName: requestBody.fullName,
-            email: requestBody.email,
-            password: requestBody.password ? '[REDACTED]' : 'empty',
-            confirmPassword: requestBody.confirmPassword ? '[REDACTED]' : 'empty',
-            phone: requestBody.phone,
-            address: requestBody.address
-        });
 
         const response = await fetch(url, {
             method: 'POST',
@@ -95,37 +57,21 @@ export class AuthService {
             body: JSON.stringify(requestBody)
         });
 
-        console.log('📡 REGISTER STEP 3: Response status:', response.status);
-        console.log('📡 REGISTER STEP 3: Response headers:', Object.fromEntries(response.headers.entries()));
-
         if (!response.ok) {
-            console.error('❌ REGISTER STEP 4: Response not ok, status:', response.status);
-
             let errorMessage = 'Registration failed';
             try {
                 const errorData = await response.json();
-                console.error('❌ REGISTER STEP 4: Error response body:', errorData);
                 errorMessage = errorData.message || errorMessage;
-            } catch (parseError) {
-                console.error('❌ REGISTER STEP 4: Could not parse error response:', parseError);
+            } catch {
                 const errorText = await response.text();
-                console.error('❌ REGISTER STEP 4: Raw error response:', errorText);
+                errorMessage = errorText || errorMessage;
             }
 
             throw new Error(errorMessage);
         }
 
-        console.log('✅ REGISTER STEP 4: Response OK, parsing JSON...');
         const data = await response.json();
-        console.log('✅ REGISTER STEP 5: Response data received:', {
-            hasToken: !!data.token,
-            hasUser: !!data.user,
-            userRole: data.user?.role,
-            userEmail: data.user?.email,
-            userId: data.user?.userId
-        });
-
-        console.log('🎉 REGISTER SUCCESS: Registration process completed successfully');
+        console.log('✅ Registration successful for user:', userData.email);
         return data;
     }
 

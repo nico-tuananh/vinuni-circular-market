@@ -75,12 +75,12 @@ export class ProfilePage {
 
                         <div class="col-sm-6">
                             <label class="form-label fw-bold">Phone Number</label>
-                            <p class="mb-0">${this.user.phone || 'Not provided'}</p>
+                            <p class="mb-0">${this.user.phone && this.user.phone.trim() ? this.user.phone : 'Not provided'}</p>
                         </div>
 
                         <div class="col-sm-6">
                             <label class="form-label fw-bold">Address</label>
-                            <p class="mb-0">${this.user.address || 'Not provided'}</p>
+                            <p class="mb-0">${this.user.address && this.user.address.trim() ? this.user.address : 'Not provided'}</p>
                         </div>
 
                         <div class="col-sm-6">
@@ -91,8 +91,21 @@ export class ProfilePage {
                         <div class="col-sm-6">
                             <label class="form-label fw-bold">Account Status</label>
                             <p class="mb-0">
-                                <span class="badge bg-success">Active</span>
+                                <span class="badge ${this.user.status === 'active' ? 'bg-success' : 'bg-warning'}">${this.user.status || 'Active'}</span>
                             </p>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label class="form-label fw-bold">Average Rating</label>
+                            <p class="mb-0">
+                                ${this.user.avgRating ? `${this.user.avgRating}/5.0` : 'No ratings yet'}
+                                ${this.user.ratingCount ? ` (${this.user.ratingCount} reviews)` : ''}
+                            </p>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label class="form-label fw-bold">Rating Count</label>
+                            <p class="mb-0">${this.user.ratingCount || 0} reviews</p>
                         </div>
                     </div>
 

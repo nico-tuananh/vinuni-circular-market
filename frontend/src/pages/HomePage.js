@@ -8,6 +8,13 @@ export class HomePage {
         this.isLoading = true;
     }
 
+    removeHeroSection() {
+        const existingHero = document.querySelector('.bg-primary.text-white.py-5');
+        if (existingHero) {
+            existingHero.remove();
+        }
+    }
+
     get isAuthenticated() {
         const { globalState } = window;
         return globalState && !!globalState.get('user');
@@ -19,51 +26,60 @@ export class HomePage {
         // Load initial data
         await this.loadData();
 
-        this.container.innerHTML = `
-            <!-- Hero Section with Search -->
-            <div class="bg-primary text-white py-5">
-                <div class="container">
-                    <div class="row align-items-center">
-                        <div class="col-lg-6">
-                            <h1 class="display-4 fw-bold mb-4">
-                                Welcome to CampusCircle
-                            </h1>
-                            <p class="lead mb-4">
-                                VinUni's student-exclusive marketplace for buying, selling, and sharing.
-                                Connect with fellow students for sustainable campus living.
-                            </p>
+        // Remove existing hero section if it exists
+        this.removeHeroSection();
 
-                            <!-- Search Bar -->
-                            <div class="mb-4">
-                                <div class="input-group input-group-lg">
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        id="hero-search"
-                                        placeholder="Search for textbooks, electronics, furniture..."
-                                        aria-label="Search listings"
-                                    >
-                                    <button class="btn btn-light" type="button" id="hero-search-btn">
-                                        <i class="bi bi-search me-2"></i>Search
-                                    </button>
-                                </div>
-                            </div>
+        // Hero section
+        const heroSection = document.createElement('div');
+        heroSection.className = 'bg-primary text-white py-5';
+        heroSection.innerHTML = `
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <h1 class="display-4 fw-bold mb-4">
+                            Welcome to CampusCircle
+                        </h1>
+                        <p class="lead mb-4">
+                            VinUni's student-exclusive marketplace for buying, selling, and sharing.
+                            Connect with fellow students for sustainable campus living.
+                        </p>
 
-                            <div class="d-flex gap-3 flex-wrap">
-                                <button class="btn btn-light btn-lg" onclick="window.App.router.navigate('/listings')">
-                                    <i class="bi bi-grid me-2"></i>Browse All
+                        <!-- Search Bar -->
+                        <div class="mb-4">
+                            <div class="input-group input-group-lg">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="hero-search"
+                                    placeholder="Search for textbooks, electronics, furniture..."
+                                    aria-label="Search listings"
+                                >
+                                <button class="btn btn-light" type="button" id="hero-search-btn">
+                                    <i class="bi bi-search me-2"></i>Search
                                 </button>
-                                ${!this.isAuthenticated ? `
-                                <button class="btn btn-outline-light btn-lg" onclick="window.App.router.navigate('/register')">
-                                    <i class="bi bi-person-plus me-2"></i>Join Community
-                                </button>
-                                ` : ''}
                             </div>
+                        </div>
+
+                        <div class="d-flex gap-3 flex-wrap">
+                            <button class="btn btn-light btn-lg" onclick="window.App.router.navigate('/listings')">
+                                <i class="bi bi-grid me-2"></i>Browse All
+                            </button>
+                            ${!this.isAuthenticated ? `
+                            <button class="btn btn-outline-light btn-lg" onclick="window.App.router.navigate('/register')">
+                                <i class="bi bi-person-plus me-2"></i>Join Community
+                            </button>
+                            ` : ''}
                         </div>
                     </div>
                 </div>
             </div>
+        `;
 
+        // Insert hero section before main content
+        this.container.parentNode.insertBefore(heroSection, this.container);
+
+        // Main content inside container-fluid
+        this.container.innerHTML = `
             <!-- Quick Category Navigation -->
             <div class="bg-light py-4">
                 <div class="container">
@@ -184,27 +200,81 @@ export class HomePage {
     }
 
     attachEventListeners() {
-        // Search functionality
-        const searchInput = document.getElementById('hero-search');
-        const searchBtn = document.getElementById('hero-search-btn');
+        console.log('🏠 HomePage: Attaching event listeners');
 
-        if (searchInput && searchBtn) {
-            const performSearch = () => {
-                const query = searchInput.value.trim();
-                if (query) {
-                    window.App.router.navigate(`/listings?q=${encodeURIComponent(query)}`);
-                } else {
-                    window.App.router.navigate('/listings');
-                }
-            };
+        function performHeroSearch() {
+            console.log('🚀 HomePage: Hero search initiated');
 
-            searchBtn.addEventListener('click', performSearch);
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    performSearch();
+            const searchInput = document.getElementById('hero-search');
+            if (!searchInput) {
+                console.error('❌ HomePage: Search input element not found');
+                return;
+            }
+
+            const query = searchInput.value.trim();
+            console.log('🔍 HomePage: Search query extracted:', query ? `"${query}"` : '(empty)');
+
+            if (query) {
+                const encodedQuery = encodeURIComponent(query);
+                const targetUrl = `/listings?q=${encodedQuery}`;
+                console.log('🧭 HomePage: Navigating to:', targetUrl);
+
+                try {
+                    if (window.App && window.App.router) {
+                        window.App.router.navigate(targetUrl);
+                        console.log('✅ HomePage: Navigation successful');
+                    } else {
+                        console.error('❌ HomePage: Router not available');
+                        window.location.href = targetUrl;
+                    }
+                } catch (error) {
+                    console.error('❌ HomePage: Navigation failed:', error);
+                    window.location.href = targetUrl;
                 }
-            });
+            } else {
+                console.log('🔄 HomePage: Empty query, navigating to all listings');
+                try {
+                    if (window.App && window.App.router) {
+                        window.App.router.navigate('/listings');
+                        console.log('✅ HomePage: Navigation to listings successful');
+                    } else {
+                        window.location.href = '/listings';
+                    }
+                } catch (error) {
+                    console.error('❌ HomePage: Navigation to listings failed:', error);
+                    window.location.href = '/listings';
+                }
+            }
         }
+
+        setTimeout(() => {
+            const searchInput = document.getElementById('hero-search');
+            const searchBtn = document.getElementById('hero-search-btn');
+
+            console.log('🔍 HomePage: Search elements found - input:', !!searchInput, 'button:', !!searchBtn);
+
+            if (searchInput && searchBtn) {
+                console.log('👂 HomePage: Attaching search button click listener');
+                searchBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('🖱️ HomePage: Search button clicked');
+                    performHeroSearch();
+                });
+
+                console.log('⌨️ HomePage: Attaching search input keypress listener');
+                searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        console.log('⏎ HomePage: Enter key pressed in search input');
+                        performHeroSearch();
+                    }
+                });
+
+                console.log('✅ HomePage: Search event listeners attached successfully');
+            } else {
+                console.warn('⚠️ HomePage: Search elements not found - input:', !!searchInput, 'button:', !!searchBtn);
+            }
+        }, 0);
     }
 
     async loadData() {
@@ -330,5 +400,10 @@ export class HomePage {
             'USED': 'Used'
         };
         return conditionMap[condition] || condition;
+    }
+
+    destroy() {
+        // Clean up hero section when navigating away
+        this.removeHeroSection();
     }
 }
