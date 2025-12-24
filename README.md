@@ -792,7 +792,7 @@ WHERE u.rating_count > 0
 ORDER BY u.avg_rating DESC, u.rating_count DESC;
 ```
 
-## 9) Tech Stack
+## Tech Stack
 
 * **Database:** MySQL
 
