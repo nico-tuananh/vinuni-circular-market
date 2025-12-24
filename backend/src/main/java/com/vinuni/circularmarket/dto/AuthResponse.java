@@ -1,6 +1,10 @@
 package com.vinuni.circularmarket.dto;
 
 import com.vinuni.circularmarket.model.UserRole;
+import com.vinuni.circularmarket.model.UserStatus;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public class AuthResponse {
 
@@ -13,10 +17,12 @@ public class AuthResponse {
     public AuthResponse() {}
 
     // Constructor with parameters
-    public AuthResponse(String token, String refreshToken, Long userId, String email, String fullName, UserRole role) {
+    public AuthResponse(String token, String refreshToken, Long userId, String email, String fullName, UserRole role,
+                       LocalDateTime createdAt, String phone, String address, UserStatus status,
+                       BigDecimal avgRating, Integer ratingCount) {
         this.token = token;
         this.refreshToken = refreshToken;
-        this.user = new User(userId, email, fullName, role);
+        this.user = new User(userId, email, fullName, role, createdAt, phone, address, status, avgRating, ratingCount);
     }
 
     // Getters and setters
@@ -99,14 +105,27 @@ public class AuthResponse {
         private String email;
         private String fullName;
         private UserRole role;
+        private LocalDateTime createdAt;
+        private String phone;
+        private String address;
+        private UserStatus status;
+        private BigDecimal avgRating;
+        private Integer ratingCount;
 
         public User() {}
 
-        public User(Long userId, String email, String fullName, UserRole role) {
+        public User(Long userId, String email, String fullName, UserRole role, LocalDateTime createdAt,
+                   String phone, String address, UserStatus status, BigDecimal avgRating, Integer ratingCount) {
             this.userId = userId;
             this.email = email;
             this.fullName = fullName;
             this.role = role;
+            this.createdAt = createdAt;
+            this.phone = phone;
+            this.address = address;
+            this.status = status;
+            this.avgRating = avgRating;
+            this.ratingCount = ratingCount;
         }
 
         // Getters and setters
@@ -121,5 +140,23 @@ public class AuthResponse {
 
         public UserRole getRole() { return role; }
         public void setRole(UserRole role) { this.role = role; }
+
+        public LocalDateTime getCreatedAt() { return createdAt; }
+        public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+        public String getPhone() { return phone; }
+        public void setPhone(String phone) { this.phone = phone; }
+
+        public String getAddress() { return address; }
+        public void setAddress(String address) { this.address = address; }
+
+        public UserStatus getStatus() { return status; }
+        public void setStatus(UserStatus status) { this.status = status; }
+
+        public BigDecimal getAvgRating() { return avgRating; }
+        public void setAvgRating(BigDecimal avgRating) { this.avgRating = avgRating; }
+
+        public Integer getRatingCount() { return ratingCount; }
+        public void setRatingCount(Integer ratingCount) { this.ratingCount = ratingCount; }
     }
 }

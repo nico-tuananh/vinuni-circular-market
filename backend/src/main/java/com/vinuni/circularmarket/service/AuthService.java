@@ -50,61 +50,47 @@ public class AuthService {
      */
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest loginRequest) {
-        logger.info("🔐 AUTH SERVICE LOGIN START: Attempting login for email: {}", loginRequest.getEmail());
-        logger.debug("📋 AUTH SERVICE LOGIN REQUEST: Email: {}, Password present: {}",
-                    loginRequest.getEmail(), loginRequest.getPassword() != null && !loginRequest.getPassword().isEmpty());
+        logger.info("🔐 LOGIN START: Attempting login for email: {}", loginRequest.getEmail());
 
         try {
-            logger.debug("🔍 AUTH SERVICE LOGIN STEP 1: Checking if user exists in database");
-            // First check if user exists
+            // Check if user exists
             User user = userRepository.findByEmail(loginRequest.getEmail())
                     .orElse(null);
             if (user == null) {
-                logger.warn("❌ AUTH SERVICE LOGIN STEP 1: User not found in database: {}", loginRequest.getEmail());
+                logger.warn("❌ LOGIN FAILED: User not found: {}", loginRequest.getEmail());
                 throw new RuntimeException("User not found");
-            } else {
-                logger.info("✅ AUTH SERVICE LOGIN STEP 1: User found - ID: {}, Email: {}, Role: {}, Status: {}",
-                           user.getUserId(), user.getEmail(), user.getRole(), user.getStatus());
-                logger.debug("🔐 AUTH SERVICE LOGIN STEP 1: Password hash exists: {}", user.getPasswordHash() != null);
             }
 
-            logger.debug("🔐 AUTH SERVICE LOGIN STEP 2: Attempting Spring Security authentication");
+            // Attempt Spring Security authentication
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                     loginRequest.getEmail(),
                     loginRequest.getPassword()
                 )
             );
-            logger.info("✅ AUTH SERVICE LOGIN STEP 2: Spring Security authentication successful for user: {}", loginRequest.getEmail());
 
-            logger.debug("🔐 AUTH SERVICE LOGIN STEP 3: Setting security context");
             SecurityContextHolder.getContext().setAuthentication(authentication);
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            logger.debug("👤 AUTH SERVICE LOGIN STEP 3: UserDetails extracted - Username: {}", userDetails.getUsername());
 
-            logger.debug("🔍 AUTH SERVICE LOGIN STEP 4: Fetching complete user data from database");
-            // Get user from database to get additional information
+            // Get complete user data
             User authenticatedUser = userRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found after authentication"));
-            logger.debug("✅ AUTH SERVICE LOGIN STEP 4: User data retrieved - Full name: {}", authenticatedUser.getFullName());
 
-            logger.debug("🔑 AUTH SERVICE LOGIN STEP 5: Generating JWT tokens");
+            // Generate JWT tokens
             String token = jwtUtil.generateToken(userDetails);
             String refreshToken = jwtUtil.generateRefreshToken(userDetails);
-            logger.debug("✅ AUTH SERVICE LOGIN STEP 5: Tokens generated - Token length: {}, Refresh token length: {}",
-                        token != null ? token.length() : 0, refreshToken != null ? refreshToken.length() : 0);
 
-            logger.info("🎉 AUTH SERVICE LOGIN SUCCESS: User logged in - User ID: {}, Email: {}, Role: {}",
+            logger.info("✅ LOGIN SUCCESS: User logged in - User ID: {}, Email: {}, Role: {}",
                        authenticatedUser.getUserId(), authenticatedUser.getEmail(), authenticatedUser.getRole());
 
             AuthResponse response = new AuthResponse(token, refreshToken, authenticatedUser.getUserId(), authenticatedUser.getEmail(),
-                                   authenticatedUser.getFullName(), authenticatedUser.getRole());
-            logger.debug("📤 AUTH SERVICE LOGIN RESPONSE: Response object created successfully");
+                                   authenticatedUser.getFullName(), authenticatedUser.getRole(), authenticatedUser.getCreatedAt(),
+                                   authenticatedUser.getPhone(), authenticatedUser.getAddress(), authenticatedUser.getStatus(),
+                                   authenticatedUser.getAvgRating(), authenticatedUser.getRatingCount());
             return response;
         } catch (Exception e) {
-            logger.error("❌ AUTH SERVICE LOGIN FAILED: Login attempt failed for email: {} - Error type: {} - Message: {}",
-                       loginRequest.getEmail(), e.getClass().getSimpleName(), e.getMessage());
-            logger.debug("🔍 AUTH SERVICE LOGIN FAILURE DETAILS:", e);
+            logger.error("❌ LOGIN FAILED: Login attempt failed for email: {} - Error: {}",
+                       loginRequest.getEmail(), e.getMessage());
             throw e;
         }
     }
@@ -116,67 +102,51 @@ public class AuthService {
      */
     @Transactional
     public AuthResponse register(RegisterRequest registerRequest) {
-        logger.info("🔐 AUTH SERVICE REGISTER START: Registering new user - Email: {}, Full Name: {}",
+        logger.info("🔐 REGISTER START: Registering new user - Email: {}, Full Name: {}",
                    registerRequest.getEmail(), registerRequest.getFullName());
-        logger.debug("📋 AUTH SERVICE REGISTER REQUEST: Email: {}, Full name: {}, Password present: {}, Phone: {}, Address: {}",
-                    registerRequest.getEmail(), registerRequest.getFullName(),
-                    registerRequest.getPassword() != null && !registerRequest.getPassword().isEmpty(),
-                    registerRequest.getPhone(), registerRequest.getAddress());
 
         try {
-            logger.debug("🔍 AUTH SERVICE REGISTER STEP 1: Validating VinUni email domain");
             // Validate VinUni email domain
             if (!isValidVinUniEmail(registerRequest.getEmail())) {
-                logger.warn("❌ AUTH SERVICE REGISTER STEP 1: Invalid VinUni email domain - Email: {}",
+                logger.warn("❌ REGISTER FAILED: Invalid VinUni email domain - Email: {}",
                            registerRequest.getEmail());
                 throw new IllegalArgumentException("Only VinUni email addresses (@vinuni.edu.vn) are allowed for registration");
             }
-            logger.info("✅ AUTH SERVICE REGISTER STEP 1: VinUni email validation passed");
 
-            logger.debug("🔍 AUTH SERVICE REGISTER STEP 2: Checking if email already exists");
             // Check if email already exists
             if (userRepository.existsByEmail(registerRequest.getEmail())) {
-                logger.warn("❌ AUTH SERVICE REGISTER STEP 2: Email already exists - Email: {}",
+                logger.warn("❌ REGISTER FAILED: Email already exists - Email: {}",
                            registerRequest.getEmail());
                 throw new IllegalArgumentException("Email address already exists");
             }
-            logger.info("✅ AUTH SERVICE REGISTER STEP 2: Email uniqueness check passed");
 
-            logger.debug("👤 AUTH SERVICE REGISTER STEP 3: Creating new user object");
             // Create new user
             User user = new User();
             user.setFullName(registerRequest.getFullName());
             user.setEmail(registerRequest.getEmail());
             String encodedPassword = passwordEncoder.encode(registerRequest.getPassword());
-            logger.debug("🔐 AUTH SERVICE REGISTER STEP 3: Password encoded - Original length: {}, Encoded length: {}",
-                        registerRequest.getPassword().length(), encodedPassword.length());
             user.setPasswordHash(encodedPassword);
             user.setPhone(registerRequest.getPhone());
             user.setAddress(registerRequest.getAddress());
             user.setStatus(UserStatus.active);
-            logger.debug("✅ AUTH SERVICE REGISTER STEP 3: User object created with all fields set");
 
-            logger.debug("💾 AUTH SERVICE REGISTER STEP 4: Saving user to database");
             User savedUser = userRepository.save(user);
-            logger.info("✅ AUTH SERVICE REGISTER STEP 4: New user saved - User ID: {}, Email: {}",
-                       savedUser.getUserId(), savedUser.getEmail());
 
-            logger.debug("🔑 AUTH SERVICE REGISTER STEP 5: Generating JWT tokens for immediate login");
             // Generate tokens for immediate login after registration
             String token = jwtUtil.generateToken(savedUser.getEmail());
             String refreshToken = jwtUtil.generateRefreshToken(savedUser);
-            logger.debug("✅ AUTH SERVICE REGISTER STEP 5: Tokens generated - Token length: {}, Refresh token length: {}",
-                        token != null ? token.length() : 0, refreshToken != null ? refreshToken.length() : 0);
+
+            logger.info("✅ REGISTER SUCCESS: Registration completed - User ID: {}, Email: {}, Role: {}",
+                       savedUser.getUserId(), savedUser.getEmail(), savedUser.getRole());
 
             AuthResponse response = new AuthResponse(token, refreshToken, savedUser.getUserId(), savedUser.getEmail(),
-                                   savedUser.getFullName(), savedUser.getRole());
-            logger.info("🎉 AUTH SERVICE REGISTER SUCCESS: Registration completed - User ID: {}, Email: {}, Role: {}",
-                       savedUser.getUserId(), savedUser.getEmail(), savedUser.getRole());
+                                   savedUser.getFullName(), savedUser.getRole(), savedUser.getCreatedAt(),
+                                   savedUser.getPhone(), savedUser.getAddress(), savedUser.getStatus(),
+                                   savedUser.getAvgRating(), savedUser.getRatingCount());
             return response;
         } catch (Exception e) {
-            logger.error("❌ AUTH SERVICE REGISTER FAILED: Failed to register user - Email: {}, Error type: {}, Message: {}",
-                        registerRequest.getEmail(), e.getClass().getSimpleName(), e.getMessage());
-            logger.debug("🔍 AUTH SERVICE REGISTER FAILURE DETAILS:", e);
+            logger.error("❌ REGISTER FAILED: Failed to register user - Email: {}, Error: {}",
+                        registerRequest.getEmail(), e.getMessage());
             throw e;
         }
     }
@@ -212,7 +182,9 @@ public class AuthService {
         String newRefreshToken = jwtUtil.generateRefreshToken(user);
 
         return new AuthResponse(newToken, newRefreshToken, user.getUserId(), user.getEmail(),
-                               user.getFullName(), user.getRole());
+                               user.getFullName(), user.getRole(), user.getCreatedAt(),
+                               user.getPhone(), user.getAddress(), user.getStatus(),
+                               user.getAvgRating(), user.getRatingCount());
     }
 
     /**

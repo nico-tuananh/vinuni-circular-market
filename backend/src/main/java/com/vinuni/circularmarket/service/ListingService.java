@@ -271,11 +271,11 @@ public class ListingService {
             User seller = listing.getSeller();
             if (seller != null) {
                 logger.debug("Seller found for listing {}", listing.getListingId());
-                UserDTO sellerDTO = new UserDTO();
+            UserDTO sellerDTO = new UserDTO();
                 sellerDTO.setUserId(seller.getUserId());
                 sellerDTO.setFullName(seller.getFullName());
                 sellerDTO.setEmail(seller.getEmail());
-                dto.setSeller(sellerDTO);
+            dto.setSeller(sellerDTO);
             } else {
                 logger.warn("No seller found for listing {}", listing.getListingId());
             }
@@ -288,11 +288,11 @@ public class ListingService {
             Category category = listing.getCategory();
             if (category != null) {
                 logger.debug("Category found for listing {}", listing.getListingId());
-                CategoryDTO categoryDTO = new CategoryDTO();
+            CategoryDTO categoryDTO = new CategoryDTO();
                 categoryDTO.setCategoryId(category.getCategoryId());
                 categoryDTO.setName(category.getName());
                 categoryDTO.setDescription(category.getDescription());
-                dto.setCategory(categoryDTO);
+            dto.setCategory(categoryDTO);
             } else {
                 logger.warn("No category found for listing {}", listing.getListingId());
             }
