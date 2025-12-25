@@ -16,10 +16,23 @@ export class ListingDetailPage {
         if (!this.container) return;
 
         // Get listing ID from URL
-        const pathParts = window.location.pathname.split('/');
-        this.listingId = pathParts[pathParts.length - 1];
+        const pathParts = window.location.pathname.split('/').filter(part => part);
+        const listingsIndex = pathParts.indexOf('listings');
+        
+        if (listingsIndex !== -1 && listingsIndex < pathParts.length - 1) {
+            this.listingId = pathParts[listingsIndex + 1];
+        } else {
+            this.listingId = null;
+        }
 
-        if (!this.listingId) {
+        // Validate listing ID
+        if (!this.listingId || 
+            this.listingId === 'edit' || 
+            this.listingId === 'create' || 
+            this.listingId === 'undefined' || 
+            this.listingId === 'null' ||
+            isNaN(this.listingId)) {
+            console.error('Invalid listing ID from URL:', this.listingId, 'Path:', window.location.pathname);
             window.App.router.navigate('/404');
             return;
         }
@@ -101,9 +114,9 @@ export class ListingDetailPage {
                         </div>
                         <div class="text-end">
                             <div class="h4 text-primary mb-0">
-                                ${this.listing.price ? `$${this.listing.price.toFixed(2)}` : 'Free'}
+                                ${this.getPriceDisplay()}
                             </div>
-                            ${type === 'Borrow' ? '<small class="text-muted">per day</small>' : ''}
+                            ${type === 'LEND' ? '<small class="text-muted">per day</small>' : ''}
                         </div>
                     </div>
                     <div class="d-flex align-items-center text-muted small">
@@ -120,12 +133,13 @@ export class ListingDetailPage {
 
     renderImageGallery() {
         const images = this.listing.images || [];
-        const mainImage = images.length > 0 ? images[0] : '/placeholder-listing.png';
+        const placeholderImage = '/image-not-available.png';
+        const mainImage = images.length > 0 && images[0] ? images[0] : placeholderImage;
 
         if (images.length <= 1) {
             return `
                 <div class="card mb-4">
-                    <img src="${mainImage}" class="card-img-top" alt="${this.listing.title}" style="max-height: 400px; object-fit: cover;">
+                    <img src="${mainImage}" class="card-img-top" alt="${this.listing.title}" style="max-height: 400px; object-fit: cover;" onerror="this.onerror=null; this.src='${placeholderImage}';">
                 </div>
             `;
         }
@@ -136,7 +150,7 @@ export class ListingDetailPage {
                     <div class="carousel-inner">
                         ${images.map((image, index) => `
                             <div class="carousel-item ${index === 0 ? 'active' : ''}">
-                                <img src="${image}" class="d-block w-100" alt="${this.listing.title}" style="max-height: 400px; object-fit: cover;">
+                                <img src="${image || placeholderImage}" class="d-block w-100" alt="${this.listing.title}" style="max-height: 400px; object-fit: cover;" onerror="this.onerror=null; this.src='${placeholderImage}';">
                             </div>
                         `).join('')}
                     </div>
@@ -153,8 +167,9 @@ export class ListingDetailPage {
                     <div class="row g-2">
                         ${images.map((image, index) => `
                             <div class="col-auto">
-                                <img src="${image}" class="img-thumbnail" alt="Thumbnail ${index + 1}"
+                                <img src="${image || placeholderImage}" class="img-thumbnail" alt="Thumbnail ${index + 1}"
                                      style="width: 60px; height: 60px; object-fit: cover; cursor: pointer;"
+                                     onerror="this.onerror=null; this.src='${placeholderImage}';"
                                      onclick="document.querySelector('#listing-carousel').carousel(${index})">
                             </div>
                         `).join('')}
@@ -229,7 +244,9 @@ export class ListingDetailPage {
     }
 
     renderCommentsSection() {
-        const canComment = this.user && this.user.id !== this.seller?.id;
+        const sellerId = this.seller?.userId || this.seller?.id;
+        const currentUserId = this.user?.userId || this.user?.id;
+        const canComment = this.user && sellerId && currentUserId && String(sellerId) !== String(currentUserId);
 
         return `
             <div class="card">
@@ -325,11 +342,8 @@ export class ListingDetailPage {
                         <small class="text-muted">${reviewCount} review${reviewCount !== 1 ? 's' : ''}</small>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-outline-primary btn-sm flex-fill" onclick="window.currentListingPage.contactSeller()">
-                            <i class="bi bi-envelope me-1"></i>Message
-                        </button>
                         <button class="btn btn-outline-secondary btn-sm flex-fill" onclick="window.currentListingPage.viewSellerProfile()">
-                            <i class="bi bi-person me-1"></i>Profile
+                            <i class="bi bi-person me-1"></i>View Profile
                         </button>
                     </div>
                 </div>
@@ -351,15 +365,16 @@ export class ListingDetailPage {
             `;
         }
 
-        if (this.user.id === this.seller?.id) {
+        const sellerId = this.seller?.userId || this.seller?.id;
+        const currentUserId = this.user.userId || this.user.id;
+        
+        // Convert both to strings for comparison to handle type mismatches
+        if (sellerId && currentUserId && String(sellerId) === String(currentUserId)) {
             return `
                 <div class="card mb-4">
-                    <div class="card-body text-center">
-                        <p class="text-muted mb-3">This is your listing</p>
                         <button class="btn btn-primary w-100" onclick="window.App.router.navigate('/listings/${this.listingId}/edit')">
                             <i class="bi bi-pencil me-2"></i>Edit Listing
                         </button>
-                    </div>
                 </div>
             `;
         }
@@ -372,11 +387,8 @@ export class ListingDetailPage {
             <div class="card mb-4">
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <button class="btn btn-primary btn-lg" onclick="window.currentListingPage.makeOffer()">
+                        <button class="btn btn-primary btn-lg" id="make-offer-btn" data-listing-type="${type}">
                             <i class="bi ${buttonIcon} me-2"></i>${buttonText}
-                        </button>
-                        <button class="btn btn-outline-primary" onclick="window.currentListingPage.addToWishlist()">
-                            <i class="bi bi-heart me-2"></i>Add to Wishlist
                         </button>
                     </div>
                 </div>
@@ -454,11 +466,25 @@ export class ListingDetailPage {
 
                 // Load reviews for seller
                 if (this.seller) {
-                    const reviewsData = await ReviewService.getSellerAverageRating(this.seller.id);
-                    this.averageRating = reviewsData.averageRating || 0;
+                    const sellerId = this.seller.userId || this.seller.id;
+                    if (sellerId) {
+                        try {
+                            const reviewsData = await ReviewService.getSellerAverageRating(sellerId);
+                            this.averageRating = reviewsData.averageRating || 0;
+                        } catch (error) {
+                            console.warn('Failed to load seller average rating:', error);
+                            this.averageRating = 0;
+                        }
+                    }
 
-                    const sellerReviews = await ReviewService.getListingReviews(this.listingId);
-                    this.reviews = sellerReviews || [];
+                    // Load reviews for this listing
+                    try {
+                        const reviewsResponse = await ReviewService.getListingReviews(this.listingId);
+                        this.reviews = reviewsResponse?.reviews || reviewsResponse || [];
+                    } catch (error) {
+                        console.warn('Failed to load listing reviews:', error);
+                        this.reviews = [];
+                    }
                 }
             }
 
@@ -471,7 +497,21 @@ export class ListingDetailPage {
     }
 
     attachEventListeners() {
-        // Add any additional event listeners here
+        // Attach make offer button listener
+        setTimeout(() => {
+            const makeOfferBtn = document.getElementById('make-offer-btn');
+            if (makeOfferBtn) {
+                console.log('✅ Attaching make offer button listener');
+                makeOfferBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🖱️ Make offer button clicked');
+                    this.makeOffer();
+                });
+            } else {
+                console.warn('⚠️ Make offer button not found');
+            }
+        }, 100);
     }
 
     showCommentModal(parentId = null) {
@@ -573,19 +613,44 @@ export class ListingDetailPage {
     }
 
     makeOffer() {
-        const type = this.listing.type || 'Sell';
-        const modalTitle = type === 'Borrow' ? 'Request to Borrow' : 'Make an Offer';
+        console.log('🔵 makeOffer() called');
+        console.log('🔵 this:', this);
+        console.log('🔵 this.user:', this.user);
+        console.log('🔵 this.listing:', this.listing);
+        
+        // Prevent sellers from making offers on their own listings
+        const sellerId = this.seller?.userId || this.seller?.id;
+        const currentUserId = this.user?.userId || this.user?.id;
+        
+        console.log('🔵 sellerId:', sellerId, 'currentUserId:', currentUserId);
+        
+        if (sellerId && currentUserId && String(sellerId) === String(currentUserId)) {
+            console.log('🔵 User is the seller, preventing offer');
+            const { globalState } = window;
+            globalState.addNotification({
+                type: 'warning',
+                title: 'Cannot Make Offer',
+                message: 'You cannot make an offer on your own listing.'
+            });
+            return;
+        }
+        
+        console.log('🔵 Proceeding to show offer modal');
+
+        const type = this.listing.listingType || this.listing.type || 'SELL';
+        const isLendType = type === 'LEND' || type === 'Borrow';
+        const modalTitle = isLendType ? 'Request to Borrow' : 'Make an Offer';
 
         const modalContent = `
             <form id="offer-form">
-                ${type === 'Sell' ? `
+                ${!isLendType ? `
                     <div class="mb-3">
                         <label for="offer-price" class="form-label">Your Offer Price</label>
                         <div class="input-group">
                             <span class="input-group-text">$</span>
-                            <input type="number" class="form-control" id="offer-price" min="0" step="0.01" placeholder="${this.listing.price || '0.00'}" required>
+                            <input type="number" class="form-control" id="offer-price" min="0" step="0.01" placeholder="${this.listing.listPrice || this.listing.price || '0.00'}" required>
                         </div>
-                        <div class="form-text">Original price: $${this.listing.price?.toFixed(2) || '0.00'}</div>
+                        <div class="form-text">Original price: ${this.getPriceDisplay()}</div>
                     </div>
                 ` : `
                     <div class="mb-3">
@@ -606,38 +671,219 @@ export class ListingDetailPage {
 
         const footerContent = `
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary" onclick="window.currentListingPage.submitOffer()">Submit ${type === 'Borrow' ? 'Request' : 'Offer'}</button>
+            <button type="button" class="btn btn-primary" id="submit-offer-btn">Submit ${isLendType ? 'Request' : 'Offer'}</button>
         `;
 
         const { ModalComponent } = window;
+        const self = this;
         const modal = new ModalComponent({
             title: modalTitle,
             content: modalContent,
             footerContent,
-            size: 'md'
+            size: 'md',
+            onShow: () => {
+                // Attach submit button listener when modal is shown
+                const submitBtn = document.getElementById('submit-offer-btn');
+                if (submitBtn) {
+                    console.log('✅ Attaching submit offer button listener');
+                    // Remove any existing listeners by cloning
+                    const newBtn = submitBtn.cloneNode(true);
+                    submitBtn.parentNode.replaceChild(newBtn, submitBtn);
+                    
+                    newBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('🖱️ Submit offer button clicked');
+                        self.submitOffer();
+                    });
+                } else {
+                    console.warn('⚠️ Submit offer button not found');
+                }
+
+                // Add form submit handler (for Enter key in form)
+                const offerForm = document.getElementById('offer-form');
+                if (offerForm) {
+                    offerForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('⌨️ Form submitted via Enter key');
+                        self.submitOffer();
+                    });
+                }
+
+                // Add Enter key handler for input fields
+                const offerPriceInput = document.getElementById('offer-price');
+                const offerMessageInput = document.getElementById('offer-message');
+                const borrowFromInput = document.getElementById('borrow-from');
+                const borrowToInput = document.getElementById('borrow-to');
+
+                // For input fields: Enter submits
+                if (offerPriceInput) {
+                    offerPriceInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
+                            e.preventDefault();
+                            console.log('⌨️ Enter pressed in offer price input');
+                            self.submitOffer();
+                        }
+                    });
+                }
+
+                if (borrowFromInput) {
+                    borrowFromInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
+                            e.preventDefault();
+                            console.log('⌨️ Enter pressed in borrow from input');
+                            self.submitOffer();
+                        }
+                    });
+                }
+
+                if (borrowToInput) {
+                    borrowToInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
+                            e.preventDefault();
+                            console.log('⌨️ Enter pressed in borrow to input');
+                            self.submitOffer();
+                        }
+                    });
+                }
+
+                // For textarea: Ctrl+Enter or Cmd+Enter submits, Enter creates new line
+                if (offerMessageInput) {
+                    offerMessageInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                            e.preventDefault();
+                            console.log('⌨️ Ctrl+Enter pressed in message textarea');
+                            self.submitOffer();
+                        }
+                    });
+                }
+            }
         });
 
         modal.show();
     }
 
     async submitOffer() {
-        const type = this.listing.type || 'SELL';
+        console.log('🟢 submitOffer() called');
+        
+        // Prevent sellers from making offers on their own listings
+        const sellerId = this.seller?.userId || this.seller?.id;
+        const currentUserId = this.user?.userId || this.user?.id;
+        
+        console.log('🟢 sellerId:', sellerId, 'currentUserId:', currentUserId);
+        
+        if (sellerId && currentUserId && String(sellerId) === String(currentUserId)) {
+            console.log('🟢 User is the seller, preventing offer');
         const { globalState } = window;
+            globalState.addNotification({
+                type: 'warning',
+                title: 'Cannot Make Offer',
+                message: 'You cannot make an offer on your own listing.'
+            });
+            return;
+        }
+
+        const type = this.listing.listingType || this.listing.type || 'SELL';
+        const { globalState } = window;
+
+        console.log('🟢 Listing type:', type);
 
         if (type === 'LEND') {
             // For borrowing, show date selection modal
+            console.log('🟢 Showing borrowing modal');
             this.showBorrowingModal();
         } else {
-            // For selling, show regular offer modal
+            // For selling, create order with offer price
+            console.log('🟢 Processing offer for SELL listing');
+            const offerPriceInput = document.getElementById('offer-price');
+
+            if (!offerPriceInput) {
+                console.error('❌ Offer price input not found');
             globalState.addNotification({
-                type: 'info',
-                title: 'Coming Soon',
-                message: 'The purchase offer system is currently under development.'
-            });
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Offer price input not found. Please try again.'
+                });
+                return;
+            }
+
+            const offerPrice = parseFloat(offerPriceInput.value);
+            console.log('🟢 Offer price entered:', offerPrice);
+            
+            if (isNaN(offerPrice) || offerPrice < 0) {
+                console.error('❌ Invalid offer price:', offerPrice);
+                globalState.addNotification({
+                    type: 'error',
+                    title: 'Invalid Price',
+                    message: 'Please enter a valid offer price.'
+                });
+                return;
+            }
+
+            try {
+                console.log('🟢 Importing OrderService');
+                const { OrderService } = await import('../services/api.js');
+                
+                const orderData = {
+                    listingId: parseInt(this.listingId),
+                    offerPrice: offerPrice
+                };
+
+                console.log('🟢 Creating order with data:', orderData);
+                console.log('🟢 Calling OrderService.createOrder()');
+                
+                const response = await OrderService.createOrder(orderData);
+                
+                console.log('🟢 Order created successfully:', response);
+
+                // Close modal
+                const modalElement = document.querySelector('.modal');
+                if (modalElement) {
+                    const modal = window.bootstrap?.Modal?.getInstance(modalElement);
+                    if (modal) modal.hide();
+                }
+
+                globalState.addNotification({
+                    type: 'success',
+                    title: 'Offer Submitted',
+                    message: 'Your offer has been submitted successfully. The seller will be notified.'
+                });
+
+            } catch (error) {
+                console.error('❌ Failed to submit offer:', error);
+                console.error('❌ Error details:', {
+                    message: error.message,
+                    status: error.status,
+                    code: error.code,
+                    details: error.details,
+                    stack: error.stack
+                });
+                const errorMessage = error.message || error.details?.message || 'Failed to submit offer. Please try again.';
+                globalState.addNotification({
+                    type: 'error',
+                    title: 'Submission Failed',
+                    message: errorMessage
+                });
+            }
         }
     }
 
     showBorrowingModal() {
+        // Prevent sellers from borrowing their own items
+        const sellerId = this.seller?.userId || this.seller?.id;
+        const currentUserId = this.user?.userId || this.user?.id;
+        
+        if (sellerId && currentUserId && String(sellerId) === String(currentUserId)) {
+            const { globalState } = window;
+            globalState.addNotification({
+                type: 'warning',
+                title: 'Cannot Borrow',
+                message: 'You cannot borrow your own item.'
+            });
+            return;
+        }
+
         const { ModalComponent } = window;
         const modalContent = `
             <form id="borrowing-form">
@@ -693,6 +939,20 @@ export class ListingDetailPage {
     }
 
     async submitBorrowingRequest() {
+        // Prevent sellers from borrowing their own items
+        const sellerId = this.seller?.userId || this.seller?.id;
+        const currentUserId = this.user?.userId || this.user?.id;
+        
+        if (sellerId && currentUserId && String(sellerId) === String(currentUserId)) {
+            const { globalState } = window;
+            globalState.addNotification({
+                type: 'warning',
+                title: 'Cannot Borrow',
+                message: 'You cannot borrow your own item.'
+            });
+            return;
+        }
+
         const fromDate = document.getElementById('borrow-from-date')?.value;
         const toDate = document.getElementById('borrow-to-date')?.value;
         const borrowMessage = document.getElementById('borrow-message')?.value;
@@ -790,7 +1050,10 @@ export class ListingDetailPage {
 
     viewSellerProfile() {
         if (this.seller) {
-            window.App.router.navigate(`/users/${this.seller.id}`);
+            const sellerId = this.seller.userId || this.seller.id;
+            if (sellerId) {
+                window.App.router.navigate(`/users/${sellerId}`);
+            }
         }
     }
 
@@ -882,5 +1145,10 @@ export class ListingDetailPage {
             'USED': 'Used'
         };
         return conditionMap[condition] || condition;
+    }
+
+    getPriceDisplay() {
+        const priceValue = this.listing.listPrice || this.listing.price || 0;
+        return priceValue > 0 ? `$${parseFloat(priceValue).toFixed(2)}` : 'Free';
     }
 }

@@ -72,9 +72,26 @@ export class ModalComponent {
 
     // Show the modal
     show() {
-        const modalElement = document.getElementById(this.id);
+        let modalElement = document.getElementById(this.id);
+        
+        // If modal doesn't exist in DOM, render and add it
+        if (!modalElement) {
+            const modalHTML = this.render();
+            const container = document.body;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = modalHTML;
+            const newModalElement = tempDiv.firstElementChild;
+            container.appendChild(newModalElement);
+            modalElement = newModalElement;
+        }
+        
         if (modalElement) {
-            this.modalInstance = new bootstrap.Modal(modalElement, {
+            // Remove existing event listeners to avoid duplicates
+            const clonedElement = modalElement.cloneNode(true);
+            modalElement.parentNode.replaceChild(clonedElement, modalElement);
+            modalElement = clonedElement;
+            
+            this.modalInstance = new window.bootstrap.Modal(modalElement, {
                 backdrop: this.backdrop,
                 keyboard: this.keyboard,
                 focus: this.focus
@@ -86,6 +103,12 @@ export class ModalComponent {
 
             modalElement.addEventListener('hidden.bs.modal', () => {
                 if (this.onClose) this.onClose();
+                // Clean up: remove modal from DOM after hiding
+                setTimeout(() => {
+                    if (modalElement && modalElement.parentNode) {
+                        modalElement.parentNode.removeChild(modalElement);
+                    }
+                }, 300);
             });
 
             this.modalInstance.show();

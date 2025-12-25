@@ -98,10 +98,24 @@ class ApiService {
                     } else {
                         console.log(`📋 API AUTH REQUEST PAYLOAD:`, bodyData);
                     }
-                } catch (e) {
+                } catch {
                     console.log(`📋 API AUTH REQUEST BODY:`, config.body);
                 }
             }
+        }
+
+        // Special logging for orders endpoint requests
+        if (fullUrl.includes('/orders') && config.method === 'POST') {
+            console.log(`📤 API ORDER REQUEST: ${config.method} ${fullUrl}`);
+            if (config.body) {
+                try {
+                    const bodyData = JSON.parse(config.body);
+                    console.log(`📋 API ORDER REQUEST PAYLOAD:`, bodyData);
+                } catch {
+                    console.log(`📋 API ORDER REQUEST BODY:`, config.body);
+                }
+            }
+            console.log(`📋 API ORDER REQUEST HEADERS:`, config.headers);
         }
 
         // Set timeout
@@ -159,6 +173,12 @@ class ApiService {
                         console.error(`❌ API AUTH ERROR DETAILS:`, errorData);
                     }
 
+                    // Special logging for orders endpoint errors
+                    if (fullUrl.includes('/orders')) {
+                        console.error(`❌ API ORDER ERROR: ${config.method} ${fullUrl} -> ${processedResponse.status}`);
+                        console.error(`❌ API ORDER ERROR DETAILS:`, errorData);
+                    }
+
                     const error = new ApiError(
                         errorData.message || `HTTP ${processedResponse.status}: ${processedResponse.statusText}`,
                         processedResponse.status,
@@ -187,6 +207,12 @@ class ApiService {
                         userEmail: data.user?.email,
                         userId: data.user?.userId
                     });
+                }
+
+                // Special logging for orders endpoint responses
+                if (fullUrl.includes('/orders') && config.method === 'POST') {
+                    console.log(`📥 API ORDER RESPONSE: ${config.method} ${fullUrl} -> Success (${response.status})`);
+                    console.log(`📊 API ORDER RESPONSE DATA:`, data);
                 }
 
                 return data;
@@ -343,8 +369,8 @@ export class ListingService {
 
     // Get recent listings
     static async getRecentListings(limit = 10) {
-        // Backend expects 'size' parameter, not 'limit'
-        return api.get(`/listings/recent?page=0&size=${limit}`);
+        // Use main listings endpoint with sorting
+        return api.get(`/listings?page=0&size=${limit}&sortBy=createdAt&sortDir=desc`);
     }
 
     // Get listings by category
@@ -516,6 +542,18 @@ export class CategoryService {
     // Search categories
     static async searchCategories(query) {
         return api.get(`/categories/search?q=${encodeURIComponent(query)}`);
+    }
+}
+
+export class UserService {
+    // Get user by ID
+    static async getUser(userId) {
+        return api.get(`/users/${userId}`);
+    }
+
+    // Search users
+    static async searchUsers(query) {
+        return api.get(`/users/search?searchTerm=${encodeURIComponent(query)}`);
     }
 }
 

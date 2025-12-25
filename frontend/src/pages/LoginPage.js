@@ -83,11 +83,7 @@ export class LoginPage {
                     const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
                     newForm.dispatchEvent(submitEvent);
                 }, true);
-            } else {
-                console.warn('⚠️ Login: Submit button not found');
             }
-        } else {
-            console.error('❌ Login: Form element not found for event listeners');
         }
     }
 
@@ -108,7 +104,6 @@ export class LoginPage {
         }
 
         if (!formElement) {
-            console.error('❌ Login: Could not find form element!');
             this.showError('Form not found. Please refresh the page and try again.');
             return;
         }
@@ -155,8 +150,6 @@ export class LoginPage {
 
         try {
             const response = await AuthService.login(email, password);
-
-            console.log('✅ Login successful for user:', response.user.email);
 
             // Show success notification
             globalState.addNotification({

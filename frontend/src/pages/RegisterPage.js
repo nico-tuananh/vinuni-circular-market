@@ -85,11 +85,7 @@ export class RegisterPage {
                     const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
                     newForm.dispatchEvent(submitEvent);
                 }, true);
-            } else {
-                console.warn('⚠️ Register: Submit button not found');
             }
-        } else {
-            console.error('❌ Register: Form element not found for event listeners');
         }
     }
 
@@ -110,7 +106,6 @@ export class RegisterPage {
         }
 
         if (!formElement) {
-            console.error('❌ Register: Could not find form element!');
             this.showError('Form not found. Please refresh the page and try again.');
             return;
         }
@@ -168,7 +163,6 @@ export class RegisterPage {
             };
 
             await AuthService.register(registerData);
-            console.log('✅ Registration successful for user:', formData.email);
 
             // Show success notification
             globalState.addNotification({

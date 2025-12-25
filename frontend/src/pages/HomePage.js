@@ -200,48 +200,37 @@ export class HomePage {
     }
 
     attachEventListeners() {
-        console.log('🏠 HomePage: Attaching event listeners');
-
         function performHeroSearch() {
-            console.log('🚀 HomePage: Hero search initiated');
-
             const searchInput = document.getElementById('hero-search');
             if (!searchInput) {
-                console.error('❌ HomePage: Search input element not found');
                 return;
             }
 
             const query = searchInput.value.trim();
-            console.log('🔍 HomePage: Search query extracted:', query ? `"${query}"` : '(empty)');
 
             if (query) {
                 const encodedQuery = encodeURIComponent(query);
                 const targetUrl = `/listings?q=${encodedQuery}`;
-                console.log('🧭 HomePage: Navigating to:', targetUrl);
 
                 try {
                     if (window.App && window.App.router) {
                         window.App.router.navigate(targetUrl);
-                        console.log('✅ HomePage: Navigation successful');
                     } else {
-                        console.error('❌ HomePage: Router not available');
                         window.location.href = targetUrl;
                     }
                 } catch (error) {
-                    console.error('❌ HomePage: Navigation failed:', error);
+                    console.error('HomePage: Navigation failed:', error);
                     window.location.href = targetUrl;
                 }
             } else {
-                console.log('🔄 HomePage: Empty query, navigating to all listings');
                 try {
                     if (window.App && window.App.router) {
                         window.App.router.navigate('/listings');
-                        console.log('✅ HomePage: Navigation to listings successful');
                     } else {
                         window.location.href = '/listings';
                     }
                 } catch (error) {
-                    console.error('❌ HomePage: Navigation to listings failed:', error);
+                    console.error('HomePage: Navigation failed:', error);
                     window.location.href = '/listings';
                 }
             }
@@ -251,28 +240,18 @@ export class HomePage {
             const searchInput = document.getElementById('hero-search');
             const searchBtn = document.getElementById('hero-search-btn');
 
-            console.log('🔍 HomePage: Search elements found - input:', !!searchInput, 'button:', !!searchBtn);
-
             if (searchInput && searchBtn) {
-                console.log('👂 HomePage: Attaching search button click listener');
                 searchBtn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    console.log('🖱️ HomePage: Search button clicked');
                     performHeroSearch();
                 });
 
-                console.log('⌨️ HomePage: Attaching search input keypress listener');
                 searchInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
                         e.preventDefault();
-                        console.log('⏎ HomePage: Enter key pressed in search input');
                         performHeroSearch();
                     }
                 });
-
-                console.log('✅ HomePage: Search event listeners attached successfully');
-            } else {
-                console.warn('⚠️ HomePage: Search elements not found - input:', !!searchInput, 'button:', !!searchBtn);
             }
         }, 0);
     }
@@ -312,11 +291,14 @@ export class HomePage {
             return '<p class="text-muted mb-0">No categories available</p>';
         }
 
-        return this.categories.slice(0, 8).map(category => `
-            <button class="btn btn-outline-primary category-btn" onclick="window.App.router.navigate('/listings?category=${category.id}')">
+        return this.categories.slice(0, 8).map(category => {
+            const categoryId = category.categoryId || category.id;
+            return `
+                <button class="btn btn-outline-primary category-btn" onclick="window.App.router.navigate('/listings?category=${categoryId}')">
                 <i class="bi bi-tag me-2"></i>${category.name}
             </button>
-        `).join('');
+            `;
+        }).join('');
     }
 
     renderFeaturedListings() {
@@ -344,14 +326,23 @@ export class HomePage {
     }
 
     renderListingCard(listing, colClass = 'col-md-4') {
-        const imageUrl = listing.images && listing.images[0] ? listing.images[0] : '/placeholder-listing.png';
-        const price = listing.price ? `$${listing.price.toFixed(2)}` : 'Free';
+        const imageUrl = listing.images && listing.images[0] ? listing.images[0] : '/image-not-available.png';
+        const priceValue = listing.listPrice || listing.price || 0;
+        const price = priceValue > 0 ? `$${parseFloat(priceValue).toFixed(2)}` : 'Free';
         const condition = this.formatCondition(listing.condition);
         const type = listing.type || 'Sell';
+        
+        const listingId = listing.listingId || listing.id;
+
+        const description = listing.description || '';
+        const maxLength = 80;
+        const truncatedDescription = description.length > maxLength 
+            ? description.substring(0, maxLength) + '...' 
+            : description;
 
         return `
             <div class="${colClass} mb-4">
-                <div class="card h-100 shadow-custom listing-card" onclick="window.App.router.navigate('/listings/${listing.id}')">
+                <div class="card h-100 shadow-custom listing-card" onclick="window.App.router.navigate('/listings/${listingId}')">
                     <div class="position-relative">
                         <img src="${imageUrl}" class="card-img-top" alt="${listing.title}" style="height: 200px; object-fit: cover;">
                         <div class="position-absolute top-0 end-0 m-2">
@@ -360,7 +351,7 @@ export class HomePage {
                     </div>
                     <div class="card-body">
                         <h6 class="card-title mb-2 text-truncate">${listing.title}</h6>
-                        <p class="card-text text-muted small mb-2">${listing.description ? listing.description.substring(0, 80) + '...' : ''}</p>
+                        <p class="card-text text-muted small mb-2">${truncatedDescription}</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="fw-bold text-primary">${price}</span>
                             <small class="text-muted">${condition}</small>

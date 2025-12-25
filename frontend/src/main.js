@@ -102,6 +102,7 @@ class App {
             '/admin/comments': () => this.loadPage('AdminCommentsPage'),
             '/admin/analytics': () => this.loadPage('AdminAnalyticsPage'),
             '/profile': () => this.loadPage('ProfilePage'),
+            '/users/:id': (params) => this.loadPage('UserProfilePage', params),
             '/settings': () => this.loadPage('SettingsPage'),
             '/listings': () => this.loadPage('BrowseListingsPage'),
             '/listings/:id': (params) => this.loadPage('ListingDetailPage', params),

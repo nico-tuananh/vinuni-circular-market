@@ -172,9 +172,13 @@ export class MyListingsPage {
     renderListingRow(listing) {
         const imageUrl = listing.images && listing.images[0] ? listing.images[0] : '/placeholder-listing.png';
         const statusBadgeClass = this.getStatusBadgeClass(listing.status);
+        const listingId = listing.listingId || listing.id;
+        const priceValue = listing.listPrice || listing.price || 0;
+        const listingType = listing.listingType || listing.type || 'SELL';
+        const typeDisplay = this.formatType(listingType);
 
         return `
-            <tr class="listing-row" onclick="window.currentMyListingsPage.viewListing('${listing.id}')">
+            <tr class="listing-row" onclick="window.currentMyListingsPage.viewListing('${listingId}')">
                 <td>
                     <div class="d-flex align-items-center">
                         <img src="${imageUrl}" alt="${listing.title}" class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;">
@@ -185,11 +189,11 @@ export class MyListingsPage {
                     </div>
                 </td>
                 <td>
-                    <span class="badge bg-${listing.type === 'Borrow' ? 'info' : 'success'}">${listing.type || 'Sell'}</span>
+                    <span class="badge bg-${listingType === 'LEND' ? 'info' : 'success'}">${typeDisplay}</span>
                 </td>
                 <td class="fw-semibold">
-                    ${listing.price ? `$${listing.price.toFixed(2)}` : 'Free'}
-                    ${listing.type === 'Borrow' ? '<small class="text-muted d-block">per day</small>' : ''}
+                    ${priceValue > 0 ? `$${parseFloat(priceValue).toFixed(2)}` : 'Free'}
+                    ${listingType === 'LEND' ? '<small class="text-muted d-block">per day</small>' : ''}
                 </td>
                 <td>
                     <span class="badge ${statusBadgeClass}">${this.formatStatus(listing.status)}</span>
@@ -202,17 +206,17 @@ export class MyListingsPage {
                             Actions
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#" onclick="event.stopPropagation(); window.currentMyListingsPage.viewListing('${listing.id}')">
+                            <li><a class="dropdown-item" href="#" onclick="event.stopPropagation(); window.currentMyListingsPage.viewListing('${listingId}')">
                                 <i class="bi bi-eye me-2"></i>View
                             </a></li>
-                            <li><a class="dropdown-item" href="#" onclick="event.stopPropagation(); window.currentMyListingsPage.editListing('${listing.id}')">
+                            <li><a class="dropdown-item" href="#" onclick="event.stopPropagation(); window.currentMyListingsPage.editListing('${listingId}')">
                                 <i class="bi bi-pencil me-2"></i>Edit
                             </a></li>
-                            <li><a class="dropdown-item" href="#" onclick="event.stopPropagation(); window.currentMyListingsPage.duplicateListing('${listing.id}')">
+                            <li><a class="dropdown-item" href="#" onclick="event.stopPropagation(); window.currentMyListingsPage.duplicateListing('${listingId}')">
                                 <i class="bi bi-files me-2"></i>Duplicate
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="#" onclick="event.stopPropagation(); window.currentMyListingsPage.deleteListing('${listing.id}')">
+                            <li><a class="dropdown-item text-danger" href="#" onclick="event.stopPropagation(); window.currentMyListingsPage.deleteListing('${listingId}')">
                                 <i class="bi bi-trash me-2"></i>Delete
                             </a></li>
                         </ul>
@@ -432,5 +436,14 @@ export class MyListingsPage {
             'BORROWED': 'Borrowed'
         };
         return statusMap[statusUpper] || status;
+    }
+
+    formatType(type) {
+        if (!type) return 'Sell';
+        const typeMap = {
+            'SELL': 'Sell',
+            'LEND': 'Borrow'
+        };
+        return typeMap[type.toUpperCase()] || type;
     }
 }
