@@ -19,7 +19,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/categories")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5174", "http://localhost:8010"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5174", "http://localhost:8010", "https://leon-uninterdicted-traci.ngrok-free.dev"})
 public class CategoryController {
 
     private final CategoryService categoryService;

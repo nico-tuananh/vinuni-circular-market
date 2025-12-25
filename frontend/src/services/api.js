@@ -79,8 +79,9 @@ class ApiService {
             config.headers.Authorization = `Bearer ${token}`;
         }
 
-        // Sanitize input data if present
-        if (config.body && typeof config.body === 'string') {
+        // Sanitize input data if present (skip for JSON bodies)
+        const contentType = config.headers['Content-Type'] || config.headers['content-type'] || '';
+        if (config.body && typeof config.body === 'string' && !contentType.toLowerCase().includes('application/json')) {
             config.body = this.sanitizeInput(config.body);
         }
 
@@ -116,6 +117,21 @@ class ApiService {
                 }
             }
             console.log(`📋 API ORDER REQUEST HEADERS:`, config.headers);
+        }
+
+        // Special logging for profile update requests
+        if (fullUrl.includes('/users/me/profile') && config.method === 'PUT') {
+            console.log(`📤 API PROFILE UPDATE REQUEST: ${config.method} ${fullUrl}`);
+            if (config.body) {
+                try {
+                    const bodyData = JSON.parse(config.body);
+                    console.log(`📋 API PROFILE UPDATE PAYLOAD:`, bodyData);
+                } catch (e) {
+                    console.error(`❌ API PROFILE UPDATE BODY PARSE ERROR:`, e);
+                    console.log(`📋 API PROFILE UPDATE BODY (raw):`, config.body);
+                }
+            }
+            console.log(`📋 API PROFILE UPDATE HEADERS:`, config.headers);
         }
 
         // Set timeout
@@ -179,6 +195,12 @@ class ApiService {
                         console.error(`❌ API ORDER ERROR DETAILS:`, errorData);
                     }
 
+                    // Special logging for profile update errors
+                    if (fullUrl.includes('/users/me/profile')) {
+                        console.error(`❌ API PROFILE UPDATE ERROR: ${config.method} ${fullUrl} -> ${processedResponse.status}`);
+                        console.error(`❌ API PROFILE UPDATE ERROR DETAILS:`, errorData);
+                    }
+
                     const error = new ApiError(
                         errorData.message || `HTTP ${processedResponse.status}: ${processedResponse.statusText}`,
                         processedResponse.status,
@@ -213,6 +235,12 @@ class ApiService {
                 if (fullUrl.includes('/orders') && config.method === 'POST') {
                     console.log(`📥 API ORDER RESPONSE: ${config.method} ${fullUrl} -> Success (${response.status})`);
                     console.log(`📊 API ORDER RESPONSE DATA:`, data);
+                }
+
+                // Special logging for profile update responses
+                if (fullUrl.includes('/users/me/profile') && config.method === 'PUT') {
+                    console.log(`📥 API PROFILE UPDATE RESPONSE: ${config.method} ${fullUrl} -> Success (${response.status})`);
+                    console.log(`📊 API PROFILE UPDATE RESPONSE DATA:`, data);
                 }
 
                 return data;
@@ -403,6 +431,31 @@ export class ListingService {
     static async deleteListing(listingId) {
         return api.delete(`/listings/${listingId}`);
     }
+
+    // Admin methods
+    static async getAllListingsForAdmin(params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        const response = await api.get(`/listings/admin/all?${queryString}`);
+        return {
+            content: response.listings || [],
+            currentPage: response.currentPage || 0,
+            totalItems: response.totalItems || 0,
+            totalPages: response.totalPages || 1
+        };
+    }
+
+    static async deleteListingAsAdmin(listingId) {
+        return api.delete(`/listings/admin/${listingId}`);
+    }
+
+    static async updateListingStatusAsAdmin(listingId, status) {
+        return api.put(`/listings/admin/${listingId}/status`, { status });
+    }
+
+    static async getListingsByUser(userId, params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        return api.get(`/listings/admin/user/${userId}?${queryString}`);
+    }
 }
 
 export class OrderService {
@@ -521,6 +574,37 @@ export class CommentService {
     static async getCommentCount(listingId) {
         return api.get(`/comments/listings/${listingId}/count`);
     }
+
+    // Admin methods
+    static async getAllComments(params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        const response = await api.get(`/comments/admin/all?${queryString}`);
+        return {
+            content: response.comments || [],
+            currentPage: response.currentPage || 0,
+            totalItems: response.totalItems || 0,
+            totalPages: response.totalPages || 1
+        };
+    }
+
+    static async deleteCommentAsAdmin(commentId) {
+        return api.delete(`/comments/admin/${commentId}`);
+    }
+
+    static async bulkDeleteComments(commentIds) {
+        return api.request(`/comments/admin/bulk`, {
+            method: 'DELETE',
+            body: JSON.stringify({ commentIds })
+        });
+    }
+
+    static async approveComment() {
+        throw new ApiError('Comment approval not implemented. Comments are auto-approved.', 501, 'NOT_IMPLEMENTED');
+    }
+
+    static async rejectComment() {
+        throw new ApiError('Comment rejection not implemented. Use delete instead.', 501, 'NOT_IMPLEMENTED');
+    }
 }
 
 export class CategoryService {
@@ -554,6 +638,58 @@ export class UserService {
     // Search users
     static async searchUsers(query) {
         return api.get(`/users/search?searchTerm=${encodeURIComponent(query)}`);
+    }
+
+    // Update current user's own profile
+    static async updateMyProfile(profileData) {
+        return api.put('/users/me/profile', profileData);
+    }
+
+    // Admin methods
+    static async getAllUsers(params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        const response = await api.get(`/admin/users?${queryString}`);
+        return {
+            content: response.users || [],
+            currentPage: response.currentPage || 0,
+            totalItems: response.totalItems || 0,
+            totalPages: response.totalPages || 1,
+            pageSize: response.pageSize || 10
+        };
+    }
+
+    static async getUserById(userId) {
+        return api.get(`/admin/users/${userId}`);
+    }
+
+    static async updateUserStatus(userId, status) {
+        return api.put(`/admin/users/${userId}/status`, { status });
+    }
+
+    static async updateUserRole(userId, role) {
+        return api.put(`/admin/users/${userId}/role`, { role });
+    }
+
+    static async deleteUser(userId) {
+        return api.delete(`/admin/users/${userId}`);
+    }
+
+    static async getStatistics() {
+        const stats = await api.get('/admin/users/statistics');
+        return {
+            total: stats.totalUsers || 0,
+            active: stats.activeUsers || 0,
+            inactive: stats.inactiveUsers || 0,
+            admin: stats.adminUsers || 0
+        };
+    }
+
+    static async bulkActivate(userIds) {
+        return api.post('/admin/users/bulk/activate', { userIds });
+    }
+
+    static async bulkDeactivate(userIds) {
+        return api.post('/admin/users/bulk/deactivate', { userIds });
     }
 }
 
@@ -622,6 +758,85 @@ api.addErrorInterceptor(async (error) => {
         }
     }
 });
+
+export class AnalyticsController {
+    static async getDashboardAnalytics() {
+        return api.get('/admin/analytics/dashboard');
+    }
+
+    static async getUserRegistrationStats(startDate, endDate) {
+        const params = new URLSearchParams({
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString()
+        });
+        return api.get(`/admin/analytics/users/registrations?${params}`);
+    }
+
+    static async getOrderStats(startDate, endDate) {
+        const params = new URLSearchParams({
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString()
+        });
+        return api.get(`/admin/analytics/orders/stats?${params}`);
+    }
+
+    static async getRevenueStats(startDate, endDate) {
+        const params = new URLSearchParams({
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString()
+        });
+        return api.get(`/admin/analytics/revenue/stats?${params}`);
+    }
+
+    static async getOrderStatsSummary() {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 1);
+        const stats = await this.getOrderStats(startDate, endDate);
+        
+        let total = 0;
+        let pending = 0;
+        
+        if (Array.isArray(stats)) {
+            stats.forEach(stat => {
+                if (Array.isArray(stat) && stat.length >= 2) {
+                    total += parseInt(stat[1]) || 0;
+                    if (stat[0] === 'REQUESTED' || stat[0] === 'PENDING') {
+                        pending += parseInt(stat[1]) || 0;
+                    }
+                }
+            });
+        }
+        
+        return { total, pending };
+    }
+
+    static async getRevenueStatsSummary() {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 1);
+        const stats = await this.getRevenueStats(startDate, endDate);
+        
+        let total = 0;
+        let monthly = 0;
+        
+        if (Array.isArray(stats)) {
+            stats.forEach(stat => {
+                if (Array.isArray(stat) && stat.length >= 2) {
+                    const amount = parseFloat(stat[1]) || 0;
+                    total += amount;
+                    monthly += amount;
+                }
+            });
+        }
+        
+        return { total, monthly };
+    }
+
+    static async getSystemHealth() {
+        return api.get('/admin/analytics/system/health');
+    }
+}
 
 // Export singleton instance and classes
 export { api, ApiService };

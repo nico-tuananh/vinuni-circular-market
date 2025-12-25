@@ -16,7 +16,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin/analytics")
 @PreAuthorize("hasRole('ADMIN')")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5174", "http://localhost:8010"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5174", "http://localhost:8010", "https://leon-uninterdicted-traci.ngrok-free.dev"})
 public class AnalyticsController {
 
     private final AnalyticsService analyticsService;

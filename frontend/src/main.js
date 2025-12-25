@@ -95,12 +95,10 @@ class App {
             '/about': () => this.loadPage('AboutPage'),
             '/terms-of-service': () => this.loadPage('TermsOfServicePage'),
             '/privacy-policy': () => this.loadPage('PrivacyPolicyPage'),
+            '/admin-directory': () => this.loadPage('AdminDirectoryPage'),
             '/admin': () => this.loadPage('AdminDashboard'),
             '/admin/users': () => this.loadPage('AdminUsersPage'),
-            '/admin/listings': () => this.loadPage('AdminListingsPage'),
-            '/admin/orders': () => this.loadPage('AdminOrdersPage'),
             '/admin/comments': () => this.loadPage('AdminCommentsPage'),
-            '/admin/analytics': () => this.loadPage('AdminAnalyticsPage'),
             '/profile': () => this.loadPage('ProfilePage'),
             '/users/:id': (params) => this.loadPage('UserProfilePage', params),
             '/settings': () => this.loadPage('SettingsPage'),
@@ -117,9 +115,9 @@ class App {
         this.router = new Router(routes, 'main-content');
 
         // Add route guards
-        const adminRoutes = ['/admin', '/admin/users', '/admin/listings', '/admin/orders', '/admin/comments', '/admin/analytics'];
+        const adminRoutes = ['/admin-directory', '/admin', '/admin/users', '/admin/comments'];
         adminRoutes.forEach(route => {
-            this.router.addRouteGuard(route, this.router.createRoleGuard('ADMIN'));
+            this.router.addRouteGuard(route, this.router.createRoleGuard('admin'));
         });
 
         this.router.addRouteGuard('/profile', this.router.createAuthGuard(true));

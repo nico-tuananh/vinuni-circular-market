@@ -62,12 +62,20 @@ export class HeaderComponent {
                         <li class="nav-item">
                             <a class="nav-link ${this.isActive('/listings') ? 'active' : ''}" href="#" onclick="window.App.router.navigate('/listings')">Browse Listings</a>
                         </li>
+                        ${this.user.role === 'admin' ? `
+                        <li class="nav-item">
+                            <a class="nav-link ${this.isActive('/admin-directory') ? 'active' : ''}" href="#" onclick="window.App.router.navigate('/admin-directory')">
+                                Admin Directory
+                            </a>
+                        </li>
+                        ` : `
                         <li class="nav-item">
                             <a class="nav-link ${this.isActive('/my-listings') ? 'active' : ''}" href="#" onclick="window.App.router.navigate('/my-listings')">My Listings</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link ${this.isActive('/my-orders') ? 'active' : ''}" href="#" onclick="window.App.router.navigate('/my-orders')">My Orders</a>
                         </li>
+                        `}
                         ` : ''}
                     </ul>
 
@@ -80,9 +88,14 @@ export class HeaderComponent {
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                     <li><a class="dropdown-item" href="#" onclick="window.App.router.navigate('/profile')">Profile</a></li>
                                     <li><a class="dropdown-item" href="#" onclick="window.App.router.navigate('/settings')">Settings</a></li>
+                                    ${this.user.role !== 'admin' ? `
                                     <li><a class="dropdown-item" href="#" onclick="window.App.router.navigate('/seller-orders')">Seller Dashboard</a></li>
+                                    ` : ''}
                                     ${this.user.role === 'admin' ? `
-                                        <li><a class="dropdown-item" href="#" onclick="window.App.router.navigate('/admin')">Admin Dashboard</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="#" onclick="window.App.router.navigate('/admin')">
+                                            <i class="bi bi-speedometer2 me-2"></i>Admin Dashboard
+                                        </a></li>
                                     ` : ''}
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="#" onclick="handleLogout()">Logout</a></li>

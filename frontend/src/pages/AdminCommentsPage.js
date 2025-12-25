@@ -7,8 +7,9 @@ export class AdminCommentsPage {
         this.currentPage = 0;
         this.totalPages = 1;
         this.pageSize = 20;
-        this.statusFilter = 'pending';
+        this.statusFilter = 'all';
         this.searchQuery = '';
+        this.typeFilter = 'all';
         this.selectedComments = new Set();
         this.isLoading = true;
     }
@@ -20,7 +21,7 @@ export class AdminCommentsPage {
         const { globalState } = window;
         const currentUser = globalState.get('user');
 
-        if (!currentUser || currentUser.role !== 'ADMIN') {
+        if (!currentUser || currentUser.role !== 'admin') {
             window.App.router.navigate('/login');
             return;
         }
@@ -70,10 +71,9 @@ export class AdminCommentsPage {
                         <div class="col-md-3">
                             <select class="form-select" id="status-filter">
                                 <option value="all" ${this.statusFilter === 'all' ? 'selected' : ''}>All Comments</option>
-                                <option value="pending" ${this.statusFilter === 'pending' ? 'selected' : ''}>Pending Review</option>
-                                <option value="approved" ${this.statusFilter === 'approved' ? 'selected' : ''}>Approved</option>
-                                <option value="rejected" ${this.statusFilter === 'rejected' ? 'selected' : ''}>Rejected</option>
-                                <option value="flagged" ${this.statusFilter === 'flagged' ? 'selected' : ''}>Flagged</option>
+                                <option value="recent" ${this.statusFilter === 'recent' ? 'selected' : ''}>Recent (24h)</option>
+                                <option value="top-level" ${this.statusFilter === 'top-level' ? 'selected' : ''}>Top-Level Only</option>
+                                <option value="replies" ${this.statusFilter === 'replies' ? 'selected' : ''}>Replies Only</option>
                             </select>
                         </div>
                         <div class="col-md-3">
@@ -102,14 +102,8 @@ export class AdminCommentsPage {
                                     <strong>${this.selectedComments.size} comment${this.selectedComments.size !== 1 ? 's' : ''} selected</strong>
                                 </div>
                                 <div class="d-flex gap-2">
-                                    <button class="btn btn-outline-success btn-sm" onclick="window.currentAdminCommentsPage.bulkApprove()">
-                                        <i class="bi bi-check-circle me-1"></i>Approve
-                                    </button>
-                                    <button class="btn btn-outline-warning btn-sm" onclick="window.currentAdminCommentsPage.bulkReject()">
-                                        <i class="bi bi-x-circle me-1"></i>Reject
-                                    </button>
                                     <button class="btn btn-outline-danger btn-sm" onclick="window.currentAdminCommentsPage.bulkDelete()">
-                                        <i class="bi bi-trash me-1"></i>Delete
+                                        <i class="bi bi-trash me-1"></i>Delete Selected
                                     </button>
                                 </div>
                             </div>
@@ -145,10 +139,13 @@ export class AdminCommentsPage {
 
     renderCommentStats() {
         const totalComments = this.comments.length;
-        const pendingComments = this.comments.filter(c => c.status === 'PENDING').length;
-        const approvedComments = this.comments.filter(c => c.status === 'APPROVED').length;
-        const rejectedComments = this.comments.filter(c => c.status === 'REJECTED').length;
-        const flaggedComments = this.comments.filter(c => c.flagged).length;
+        const recentComments = this.comments.filter(c => {
+            const createdAt = new Date(c.createdAt);
+            const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+            return createdAt > dayAgo;
+        }).length;
+        const topLevelComments = this.comments.filter(c => !c.parentId).length;
+        const replies = this.comments.filter(c => c.parentId).length;
 
         return `
             <div class="col-xl-3 col-md-6 mb-3">
@@ -162,24 +159,24 @@ export class AdminCommentsPage {
             <div class="col-xl-3 col-md-6 mb-3">
                 <div class="card h-100">
                     <div class="card-body text-center">
-                        <div class="h4 mb-1 text-warning">${pendingComments}</div>
-                        <div class="small text-muted">Pending Review</div>
+                        <div class="h4 mb-1 text-primary">${recentComments}</div>
+                        <div class="small text-muted">Last 24 Hours</div>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-md-6 mb-3">
                 <div class="card h-100">
                     <div class="card-body text-center">
-                        <div class="h4 mb-1 text-success">${approvedComments}</div>
-                        <div class="small text-muted">Approved</div>
+                        <div class="h4 mb-1 text-info">${topLevelComments}</div>
+                        <div class="small text-muted">Top-Level</div>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-md-6 mb-3">
                 <div class="card h-100">
                     <div class="card-body text-center">
-                        <div class="h4 mb-1 text-danger">${flaggedComments}</div>
-                        <div class="small text-muted">Flagged</div>
+                        <div class="h4 mb-1 text-secondary">${replies}</div>
+                        <div class="small text-muted">Replies</div>
                     </div>
                 </div>
             </div>
@@ -212,12 +209,10 @@ export class AdminCommentsPage {
 
     renderCommentItem(comment) {
         const isSelected = this.selectedComments.has(comment.commentId);
-        const statusBadgeClass = this.getStatusBadgeClass(comment.status);
-        const isFlagged = comment.flagged || false;
-        const isReview = comment.rating !== undefined;
+        const isReply = comment.parentId !== null && comment.parentId !== undefined;
 
         return `
-            <div class="list-group-item ${isSelected ? 'bg-light' : ''} ${isFlagged ? 'border-danger' : ''}">
+            <div class="list-group-item ${isSelected ? 'bg-light' : ''}">
                 <div class="d-flex">
                     <!-- Selection Checkbox -->
                     <div class="flex-shrink-0 me-3">
@@ -245,9 +240,7 @@ export class AdminCommentsPage {
                                 </div>
                             </div>
                             <div class="d-flex align-items-center gap-2">
-                                ${isReview ? `<div class="star-rating">${this.renderStarRating(comment.rating)}</div>` : ''}
-                                <span class="badge ${statusBadgeClass}">${comment.status}</span>
-                                ${isFlagged ? '<i class="bi bi-flag-fill text-danger" title="Flagged for review"></i>' : ''}
+                                ${isReply ? '<span class="badge bg-secondary">Reply</span>' : '<span class="badge bg-info">Top-Level</span>'}
                             </div>
                         </div>
 
@@ -256,35 +249,22 @@ export class AdminCommentsPage {
                             <p class="mb-1">${this.escapeHtml(comment.content)}</p>
                             ${comment.listing ? `
                                 <small class="text-muted">
-                                    On listing: <a href="#" onclick="window.App.router.navigate('/listings/${comment.listing.listingId}')" class="text-decoration-none">
-                                        ${comment.listing.title}
+                                    On listing: <a href="#" onclick="window.App.router.navigate('/listings/${comment.listing.listingId || comment.listingId}')" class="text-decoration-none">
+                                        ${comment.listing.title || 'View Listing'}
                                     </a>
+                                </small>
+                            ` : comment.listingId ? `
+                                <small class="text-muted">
+                                    Listing ID: ${comment.listingId}
                                 </small>
                             ` : ''}
                         </div>
 
                         <!-- Action Buttons -->
                         <div class="d-flex gap-2">
-                            ${comment.status === 'PENDING' ? `
-                                <button class="btn btn-sm btn-outline-success" onclick="window.currentAdminCommentsPage.approveComment(${comment.commentId})">
-                                    <i class="bi bi-check me-1"></i>Approve
-                                </button>
-                                <button class="btn btn-sm btn-outline-warning" onclick="window.currentAdminCommentsPage.rejectComment(${comment.commentId})">
-                                    <i class="bi bi-x me-1"></i>Reject
-                                </button>
-                            ` : ''}
                             <button class="btn btn-sm btn-outline-danger" onclick="window.currentAdminCommentsPage.deleteComment(${comment.commentId})">
                                 <i class="bi bi-trash me-1"></i>Delete
                             </button>
-                            ${!isFlagged ? `
-                                <button class="btn btn-sm btn-outline-secondary" onclick="window.currentAdminCommentsPage.flagComment(${comment.commentId})">
-                                    <i class="bi bi-flag me-1"></i>Flag
-                                </button>
-                            ` : `
-                                <button class="btn btn-sm btn-outline-secondary" onclick="window.currentAdminCommentsPage.unflagComment(${comment.commentId})">
-                                    <i class="bi bi-flag-fill me-1"></i>Unflag
-                                </button>
-                            `}
                         </div>
                     </div>
                 </div>
@@ -346,32 +326,35 @@ export class AdminCommentsPage {
             const { CommentService } = await import('../services/api.js');
             const response = await CommentService.getAllComments({
                 page: this.currentPage,
-                size: this.pageSize,
-                status: this.statusFilter !== 'all' ? this.statusFilter.toUpperCase() : undefined
+                size: this.pageSize
             });
 
             this.comments = response.content || [];
             this.filteredComments = [...this.comments];
             this.totalPages = response.totalPages || 1;
 
-            // Update pending count in sidebar
-            this.updatePendingCount();
+            this.updateCommentsList();
+            this.updateCommentStats();
 
         } catch (error) {
             console.error('Failed to load comments:', error);
             this.comments = [];
             this.filteredComments = [];
+            const { globalState } = window;
+            globalState.addNotification({
+                type: 'error',
+                title: 'Failed to Load Comments',
+                message: 'Unable to load comments. Please try again.'
+            });
         } finally {
             this.isLoading = false;
         }
     }
 
-    updatePendingCount() {
-        const pendingCount = this.comments.filter(c => c.status === 'PENDING').length;
-        const badge = document.getElementById('pending-comments-count');
-        if (badge) {
-            badge.textContent = pendingCount;
-            badge.style.display = pendingCount > 0 ? 'inline' : 'none';
+    updateCommentStats() {
+        const statsContainer = document.getElementById('comment-stats');
+        if (statsContainer) {
+            statsContainer.innerHTML = this.renderCommentStats();
         }
     }
 
@@ -406,10 +389,20 @@ export class AdminCommentsPage {
         this.filteredComments = this.comments.filter(comment => {
             const matchesSearch = !this.searchQuery ||
                 comment.content.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                comment.user?.fullName.toLowerCase().includes(this.searchQuery.toLowerCase());
+                comment.user?.fullName?.toLowerCase().includes(this.searchQuery.toLowerCase());
 
-            const matchesStatus = this.statusFilter === 'all' || comment.status.toLowerCase() === this.statusFilter;
-            const matchesType = this.typeFilter === 'all' ||
+            let matchesStatus = true;
+            if (this.statusFilter === 'recent') {
+                const createdAt = new Date(comment.createdAt);
+                const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+                matchesStatus = createdAt > dayAgo;
+            } else if (this.statusFilter === 'top-level') {
+                matchesStatus = !comment.parentId;
+            } else if (this.statusFilter === 'replies') {
+                matchesStatus = comment.parentId !== null && comment.parentId !== undefined;
+            }
+
+            const matchesType = !this.typeFilter || this.typeFilter === 'all' ||
                 (this.typeFilter === 'review' && comment.rating !== undefined) ||
                 (this.typeFilter === 'comment' && comment.rating === undefined);
 
@@ -421,7 +414,7 @@ export class AdminCommentsPage {
 
     clearFilters() {
         this.searchQuery = '';
-        this.statusFilter = 'pending';
+        this.statusFilter = 'all';
         this.typeFilter = 'all';
 
         const searchInput = document.getElementById('comment-search');
@@ -429,7 +422,7 @@ export class AdminCommentsPage {
         const typeFilter = document.getElementById('type-filter');
 
         if (searchInput) searchInput.value = '';
-        if (statusFilter) statusFilter.value = 'pending';
+        if (statusFilter) statusFilter.value = 'all';
         if (typeFilter) typeFilter.value = 'all';
 
         this.filteredComments = [...this.comments];
@@ -464,58 +457,39 @@ export class AdminCommentsPage {
         }
     }
 
-    async bulkApprove() {
-        await this.bulkAction('approve', 'Approve Comments', 'approved');
-    }
-
-    async bulkReject() {
-        await this.bulkAction('reject', 'Reject Comments', 'rejected');
-    }
-
     async bulkDelete() {
-        await this.bulkAction('delete', 'Delete Comments', 'deleted');
-    }
-
-    async bulkAction(action, title, pastTense) {
         if (this.selectedComments.size === 0) return;
 
         const { ModalComponent } = window;
         const modal = ModalComponent.createConfirmation({
-            title: `${title} (${this.selectedComments.size})`,
-            message: `Are you sure you want to ${action} ${this.selectedComments.size} comment${this.selectedComments.size !== 1 ? 's' : ''}?`,
-            confirmText: title,
-            confirmVariant: action === 'delete' ? 'danger' : 'primary',
+            title: `Delete Comments (${this.selectedComments.size})`,
+            message: `Are you sure you want to delete ${this.selectedComments.size} comment${this.selectedComments.size !== 1 ? 's' : ''}? This action cannot be undone.`,
+            confirmText: 'Delete Comments',
+            confirmVariant: 'danger',
             onConfirm: async () => {
                 try {
-                    // Bulk operations - would need backend support
-                    for (const commentId of this.selectedComments) {
-                        if (action === 'approve') {
-                            await this.approveComment(commentId, false);
-                        } else if (action === 'reject') {
-                            await this.rejectComment(commentId, false);
-                        } else if (action === 'delete') {
-                            await this.deleteComment(commentId, false);
-                        }
-                    }
+                    const { CommentService } = await import('../services/api.js');
+                    const commentIds = Array.from(this.selectedComments);
+                    await CommentService.bulkDeleteComments(commentIds);
 
                     // Clear selection and reload
                     this.selectedComments.clear();
                     await this.loadComments();
-                    this.render();
 
                     const { globalState } = window;
                     globalState.addNotification({
                         type: 'success',
-                        title: 'Bulk Action Completed',
-                        message: `Successfully ${pastTense} ${this.selectedComments.size} comment${this.selectedComments.size !== 1 ? 's' : ''}.`
+                        title: 'Bulk Delete Completed',
+                        message: `Successfully deleted ${commentIds.length} comment${commentIds.length !== 1 ? 's' : ''}.`
                     });
 
                 } catch (error) {
+                    console.error('Bulk delete failed:', error);
                     const { globalState } = window;
                     globalState.addNotification({
                         type: 'error',
-                        title: 'Bulk Action Failed',
-                        message: `Failed to ${action} comments. Please try again.`
+                        title: 'Bulk Delete Failed',
+                        message: error.message || 'Failed to delete comments. Please try again.'
                     });
                 }
             }
@@ -524,132 +498,51 @@ export class AdminCommentsPage {
         modal.show();
     }
 
-    async approveComment(commentId, showNotification = true) {
-        try {
-            const { CommentService } = await import('../services/api.js');
-            await CommentService.approveComment(commentId);
+    async deleteComment(commentId) {
+        const { ModalComponent } = window;
+        const modal = ModalComponent.createConfirmation({
+            title: 'Delete Comment',
+            message: 'Are you sure you want to delete this comment? This action cannot be undone.',
+            confirmText: 'Delete Comment',
+            confirmVariant: 'danger',
+            onConfirm: async () => {
+                try {
+                    const { CommentService } = await import('../services/api.js');
+                    await CommentService.deleteCommentAsAdmin(commentId);
 
-            if (showNotification) {
-                await this.loadComments();
-                this.render();
+                    await this.loadComments();
 
-                const { globalState } = window;
-                globalState.addNotification({
-                    type: 'success',
-                    title: 'Comment Approved',
-                    message: 'The comment has been approved and is now visible.'
-                });
+                    const { globalState } = window;
+                    globalState.addNotification({
+                        type: 'success',
+                        title: 'Comment Deleted',
+                        message: 'The comment has been permanently deleted.'
+                    });
+
+                } catch (error) {
+                    console.error('Delete comment failed:', error);
+                    const { globalState } = window;
+                    globalState.addNotification({
+                        type: 'error',
+                        title: 'Delete Failed',
+                        message: error.message || 'Failed to delete comment. Please try again.'
+                    });
+                }
             }
-
-        } catch (error) {
-            if (showNotification) {
-                const { globalState } = window;
-                globalState.addNotification({
-                    type: 'error',
-                    title: 'Approval Failed',
-                    message: 'Failed to approve comment. Please try again.'
-                });
-            }
-        }
-    }
-
-    async rejectComment(commentId, showNotification = true) {
-        try {
-            const { CommentService } = await import('../services/api.js');
-            await CommentService.rejectComment(commentId);
-
-            if (showNotification) {
-                await this.loadComments();
-                this.render();
-
-                const { globalState } = window;
-                globalState.addNotification({
-                    type: 'success',
-                    title: 'Comment Rejected',
-                    message: 'The comment has been rejected and hidden.'
-                });
-            }
-
-        } catch (error) {
-            if (showNotification) {
-                const { globalState } = window;
-                globalState.addNotification({
-                    type: 'error',
-                    title: 'Rejection Failed',
-                    message: 'Failed to reject comment. Please try again.'
-                });
-            }
-        }
-    }
-
-    async deleteComment(commentId, showNotification = true) {
-        try {
-            const { CommentService } = await import('../services/api.js');
-            await CommentService.deleteComment(commentId);
-
-            if (showNotification) {
-                await this.loadComments();
-                this.render();
-
-                const { globalState } = window;
-                globalState.addNotification({
-                    type: 'success',
-                    title: 'Comment Deleted',
-                    message: 'The comment has been permanently deleted.'
-                });
-            }
-
-        } catch (error) {
-            if (showNotification) {
-                const { globalState } = window;
-                globalState.addNotification({
-                    type: 'error',
-                    title: 'Delete Failed',
-                    message: 'Failed to delete comment. Please try again.'
-                });
-            }
-        }
-    }
-
-    async flagComment(commentId) {
-        // Implementation for flagging comments
-        const { globalState } = window;
-        globalState.addNotification({
-            type: 'info',
-            title: 'Comment Flagged',
-            message: 'Comment has been flagged for additional review.'
         });
+
+        modal.show();
     }
 
-    async unflagComment(commentId) {
-        // Implementation for unflagging comments
-        const { globalState } = window;
-        globalState.addNotification({
-            type: 'info',
-            title: 'Comment Unflagged',
-            message: 'Comment flag has been removed.'
-        });
+    async refreshComments() {
+        await this.loadComments();
     }
 
-    refreshComments() {
-        this.loadComments();
-    }
-
-    goToPage(page) {
+    async goToPage(page) {
         if (page >= 0 && page < this.totalPages) {
             this.currentPage = page;
-            this.loadComments();
+            await this.loadComments();
         }
-    }
-
-    getStatusBadgeClass(status) {
-        const statusClasses = {
-            'PENDING': 'bg-warning',
-            'APPROVED': 'bg-success',
-            'REJECTED': 'bg-danger',
-            'FLAGGED': 'bg-danger'
-        };
-        return statusClasses[status] || 'bg-secondary';
     }
 
     getInitials(name) {

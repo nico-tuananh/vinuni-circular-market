@@ -171,7 +171,11 @@ export class Router {
                 return false;
             }
 
-            if (user.role !== requiredRole) {
+            // Normalize role comparison (backend uses lowercase: 'admin', 'student')
+            const userRole = user.role ? user.role.toLowerCase() : '';
+            const normalizedRequiredRole = requiredRole.toLowerCase();
+            
+            if (userRole !== normalizedRequiredRole) {
                 this.navigate(redirectTo);
                 return false;
             }

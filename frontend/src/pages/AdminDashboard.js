@@ -22,7 +22,7 @@ export class AdminDashboard {
         const { globalState } = window;
         const currentUser = globalState.get('user');
 
-        if (!currentUser || currentUser.role !== 'ADMIN') {
+        if (!currentUser || currentUser.role !== 'admin') {
             window.App.router.navigate('/login');
             return;
         }
@@ -312,9 +312,6 @@ export class AdminDashboard {
 
     async loadDashboardData() {
         try {
-            // Load analytics data from API
-            const { AnalyticsController } = await import('../services/api.js');
-
             // Load various metrics
             const [userStats, listingStats, orderStats, revenueStats] = await Promise.all([
                 this.loadUserStats(),
@@ -338,8 +335,8 @@ export class AdminDashboard {
             // Load top sellers
             this.topSellers = await this.loadTopSellers();
 
-            // Generate recent activity (mock data for now)
-            this.recentActivity = this.generateRecentActivity();
+            // Generate recent activity
+            this.recentActivity = await this.generateRecentActivity();
 
             // Update UI
             this.updateMetricsDisplay();
@@ -372,11 +369,14 @@ export class AdminDashboard {
 
     async loadListingStats() {
         try {
-            // Mock data - replace with actual API call
+            const { ListingService } = await import('../services/api.js');
+            const response = await ListingService.getListings({ page: 0, size: 1 });
+            const total = response.totalItems || 0;
+            const active = response.content?.filter(l => l.status === 'AVAILABLE').length || 0;
             return {
-                total: 150,
-                active: 120,
-                inactive: 30
+                total,
+                active,
+                inactive: total - active
             };
         } catch {
             return { total: 0, active: 0 };
@@ -386,9 +386,10 @@ export class AdminDashboard {
     async loadOrderStats() {
         try {
             const { AnalyticsController } = await import('../services/api.js');
-            const stats = await AnalyticsController.getOrderStats();
-            return stats;
-        } catch {
+            const stats = await AnalyticsController.getOrderStatsSummary();
+            return stats || { total: 0, pending: 0 };
+        } catch (error) {
+            console.error('Failed to load order stats:', error);
             return { total: 0, pending: 0 };
         }
     }
@@ -396,56 +397,101 @@ export class AdminDashboard {
     async loadRevenueStats() {
         try {
             const { AnalyticsController } = await import('../services/api.js');
-            const stats = await AnalyticsController.getRevenueStats();
-            return stats;
-        } catch {
+            const stats = await AnalyticsController.getRevenueStatsSummary();
+            return stats || { total: 0, monthly: 0 };
+        } catch (error) {
+            console.error('Failed to load revenue stats:', error);
             return { total: 0, monthly: 0 };
         }
     }
 
     async loadTopSellers() {
         try {
-            // Mock data - replace with actual API call
-            return [
-                { name: 'Alice Nguyen', listings: 25, revenue: 1250.50 },
-                { name: 'Bob Tran', listings: 18, revenue: 890.75 },
-                { name: 'Carol Le', listings: 22, revenue: 1100.25 },
-                { name: 'David Pham', listings: 15, revenue: 675.00 },
-                { name: 'Eva Hoang', listings: 12, revenue: 540.80 }
-            ];
+            const { OrderService } = await import('../services/api.js');
+            const sales = await OrderService.getMySales();
+            
+            const sellerMap = new Map();
+            
+            if (Array.isArray(sales)) {
+                sales.forEach(order => {
+                    if (order.seller && order.status === 'COMPLETED') {
+                        const sellerId = order.seller.userId;
+                        const sellerName = order.seller.fullName || 'Unknown';
+                        
+                        if (!sellerMap.has(sellerId)) {
+                            sellerMap.set(sellerId, {
+                                name: sellerName,
+                                listings: 0,
+                                revenue: 0
+                            });
+                        }
+                        
+                        const seller = sellerMap.get(sellerId);
+                        seller.listings += 1;
+                        seller.revenue += parseFloat(order.totalPrice || 0);
+                    }
+                });
+            }
+            
+            return Array.from(sellerMap.values())
+                .sort((a, b) => b.revenue - a.revenue)
+                .slice(0, 5);
         } catch {
             return [];
         }
     }
 
-    generateRecentActivity() {
-        // Mock recent activity data
-        return [
-            {
-                type: 'user',
-                icon: 'person-plus',
-                description: 'New user registered: john.doe@vinuni.edu.vn',
-                timestamp: new Date(Date.now() - 1000 * 60 * 5) // 5 minutes ago
-            },
-            {
-                type: 'listing',
-                icon: 'plus-circle',
-                description: 'New listing created: "Calculus Textbook 2023"',
-                timestamp: new Date(Date.now() - 1000 * 60 * 15) // 15 minutes ago
-            },
-            {
-                type: 'order',
-                icon: 'cart',
-                description: 'Order #1234 placed for MacBook Pro',
-                timestamp: new Date(Date.now() - 1000 * 60 * 30) // 30 minutes ago
-            },
-            {
-                type: 'user',
-                icon: 'person-check',
-                description: 'User account activated: sarah.wilson@vinuni.edu.vn',
-                timestamp: new Date(Date.now() - 1000 * 60 * 45) // 45 minutes ago
+    async generateRecentActivity() {
+        try {
+            const activities = [];
+            
+            // Get recent users
+            const { UserService } = await import('../services/api.js');
+            const recentUsers = await UserService.getAllUsers({ page: 0, size: 5, sortBy: 'createdAt', sortDir: 'desc' });
+            if (recentUsers.content) {
+                recentUsers.content.slice(0, 3).forEach(user => {
+                    activities.push({
+                        type: 'user',
+                        icon: 'person-plus',
+                        description: `New user registered: ${user.email}`,
+                        timestamp: new Date(user.createdAt)
+                    });
+                });
             }
-        ];
+            
+            // Get recent listings
+            const { ListingService } = await import('../services/api.js');
+            const recentListings = await ListingService.getRecentListings(3);
+            if (recentListings.content) {
+                recentListings.content.forEach(listing => {
+                    activities.push({
+                        type: 'listing',
+                        icon: 'plus-circle',
+                        description: `New listing created: "${listing.title}"`,
+                        timestamp: new Date(listing.createdAt)
+                    });
+                });
+            }
+            
+            // Get recent orders
+            const { OrderService } = await import('../services/api.js');
+            const recentOrders = await OrderService.getMyOrders();
+            if (Array.isArray(recentOrders) && recentOrders.length > 0) {
+                recentOrders.slice(0, 2).forEach(order => {
+                    activities.push({
+                        type: 'order',
+                        icon: 'cart',
+                        description: `Order #${order.orderId} placed`,
+                        timestamp: new Date(order.createdAt)
+                    });
+                });
+            }
+            
+            return activities.sort((a, b) => b.timestamp - a.timestamp).slice(0, 10);
+        } catch (error) {
+            console.error('Failed to generate recent activity:', error);
+            return [];
+        }
     }
 
     updateMetricsDisplay() {
@@ -484,8 +530,8 @@ export class AdminDashboard {
     }
 
     async initializeCharts() {
-        // Initialize Chart.js if available
-        if (typeof Chart !== 'undefined') {
+        // Initialize Chart.js if available (loaded via CDN, accessible via window.Chart)
+        if (typeof window.Chart !== 'undefined') {
             await this.createActivityChart();
             await this.createRevenueChart();
             await this.createOrdersChart();
@@ -513,7 +559,7 @@ export class AdminDashboard {
             ordersData.push(Math.floor(Math.random() * 6) + 2);
         }
 
-        new Chart(ctx, {
+        new window.Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
@@ -566,7 +612,7 @@ export class AdminDashboard {
         const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
         const data = [1200, 1900, 1500, 2500, 2200, 3000];
 
-        new Chart(ctx, {
+        new window.Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
@@ -614,7 +660,7 @@ export class AdminDashboard {
             }]
         };
 
-        new Chart(ctx, {
+        new window.Chart(ctx, {
             type: 'doughnut',
             data: data,
             options: {
@@ -630,13 +676,18 @@ export class AdminDashboard {
     }
 
     changeChartPeriod(period) {
-        // Update chart period - implementation would reload chart data
         console.log('Changing chart period to:', period);
 
-        // Update active button
         const buttons = document.querySelectorAll('.btn-group .btn');
-        buttons.forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
+        buttons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.textContent.trim() === period.toUpperCase()) {
+                btn.classList.add('active');
+            }
+        });
+
+        this.chartPeriod = period;
+        this.initializeCharts();
     }
 
     getInitials(name) {

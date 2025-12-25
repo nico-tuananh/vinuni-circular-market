@@ -212,17 +212,24 @@ export class ProfilePage {
         const { globalState } = window;
 
         try {
-            // Here you would make an API call to update the profile
-            // For now, we'll simulate the update
-            const updatedUser = {
-                ...this.user,
+            const { UserService } = await import('../services/api.js');
+            
+            const profileData = {
                 fullName: formData.fullName.trim(),
-                phone: formData.phone || null,
-                address: formData.address || null
+                phone: formData.phone?.trim() || null,
+                address: formData.address?.trim() || null
             };
 
-            // Update global state
+            const updatedUser = await UserService.updateMyProfile(profileData);
+
+            // Update global state with the response from backend
             globalState.login(updatedUser);
+            this.user = updatedUser;
+
+            // Update header to reflect name change
+            if (window.App && window.App.header) {
+                window.App.header.updateUser(updatedUser);
+            }
 
             // Show success notification
             globalState.addNotification({
@@ -231,12 +238,30 @@ export class ProfilePage {
                 message: 'Your profile has been updated successfully!'
             });
 
-            // Exit edit mode
+            // Exit edit mode and re-render
             this.isEditing = false;
             this.render();
 
         } catch (error) {
-            this.showError(error.message || 'Failed to update profile. Please try again.');
+            console.error('Failed to update profile:', error);
+            let errorMessage = 'Failed to update profile. Please try again.';
+            
+            if (error.message) {
+                errorMessage = error.message;
+            } else if (error.response) {
+                errorMessage = error.response.message || errorMessage;
+            } else if (typeof error === 'string') {
+                errorMessage = error;
+            }
+            
+            this.showError(errorMessage);
+            
+            // Also show notification
+            globalState.addNotification({
+                type: 'error',
+                title: 'Profile Update Failed',
+                message: errorMessage
+            });
         } finally {
             this.setLoading(false);
         }

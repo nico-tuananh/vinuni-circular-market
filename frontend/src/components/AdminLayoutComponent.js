@@ -9,7 +9,7 @@ export class AdminLayoutComponent {
         const { globalState } = window;
         this.user = globalState.get('user');
 
-        if (!this.user || this.user.role !== 'ADMIN') {
+        if (!this.user || this.user.role !== 'admin') {
             return this.renderAccessDenied();
         }
 
@@ -22,7 +22,7 @@ export class AdminLayoutComponent {
                             <i class="bi bi-shield-check me-2"></i>
                             <span>Admin Panel</span>
                         </div>
-                        <button class="sidebar-close d-lg-none" onclick="this.closeSidebar()">
+                        <button class="sidebar-close d-lg-none" onclick="AdminLayoutComponent.closeSidebar()">
                             <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
@@ -109,17 +109,17 @@ export class AdminLayoutComponent {
                     <!-- Admin Header -->
                     <header class="admin-header">
                         <div class="header-left">
-                            <button class="sidebar-toggle d-lg-none" onclick="this.toggleSidebar()">
+                            <button class="sidebar-toggle d-lg-none" onclick="AdminLayoutComponent.toggleSidebar()">
                                 <i class="bi bi-list"></i>
                             </button>
                             <h1 class="page-title" id="admin-page-title">Dashboard</h1>
                         </div>
                         <div class="header-right">
                             <div class="header-notifications">
-                                <button class="btn btn-link position-relative" onclick="this.showNotifications()">
-                                    <i class="bi bi-bell"></i>
-                                    <span class="badge bg-danger position-absolute top-0 start-100 translate-middle" id="notification-count" style="display: none;">0</span>
-                                </button>
+                            <button class="btn btn-link position-relative" onclick="AdminLayoutComponent.showNotifications()">
+                                <i class="bi bi-bell"></i>
+                                <span class="badge bg-danger position-absolute top-0 start-100 translate-middle" id="notification-count" style="display: none;">0</span>
+                            </button>
                             </div>
                             <div class="header-user">
                                 <span class="text-muted">Welcome, ${this.user.fullName}</span>
@@ -136,7 +136,7 @@ export class AdminLayoutComponent {
                 </div>
 
                 <!-- Sidebar Overlay (Mobile) -->
-                <div class="sidebar-overlay d-lg-none" onclick="this.closeSidebar()"></div>
+                <div class="sidebar-overlay d-lg-none" onclick="AdminLayoutComponent.closeSidebar()"></div>
             </div>
         `;
     }
@@ -162,7 +162,7 @@ export class AdminLayoutComponent {
         `;
     }
 
-    toggleSidebar() {
+    static toggleSidebar() {
         const sidebar = document.getElementById('admin-sidebar');
         const overlay = document.querySelector('.sidebar-overlay');
 
@@ -172,7 +172,7 @@ export class AdminLayoutComponent {
         }
     }
 
-    closeSidebar() {
+    static closeSidebar() {
         const sidebar = document.getElementById('admin-sidebar');
         const overlay = document.querySelector('.sidebar-overlay');
 
@@ -182,8 +182,7 @@ export class AdminLayoutComponent {
         }
     }
 
-    showNotifications() {
-        // Placeholder for notifications dropdown
+    static showNotifications() {
         const { globalState } = window;
         globalState.addNotification({
             type: 'info',

@@ -367,14 +367,41 @@ export class ListingDetailPage {
 
         const sellerId = this.seller?.userId || this.seller?.id;
         const currentUserId = this.user.userId || this.user.id;
+        const isOwner = sellerId && currentUserId && String(sellerId) === String(currentUserId);
+        const isAdmin = this.user.role === 'admin';
         
         // Convert both to strings for comparison to handle type mismatches
-        if (sellerId && currentUserId && String(sellerId) === String(currentUserId)) {
+        if (isOwner) {
             return `
                 <div class="card mb-4">
-                        <button class="btn btn-primary w-100" onclick="window.App.router.navigate('/listings/${this.listingId}/edit')">
-                            <i class="bi bi-pencil me-2"></i>Edit Listing
-                        </button>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" onclick="window.App.router.navigate('/listings/${this.listingId}/edit')">
+                                <i class="bi bi-pencil me-2"></i>Edit Listing
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="window.currentListingPage.deleteListing()">
+                                <i class="bi bi-trash me-2"></i>Delete Listing
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (isAdmin) {
+            return `
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="alert alert-warning mb-3">
+                            <i class="bi bi-shield-check me-2"></i>
+                            <strong>Admin View</strong>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-danger" onclick="window.currentListingPage.deleteListingAsAdmin()">
+                                <i class="bi bi-trash me-2"></i>Delete Listing (Admin)
+                            </button>
+                        </div>
+                    </div>
                 </div>
             `;
         }
@@ -1081,6 +1108,76 @@ export class ListingDetailPage {
             title: 'Coming Soon',
             message: 'Comment deletion will be available soon.'
         });
+    }
+
+    async deleteListing() {
+        const { ModalComponent } = window;
+        const modal = ModalComponent.createConfirmation({
+            title: 'Delete Listing',
+            message: 'Are you sure you want to delete this listing? This action cannot be undone.',
+            confirmText: 'Delete Listing',
+            confirmVariant: 'danger',
+            onConfirm: async () => {
+                try {
+                    const { ListingService } = await import('../services/api.js');
+                    await ListingService.deleteListing(this.listingId);
+
+                    const { globalState } = window;
+                    globalState.addNotification({
+                        type: 'success',
+                        title: 'Listing Deleted',
+                        message: 'Your listing has been deleted successfully.'
+                    });
+
+                    window.App.router.navigate('/listings');
+                } catch (error) {
+                    console.error('Failed to delete listing:', error);
+                    const { globalState } = window;
+                    globalState.addNotification({
+                        type: 'error',
+                        title: 'Delete Failed',
+                        message: error.message || 'Failed to delete listing. Please try again.'
+                    });
+                }
+            }
+        });
+
+        modal.show();
+    }
+
+    async deleteListingAsAdmin() {
+        const { ModalComponent } = window;
+        const modal = ModalComponent.createConfirmation({
+            title: 'Delete Listing (Admin)',
+            message: 'Are you sure you want to delete this listing as an administrator? This action cannot be undone and will remove the listing regardless of ownership.',
+            confirmText: 'Delete Listing',
+            confirmVariant: 'danger',
+            onConfirm: async () => {
+                try {
+                    const { ListingService } = await import('../services/api.js');
+                    await ListingService.deleteListingAsAdmin(this.listingId);
+
+                    const { globalState } = window;
+                    globalState.addNotification({
+                        type: 'success',
+                        title: 'Listing Deleted',
+                        message: 'The listing has been deleted successfully by administrator.'
+                    });
+
+                    window.App.router.navigate('/listings');
+                } catch (error) {
+                    console.error('Failed to delete listing as admin:', error);
+                    const { globalState } = window;
+                    globalState.addNotification({
+                        type: 'error',
+                        title: 'Delete Failed',
+                        message: error.message || 'Failed to delete listing. Please try again.'
+                    });
+                }
+            }
+        });
+
+        modal.show();
     }
 
     getInitials(name) {

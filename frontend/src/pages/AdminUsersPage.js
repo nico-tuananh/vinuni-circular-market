@@ -21,7 +21,7 @@ export class AdminUsersPage {
         const { globalState } = window;
         const currentUser = globalState.get('user');
 
-        if (!currentUser || currentUser.role !== 'ADMIN') {
+        if (!currentUser || currentUser.role !== 'admin') {
             window.App.router.navigate('/login');
             return;
         }
@@ -78,7 +78,7 @@ export class AdminUsersPage {
                             <select class="form-select" id="role-filter">
                                 <option value="all" ${this.roleFilter === 'all' ? 'selected' : ''}>All Roles</option>
                                 <option value="STUDENT" ${this.roleFilter === 'STUDENT' ? 'selected' : ''}>Student</option>
-                                <option value="ADMIN" ${this.roleFilter === 'ADMIN' ? 'selected' : ''}>Admin</option>
+                                <option value="admin" ${this.roleFilter === 'admin' ? 'selected' : ''}>Admin</option>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -145,7 +145,7 @@ export class AdminUsersPage {
         const totalUsers = this.users.length;
         const activeUsers = this.users.filter(u => u.status === 'ACTIVE').length;
         const inactiveUsers = this.users.filter(u => u.status === 'INACTIVE').length;
-        const adminUsers = this.users.filter(u => u.role === 'ADMIN').length;
+        const adminUsers = this.users.filter(u => u.role === 'admin').length;
 
         return `
             <div class="col-xl-3 col-md-6 mb-3">
@@ -228,7 +228,7 @@ export class AdminUsersPage {
     renderUserRow(user) {
         const isSelected = this.selectedUsers.has(user.userId);
         const statusBadgeClass = this.getStatusBadgeClass(user.status);
-        const roleBadgeClass = user.role === 'ADMIN' ? 'bg-danger' : 'bg-info';
+        const roleBadgeClass = user.role === 'admin' ? 'bg-danger' : 'bg-info';
 
         return `
             <tr class="${isSelected ? 'table-active' : ''}">
@@ -339,19 +339,37 @@ export class AdminUsersPage {
             const { UserService } = await import('../services/api.js');
             const response = await UserService.getAllUsers({
                 page: this.currentPage,
-                size: this.pageSize
+                size: this.pageSize,
+                sortBy: 'createdAt',
+                sortDir: 'desc'
             });
 
             this.users = response.content || [];
             this.filteredUsers = [...this.users];
             this.totalPages = response.totalPages || 1;
 
+            this.updateUsersTable();
+            this.updateUserStats();
+
         } catch (error) {
             console.error('Failed to load users:', error);
             this.users = [];
             this.filteredUsers = [];
+            const { globalState } = window;
+            globalState.addNotification({
+                type: 'error',
+                title: 'Failed to Load Users',
+                message: 'Unable to load users. Please try again.'
+            });
         } finally {
             this.isLoading = false;
+        }
+    }
+
+    updateUserStats() {
+        const statsContainer = document.getElementById('user-stats');
+        if (statsContainer) {
+            statsContainer.innerHTML = this.renderUserStats();
         }
     }
 
@@ -389,7 +407,7 @@ export class AdminUsersPage {
                 user.email.toLowerCase().includes(this.searchQuery.toLowerCase());
 
             const matchesStatus = this.statusFilter === 'all' || user.status === this.statusFilter.toUpperCase();
-            const matchesRole = this.roleFilter === 'all' || user.role === this.roleFilter;
+            const matchesRole = this.roleFilter === 'all' || user.role?.toLowerCase() === this.roleFilter.toLowerCase();
 
             return matchesSearch && matchesStatus && matchesRole;
         });
@@ -487,13 +505,14 @@ export class AdminUsersPage {
                 try {
                     const { UserService } = await import('../services/api.js');
 
+                    const userIds = Array.from(this.selectedUsers);
+                    
                     if (method === 'activate') {
-                        await UserService.bulkActivate(Array.from(this.selectedUsers));
+                        await UserService.bulkActivate(userIds);
                     } else if (method === 'deactivate') {
-                        await UserService.bulkDeactivate(Array.from(this.selectedUsers));
+                        await UserService.bulkDeactivate(userIds);
                     } else if (method === 'delete') {
-                        // Note: Bulk delete might not be implemented in backend
-                        for (const userId of this.selectedUsers) {
+                        for (const userId of userIds) {
                             await UserService.deleteUser(userId);
                         }
                     }
@@ -501,7 +520,6 @@ export class AdminUsersPage {
                     // Clear selection and reload
                     this.selectedUsers.clear();
                     await this.loadUsers();
-                    this.render();
 
                     const { globalState } = window;
                     globalState.addNotification({
@@ -565,7 +583,6 @@ export class AdminUsersPage {
             await UserService.updateUserStatus(userId, status);
 
             await this.loadUsers();
-            this.render();
 
             const { globalState } = window;
             globalState.addNotification({
@@ -575,11 +592,12 @@ export class AdminUsersPage {
             });
 
         } catch (error) {
+            console.error('Failed to update user status:', error);
             const { globalState } = window;
             globalState.addNotification({
                 type: 'error',
                 title: 'Status Update Failed',
-                message: `Failed to ${action} user. Please try again.`
+                message: error.message || `Failed to ${action} user. Please try again.`
             });
         }
     }
@@ -597,7 +615,6 @@ export class AdminUsersPage {
                     await UserService.deleteUser(userId);
 
                     await this.loadUsers();
-                    this.render();
 
                     const { globalState } = window;
                     globalState.addNotification({
@@ -620,10 +637,10 @@ export class AdminUsersPage {
         modal.show();
     }
 
-    goToPage(page) {
+    async goToPage(page) {
         if (page >= 0 && page < this.totalPages) {
             this.currentPage = page;
-            this.loadUsers();
+            await this.loadUsers();
         }
     }
 
