@@ -34,7 +34,6 @@ public class Order {
     @Column(name = "final_price", precision = 10, scale = 2)
     private BigDecimal finalPrice;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private OrderStatus status = OrderStatus.REQUESTED;
 

@@ -2,11 +2,14 @@ package com.vinuni.circularmarket.controller;
 
 import com.vinuni.circularmarket.dto.CreateOrderRequest;
 import com.vinuni.circularmarket.dto.OrderDTO;
+import com.vinuni.circularmarket.model.User;
 import com.vinuni.circularmarket.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -34,7 +37,6 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<?> createOrder(@Valid @RequestBody CreateOrderRequest request) {
         try {
-            // In real implementation, get user ID from security context
             Long buyerId = getCurrentUserId();
 
             OrderDTO createdOrder = orderService.createOrder(buyerId, request);
@@ -44,8 +46,11 @@ public class OrderController {
             error.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         } catch (Exception e) {
+            // Log the actual error for debugging
+            System.err.println("ERROR creating order: " + e.getMessage());
+            e.printStackTrace();
             Map<String, String> error = new HashMap<>();
-            error.put("message", "Failed to create order");
+            error.put("message", "Failed to create order: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
@@ -218,10 +223,16 @@ public class OrderController {
 
     /**
      * Helper method to get current user ID from security context
-     * In real implementation, this would extract user ID from JWT token
+     * Extracts user ID from the authenticated User entity in SecurityContext
      */
     private Long getCurrentUserId() {
-        // Placeholder - in real implementation, extract from JWT token
-        return 1L; // Placeholder
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() != null) {
+            if (authentication.getPrincipal() instanceof User) {
+                User user = (User) authentication.getPrincipal();
+                return user.getUserId();
+            }
+        }
+        throw new IllegalStateException("User not authenticated");
     }
 }

@@ -10,6 +10,7 @@ import com.vinuni.circularmarket.model.Review;
 import com.vinuni.circularmarket.repository.OrderRepository;
 import com.vinuni.circularmarket.repository.ReviewRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -101,7 +102,31 @@ public class ReviewService {
      */
     @Transactional(readOnly = true)
     public Page<ReviewDTO> getReviewsByListingId(Long listingId, Pageable pageable) {
-        return reviewRepository.findByListingId(listingId, pageable).map(this::convertToDTO);
+        try {
+            Page<Review> reviewsPage = reviewRepository.findByListingId(listingId, pageable);
+            
+            // Convert to DTOs, handling potential lazy loading issues
+            List<ReviewDTO> reviewDTOs = reviewsPage.getContent().stream()
+                .map(review -> {
+                    try {
+                        return convertToDTO(review);
+                    } catch (Exception e) {
+                        // If conversion fails due to lazy loading, return minimal DTO
+                        ReviewDTO dto = new ReviewDTO();
+                        dto.setReviewId(review.getReviewId());
+                        dto.setRating(review.getRating());
+                        dto.setComment(review.getComment());
+                        dto.setCreatedAt(review.getCreatedAt());
+                        return dto;
+                    }
+                })
+                .collect(Collectors.toList());
+            
+            return new PageImpl<>(reviewDTOs, pageable, reviewsPage.getTotalElements());
+        } catch (Exception e) {
+            // Return empty page if query fails
+            return Page.empty(pageable);
+        }
     }
 
     /**

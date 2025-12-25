@@ -160,8 +160,15 @@ public class AnalyticsService {
                     long totalOrders = orderRepository.countBySeller_UserId(user.getUserId());
                     long completedOrders = orderRepository.countBySeller_UserIdAndStatus(user.getUserId(), OrderStatus.COMPLETED);
 
-                    // Calculate revenue (simplified - should use a proper query)
-                    BigDecimal revenue = BigDecimal.valueOf(completedOrders * 30.00); // Placeholder calculation
+                    // Calculate actual revenue from completed orders
+                    List<Order> completedOrderList = orderRepository.findBySeller_UserIdAndStatus(user.getUserId(), OrderStatus.COMPLETED);
+                    BigDecimal revenue = completedOrderList.stream()
+                            .map(order -> {
+                                // Use finalPrice if available, otherwise use offerPrice
+                                return order.getFinalPrice() != null ? order.getFinalPrice() : 
+                                       (order.getOfferPrice() != null ? order.getOfferPrice() : BigDecimal.ZERO);
+                            })
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
 
                     // Get seller rating
                     Double avgRating = reviewRepository.findAverageRatingBySellerId(user.getUserId());

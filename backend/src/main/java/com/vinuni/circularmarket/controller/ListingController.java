@@ -6,6 +6,7 @@ import com.vinuni.circularmarket.dto.UpdateListingRequest;
 import com.vinuni.circularmarket.model.ListingStatus;
 import com.vinuni.circularmarket.model.ListingCondition;
 import com.vinuni.circularmarket.model.ListingType;
+import com.vinuni.circularmarket.model.User;
 import com.vinuni.circularmarket.service.ListingService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -17,6 +18,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -292,7 +295,6 @@ public class ListingController {
             @RequestParam(defaultValue = "10") int size) {
 
         try {
-            // In real implementation, get user ID from security context
             Long userId = getCurrentUserId();
 
             Pageable pageable = PageRequest.of(page, size);
@@ -321,7 +323,6 @@ public class ListingController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createListing(@Valid @RequestBody CreateListingRequest request) {
         try {
-            // In real implementation, get user ID from security context
             Long userId = getCurrentUserId();
 
             ListingDTO createdListing = listingService.createListing(userId, request);
@@ -347,7 +348,6 @@ public class ListingController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updateListing(@PathVariable Long listingId, @Valid @RequestBody UpdateListingRequest request) {
         try {
-            // In real implementation, get user ID from security context
             Long userId = getCurrentUserId();
 
             ListingDTO updatedListing = listingService.updateListing(listingId, userId, request);
@@ -372,7 +372,6 @@ public class ListingController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> deleteListing(@PathVariable Long listingId) {
         try {
-            // In real implementation, get user ID from security context
             Long userId = getCurrentUserId();
 
             listingService.deleteListing(listingId, userId);
@@ -526,12 +525,16 @@ public class ListingController {
 
     /**
      * Helper method to get current user ID from security context
-     * In real implementation, this would extract user ID from JWT token
+     * Extracts user ID from the authenticated User entity in SecurityContext
      */
     private Long getCurrentUserId() {
-        // Placeholder - in real implementation, extract from JWT token
-        // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        // This would need to be implemented based on your JWT token structure
-        return 1L; // Placeholder
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() != null) {
+            if (authentication.getPrincipal() instanceof User) {
+                User user = (User) authentication.getPrincipal();
+                return user.getUserId();
+            }
+        }
+        throw new IllegalStateException("User not authenticated");
     }
 }

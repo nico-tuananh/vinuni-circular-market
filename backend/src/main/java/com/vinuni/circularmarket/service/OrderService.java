@@ -4,6 +4,7 @@ import com.vinuni.circularmarket.dto.*;
 import com.vinuni.circularmarket.model.*;
 import com.vinuni.circularmarket.repository.ListingRepository;
 import com.vinuni.circularmarket.repository.OrderRepository;
+import com.vinuni.circularmarket.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,13 +19,16 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ListingRepository listingRepository;
     private final ListingService listingService;
+    private final UserRepository userRepository;
 
     public OrderService(OrderRepository orderRepository,
                        ListingRepository listingRepository,
-                       ListingService listingService) {
+                       ListingService listingService,
+                       UserRepository userRepository) {
         this.orderRepository = orderRepository;
         this.listingRepository = listingRepository;
         this.listingService = listingService;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -35,36 +39,68 @@ public class OrderService {
      */
     @Transactional
     public OrderDTO createOrder(Long buyerId, CreateOrderRequest request) {
+        try {
+            System.out.println("OrderService.createOrder called - buyerId: " + buyerId + ", listingId: " + request.getListingId() + ", offerPrice: " + request.getOfferPrice());
+            
         // Validate listing exists and is available
         Listing listing = listingRepository.findById(request.getListingId())
                 .orElseThrow(() -> new IllegalArgumentException("Listing not found with id: " + request.getListingId()));
+
+            System.out.println("Listing found: " + listing.getListingId() + ", status: " + listing.getStatus());
 
         if (listing.getStatus() != ListingStatus.AVAILABLE) {
             throw new IllegalArgumentException("Listing is not available for ordering");
         }
 
+            // Access seller to ensure it's loaded (LAZY loading)
+            User seller = listing.getSeller();
+            if (seller == null) {
+                throw new IllegalArgumentException("Listing seller information is missing");
+            }
+            System.out.println("Seller found: " + seller.getUserId());
+
+            // Prevent seller from ordering their own listing
+            if (seller.getUserId().equals(buyerId)) {
+                throw new IllegalArgumentException("You cannot order your own listing");
+            }
+
         // Check if buyer already has an active order for this listing
         List<Order> activeOrders = orderRepository.findActiveOrdersByListingId(request.getListingId());
         boolean buyerHasActiveOrder = activeOrders.stream()
-                .anyMatch(order -> order.getBuyer().getUserId().equals(buyerId));
+                    .anyMatch(order -> {
+                        User orderBuyer = order.getBuyer();
+                        return orderBuyer != null && orderBuyer.getUserId().equals(buyerId);
+                    });
 
         if (buyerHasActiveOrder) {
             throw new IllegalArgumentException("You already have an active order for this listing");
         }
 
-        // Prevent seller from ordering their own listing
-        if (listing.getSeller().getUserId().equals(buyerId)) {
-            throw new IllegalArgumentException("You cannot order your own listing");
-        }
+            // Fetch buyer from database
+            User buyer = userRepository.findById(buyerId)
+                    .orElseThrow(() -> new IllegalArgumentException("Buyer not found with id: " + buyerId));
 
-        // Create dummy buyer - in real implementation, this would come from security context
-        User buyer = new User();
-        buyer.setUserId(buyerId);
+            System.out.println("Buyer found: " + buyer.getUserId() + ", creating order...");
+
+            // Validate offerPrice is not null
+            if (request.getOfferPrice() == null) {
+                throw new IllegalArgumentException("Offer price is required");
+            }
 
         Order order = new Order(listing, buyer, request.getOfferPrice());
+            System.out.println("Order created, saving...");
         Order savedOrder = orderRepository.save(order);
+            System.out.println("Order saved successfully: " + savedOrder.getOrderId());
 
         return convertToDTO(savedOrder);
+        } catch (IllegalArgumentException e) {
+            System.err.println("OrderService IllegalArgumentException: " + e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            System.err.println("OrderService Exception: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to create order: " + e.getMessage(), e);
+        }
     }
 
     /**

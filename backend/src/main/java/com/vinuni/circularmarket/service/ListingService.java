@@ -6,6 +6,7 @@ import com.vinuni.circularmarket.repository.CategoryRepository;
 import com.vinuni.circularmarket.repository.CommentRepository;
 import com.vinuni.circularmarket.repository.ListingRepository;
 import com.vinuni.circularmarket.repository.OrderRepository;
+import com.vinuni.circularmarket.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -28,15 +29,18 @@ public class ListingService {
     private final CategoryRepository categoryRepository;
     private final CommentRepository commentRepository;
     private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
 
     public ListingService(ListingRepository listingRepository,
                          CategoryRepository categoryRepository,
                          CommentRepository commentRepository,
-                         OrderRepository orderRepository) {
+                         OrderRepository orderRepository,
+                         UserRepository userRepository) {
         this.listingRepository = listingRepository;
         this.categoryRepository = categoryRepository;
         this.commentRepository = commentRepository;
         this.orderRepository = orderRepository;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -118,9 +122,9 @@ public class ListingService {
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new IllegalArgumentException("Category not found with id: " + request.getCategoryId()));
 
-            // Create dummy user for now - in real implementation, this would come from security context
-            User seller = new User();
-            seller.setUserId(sellerId);
+            // Fetch seller from database
+            User seller = userRepository.findById(sellerId)
+                    .orElseThrow(() -> new IllegalArgumentException("Seller not found with id: " + sellerId));
 
             Listing listing = new Listing(seller, category, request.getTitle(),
                                         request.getDescription(), request.getCondition(),

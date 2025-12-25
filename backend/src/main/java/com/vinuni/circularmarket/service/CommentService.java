@@ -8,6 +8,7 @@ import com.vinuni.circularmarket.model.Listing;
 import com.vinuni.circularmarket.model.User;
 import com.vinuni.circularmarket.repository.CommentRepository;
 import com.vinuni.circularmarket.repository.ListingRepository;
+import com.vinuni.circularmarket.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,10 +23,12 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final ListingRepository listingRepository;
+    private final UserRepository userRepository;
 
-    public CommentService(CommentRepository commentRepository, ListingRepository listingRepository) {
+    public CommentService(CommentRepository commentRepository, ListingRepository listingRepository, UserRepository userRepository) {
         this.commentRepository = commentRepository;
         this.listingRepository = listingRepository;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -41,9 +44,9 @@ public class CommentService {
         Listing listing = listingRepository.findById(listingId)
                 .orElseThrow(() -> new IllegalArgumentException("Listing not found with id: " + listingId));
 
-        // Create dummy user - in real implementation, this would come from security context
-        User user = new User();
-        user.setUserId(userId);
+        // Fetch user from database
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
 
         Comment comment;
         if (request.getParentId() != null) {

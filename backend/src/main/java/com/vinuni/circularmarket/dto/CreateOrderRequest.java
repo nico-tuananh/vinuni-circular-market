@@ -11,6 +11,7 @@ public class CreateOrderRequest {
     @NotNull(message = "Listing ID is required")
     private Long listingId;
 
+    @NotNull(message = "Offer price is required")
     @DecimalMin(value = "0.00", message = "Offer price must be non-negative")
     @Digits(integer = 8, fraction = 2, message = "Offer price must have at most 8 integer digits and 2 decimal places")
     private BigDecimal offerPrice;

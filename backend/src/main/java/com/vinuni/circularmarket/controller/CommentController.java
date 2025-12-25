@@ -2,6 +2,7 @@ package com.vinuni.circularmarket.controller;
 
 import com.vinuni.circularmarket.dto.CommentDTO;
 import com.vinuni.circularmarket.dto.CreateCommentRequest;
+import com.vinuni.circularmarket.model.User;
 import com.vinuni.circularmarket.service.CommentService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -10,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -306,10 +309,16 @@ public class CommentController {
 
     /**
      * Helper method to get current user ID from security context
-     * In real implementation, this would extract user ID from JWT token
+     * Extracts user ID from the authenticated User entity in SecurityContext
      */
     private Long getCurrentUserId() {
-        // Placeholder - in real implementation, extract from JWT token
-        return 1L; // Placeholder
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() != null) {
+            if (authentication.getPrincipal() instanceof User) {
+                User user = (User) authentication.getPrincipal();
+                return user.getUserId();
+            }
+        }
+        throw new IllegalStateException("User not authenticated");
     }
 }

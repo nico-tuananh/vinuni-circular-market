@@ -88,6 +88,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/listings/filter").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/listings/category/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/listings/{id}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/users/{id}").permitAll()
 
                 // Admin endpoints
                 .requestMatchers(HttpMethod.GET, "/api/admin/users/**").hasRole("ADMIN")
