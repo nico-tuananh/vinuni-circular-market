@@ -117,9 +117,9 @@ export class AdminLayoutComponent {
                         <div class="header-right">
                             <div class="header-notifications">
                             <button class="btn btn-link position-relative" onclick="AdminLayoutComponent.showNotifications()">
-                                <i class="bi bi-bell"></i>
-                                <span class="badge bg-danger position-absolute top-0 start-100 translate-middle" id="notification-count" style="display: none;">0</span>
-                            </button>
+                                    <i class="bi bi-bell"></i>
+                                    <span class="badge bg-danger position-absolute top-0 start-100 translate-middle" id="notification-count" style="display: none;">0</span>
+                                </button>
                             </div>
                             <div class="header-user">
                                 <span class="text-muted">Welcome, ${this.user.fullName}</span>

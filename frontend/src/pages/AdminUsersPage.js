@@ -506,7 +506,7 @@ export class AdminUsersPage {
                     const { UserService } = await import('../services/api.js');
 
                     const userIds = Array.from(this.selectedUsers);
-                    
+
                     if (method === 'activate') {
                         await UserService.bulkActivate(userIds);
                     } else if (method === 'deactivate') {

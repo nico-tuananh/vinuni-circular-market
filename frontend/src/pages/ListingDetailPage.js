@@ -270,7 +270,9 @@ export class ListingDetailPage {
     }
 
     renderComment(comment) {
-        const isOwner = this.user && comment.userId === this.user.id;
+        const currentUserId = this.user?.userId || this.user?.id;
+        const commentUserId = comment.userId || comment.user?.userId || comment.user?.id;
+        const isOwner = this.user && currentUserId && commentUserId && String(currentUserId) === String(commentUserId);
         const canReply = this.user && !comment.parentId;
         const hasReplies = comment.replies && comment.replies.length > 0;
 
@@ -377,8 +379,8 @@ export class ListingDetailPage {
                     <div class="card-body">
                         <div class="d-grid gap-2">
                             <button class="btn btn-primary" onclick="window.App.router.navigate('/listings/${this.listingId}/edit')">
-                                <i class="bi bi-pencil me-2"></i>Edit Listing
-                            </button>
+                            <i class="bi bi-pencil me-2"></i>Edit Listing
+                        </button>
                             <button class="btn btn-outline-danger" onclick="window.currentListingPage.deleteListing()">
                                 <i class="bi bi-trash me-2"></i>Delete Listing
                             </button>

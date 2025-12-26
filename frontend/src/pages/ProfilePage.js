@@ -183,10 +183,38 @@ export class ProfilePage {
             contentElement.innerHTML = this.renderProfileEdit();
             editBtn.innerHTML = '<i class="bi bi-x me-2"></i>Cancel Edit';
             editBtn.className = 'btn btn-outline-secondary';
+            this.attachEventListeners();
         } else {
             contentElement.innerHTML = this.renderProfileView();
             editBtn.innerHTML = '<i class="bi bi-pencil me-2"></i>Edit Profile';
             editBtn.className = 'btn btn-outline-primary';
+        }
+    }
+
+    attachEventListeners() {
+        const form = document.querySelector('#profile-content form');
+        if (form) {
+            // Remove any existing listeners by cloning the form
+            const newForm = form.cloneNode(true);
+            form.parentNode.replaceChild(newForm, form);
+
+            // Attach submit listener
+            newForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.handleProfileUpdate(e);
+            }, true);
+
+            // Also attach click listener to button as backup
+            const submitButton = newForm.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                    newForm.dispatchEvent(submitEvent);
+                });
+            }
         }
     }
 
@@ -195,15 +223,15 @@ export class ProfilePage {
 
         if (this.isLoading) return;
 
-        const { FormComponent } = window;
-        const formComponent = new FormComponent({}); // Temporary instance for data extraction
-        const formData = formComponent.getFormData(event.target);
+        // Extract form data directly from the form
+        const formData = new FormData(event.target);
 
         // Clear previous errors
         this.hideError();
 
         // Validate required fields
-        if (!formData.fullName.trim()) {
+        const fullName = formData.get('fullName') || '';
+        if (!fullName.trim()) {
             this.showError('Full name is required');
             return;
         }
@@ -213,18 +241,26 @@ export class ProfilePage {
 
         try {
             const { UserService } = await import('../services/api.js');
-            
+
             const profileData = {
-                fullName: formData.fullName.trim(),
-                phone: formData.phone?.trim() || null,
-                address: formData.address?.trim() || null
+                fullName: fullName.trim(),
+                phone: (formData.get('phone') || '').trim() || null,
+                address: (formData.get('address') || '').trim() || null
             };
 
             const updatedUser = await UserService.updateMyProfile(profileData);
 
             // Update global state with the response from backend
             globalState.login(updatedUser);
-            this.user = updatedUser;
+
+            // Update local user data - merge form data with backend response to ensure consistency
+            this.user = {
+                ...this.user, // Keep existing data
+                ...updatedUser, // Override with backend response
+                fullName: fullName.trim(),
+                phone: (formData.get('phone') || '').trim() || null,
+                address: (formData.get('address') || '').trim() || null
+            };
 
             // Update header to reflect name change
             if (window.App && window.App.header) {
@@ -238,9 +274,9 @@ export class ProfilePage {
                 message: 'Your profile has been updated successfully!'
             });
 
-            // Exit edit mode and re-render
+            // Exit edit mode and update display
             this.isEditing = false;
-            this.render();
+            this.toggleEdit();
 
         } catch (error) {
             console.error('Failed to update profile:', error);
@@ -294,10 +330,11 @@ export class ProfilePage {
 
     setLoading(loading) {
         this.isLoading = loading;
-        // If in edit mode, re-render the form
+        // If in edit mode, re-render the form and re-attach listeners
         if (this.isEditing) {
-            this.toggleEdit();
-            this.toggleEdit(); // Toggle twice to refresh
+            const contentElement = document.getElementById('profile-content');
+            contentElement.innerHTML = this.renderProfileEdit();
+            this.attachEventListeners();
         }
     }
 

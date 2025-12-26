@@ -506,29 +506,29 @@ export class AdminCommentsPage {
             confirmText: 'Delete Comment',
             confirmVariant: 'danger',
             onConfirm: async () => {
-                try {
-                    const { CommentService } = await import('../services/api.js');
+        try {
+            const { CommentService } = await import('../services/api.js');
                     await CommentService.deleteCommentAsAdmin(commentId);
 
-                    await this.loadComments();
+                await this.loadComments();
 
-                    const { globalState } = window;
-                    globalState.addNotification({
-                        type: 'success',
-                        title: 'Comment Deleted',
-                        message: 'The comment has been permanently deleted.'
-                    });
+                const { globalState } = window;
+                globalState.addNotification({
+                    type: 'success',
+                    title: 'Comment Deleted',
+                    message: 'The comment has been permanently deleted.'
+                });
 
-                } catch (error) {
+        } catch (error) {
                     console.error('Delete comment failed:', error);
-                    const { globalState } = window;
-                    globalState.addNotification({
-                        type: 'error',
-                        title: 'Delete Failed',
+                const { globalState } = window;
+                globalState.addNotification({
+                    type: 'error',
+                    title: 'Delete Failed',
                         message: error.message || 'Failed to delete comment. Please try again.'
-                    });
-                }
+                });
             }
+        }
         });
 
         modal.show();
