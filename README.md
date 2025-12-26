@@ -162,7 +162,7 @@ vinuni-circular-market/
 ```
 **Note**: Data flow is implemented to follow Spring Boot conventions:
 - Incoming request: HTTP Request → Request DTO → Service → Domain Model → Repository → Database.
-- Outcoming response: Database → Repository → Domain Model → Service → Response DTO → HTTP Response.
+- Outgoing response: Database → Repository → Domain Model → Service → Response DTO → HTTP Response.
 
 ## Getting Started
 
