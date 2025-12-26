@@ -3,6 +3,7 @@ references/
 .DS_Store
 .env
 backend/target/
+backend/src/main/resources/application.properties
 frontend/node_modules/
 frontend/dist/
 frontend/build/
