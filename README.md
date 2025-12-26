@@ -95,10 +95,8 @@ vinuni-circular-market/
 │   │       ├── JwtUtil.java
 │   │       └── SecurityConfig.java
 │   ├── src/main/resources/
-│   │   └── application.properties
-│   ├── src/test/                       # Unit & integration tests
-│   ├── target/                         # Compiled classes and build artifacts
-│   └── Dockerfile
+│   │   └── application.examples.properties   # Application example configurations
+│   └── src/test/                       # Unit & integration tests
 ├── frontend/                           # Vanilla JavaScript SPA with Vite
 │   ├── public/                         # Static assets
 │   │   └── vite.svg
@@ -141,26 +139,24 @@ vinuni-circular-market/
 │   │   ├── App.css
 │   │   ├── index.css
 │   │   └── main.js
-│   ├── dist/                           # Production build output
-│   ├── node_modules/                   # Node.js dependencies
-│   ├── .nvmrc
+│   ├── .env                          # Vite environment variables (safe exposure for development)   
+│   ├── .nvmrc                        # Node version config
 │   ├── eslint.config.js
 │   ├── index.html
 │   ├── package.json
 │   ├── package-lock.json
 │   ├── README.md
 │   └── vite.config.js
-├── db/                                 # Database layer
+├── db/                                # Database layer
 │   ├── VinUniCircularMarket.sql       # Table schemas & constraints
 │   ├── VinUniCircularMarket_Input.sql # Sample data
 │   └── VinUniCircularMarket_Functions.sql # Views, procedures, triggers
-├── docs/                               # Documentation
+├── docs/                              # Documentation
 │   ├── API.md
 │   ├── deployment.md
 │   └── testing.md
-├── references/                         # Reference implementations
+├── references/                        # Reference implementations
 ├── .gitignore
-├── IMPLEMENTATION_PLAN.md
 ├── LICENSE
 └── README.md
 ```
